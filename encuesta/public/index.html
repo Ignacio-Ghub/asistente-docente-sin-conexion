@@ -71,9 +71,9 @@
   .chip input:checked + span::before { border-color:var(--marino); background:var(--marino); box-shadow:inset 0 0 0 3px #fff; }
   .chip input:focus-visible + span { outline:3px solid var(--amarillo); outline-offset:2px; }
 
-  input[type=text], input[type=number], textarea { width:100%; padding:13px 14px; border:1.5px solid var(--borde); border-radius:14px; font-size:16px;
+  input[type=text], input[type=number], input[type=email], input[type=tel], textarea { width:100%; padding:13px 14px; border:1.5px solid var(--borde); border-radius:14px; font-size:16px;
     background:#FBFCFE; color:var(--texto); font-family:inherit; transition:border-color .15s, background .15s; }
-  input[type=text]:focus, input[type=number]:focus, textarea:focus { outline:none; border-color:var(--azul); background:#fff; box-shadow:0 0 0 4px rgba(47,123,217,.12); }
+  input[type=text]:focus, input[type=number]:focus, input[type=email]:focus, input[type=tel]:focus, textarea:focus { outline:none; border-color:var(--azul); background:#fff; box-shadow:0 0 0 4px rgba(47,123,217,.12); }
   textarea { min-height:96px; resize:vertical; }
 
   /* Ordenar del 1 al 5 */
@@ -260,7 +260,14 @@
       <div class="opciones">
         <label class="chip"><input type="radio" name="probar" value="Sí"><span>Sí, me gustaría</span></label>
         <label class="chip"><input type="radio" name="probar" value="No"><span>No por ahora</span></label></div>
-      <div id="bloque-contacto" hidden><label class="nota" for="contacto" style="display:block;margin:12px 0 6px">Deje su WhatsApp o correo para coordinar la prueba (opcional).</label><input type="text" id="contacto" name="contacto" placeholder="Ej.: +58 414 000 0000"></div></div>
+      <div id="bloque-contacto" hidden>
+        <p class="nota" style="margin:14px 0 4px">¿Dónde le enviamos el enlace para probarlo? Deje al menos uno; si deja los dos, le llegará a ambos.</p>
+        <label class="enunciado" for="correo" style="margin:10px 0 6px;font-size:15px">Correo electrónico</label>
+        <input type="email" id="correo" name="correo" inputmode="email" autocomplete="email" placeholder="Ej.: maestra@gmail.com">
+        <label class="enunciado" for="whatsapp" style="margin:12px 0 6px;font-size:15px">WhatsApp</label>
+        <input type="tel" id="whatsapp" name="whatsapp" inputmode="tel" autocomplete="tel" placeholder="Ej.: 0414 123 4567">
+        <p class="error" id="error-contacto" hidden>Deje su correo o su WhatsApp para enviarle el enlace.</p>
+      </div></div>
     <div class="pregunta"><span class="enunciado"><span class="n">22.</span>¿Nos autoriza a citar sus respuestas, sin su nombre, en solicitudes de financiamiento?</span>
       <div class="opciones">
         <label class="chip"><input type="radio" name="autoriza" value="Sí"><span>Sí</span></label>
@@ -277,18 +284,10 @@
   <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
   <h2>¡Muchas gracias!</h2>
   <p>Sus respuestas nos ayudan a construir herramientas útiles para su escuela.</p>
-</div>
-
-<div class="tarjeta probar" id="probar" hidden>
-  <h2>Ya puede probar el asistente</h2>
-  <p>El asistente le propone borradores de planes de clase y de evaluaciones cortas según el currículo, y le avisa qué estudiantes necesitan refuerzo. Usted revisa, corrige y decide.</p>
-  <a class="enviar" href="https://asistente-docente-prueba.vercel.app/?codigo=aula2026" target="_blank" rel="noopener" style="text-decoration:none">Probar el asistente
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-  <div class="aviso-prueba">
-    <p><b>Esta versión de prueba funciona con internet</b>, para que pueda usarla desde su teléfono. La versión para la escuela funcionará sin internet.</p>
-    <p class="nota">Use nombres inventados para los estudiantes.</p>
+  <div class="aviso-prueba" id="revise" hidden style="text-align:left;margin-top:18px">
+    <p style="margin:0"><b id="revise-titulo"></b></p>
+    <p style="margin:6px 0 0">Allí le enviamos el enlace para probar el asistente y cómo usarlo.</p>
   </div>
-  <p class="nota" id="aviso-contacto" style="text-align:center;margin:12px 0 0"></p>
 </div>
 </main>
 <footer>Una iniciativa de Jesús Ignacio Briceño Alarcón · JIBA<br>
@@ -358,6 +357,9 @@ form.onsubmit = async e => {
   if (ordenMal) { document.getElementById('orden').scrollIntoView({block:'center'}); return; }
   const respondidas = Object.values(r).filter(v => Array.isArray(v) ? v.length : v).length;
   if (respondidas < 3) { err.textContent = 'Responda al menos algunas preguntas antes de enviar.'; err.hidden = false; return; }
+  const sinContacto = r.probar === 'Sí' && !r.correo && !r.whatsapp;
+  document.getElementById('error-contacto').hidden = !sinContacto;
+  if (sinContacto) { document.getElementById('correo').scrollIntoView({block:'center'}); return; }
   const boton = document.getElementById('enviar'); boton.disabled = true; boton.firstChild.textContent = 'Enviando… ';
   try {
     const res = await fetch('/api/enviar', {method:'POST', headers:{'Content-Type':'application/json'},
@@ -367,11 +369,9 @@ form.onsubmit = async e => {
     form.hidden = true; document.getElementById('gracias').hidden = false; window.scrollTo(0, 0);
     document.querySelector('.progreso').hidden = true; document.getElementById('porcentaje').hidden = true;
     if (r.probar === 'Sí') {
-      document.getElementById('probar').hidden = false;
-      const c = r.contacto || '';
-      document.getElementById('aviso-contacto').textContent = /@/.test(c)
-        ? 'También le enviamos este enlace a su correo.'
-        : c ? 'También le enviaremos este enlace por WhatsApp.' : '';
+      document.getElementById('revise').hidden = false;
+      document.getElementById('revise-titulo').textContent = r.correo && r.whatsapp
+        ? 'Revise su correo y su WhatsApp.' : r.correo ? 'Revise su correo.' : 'Revise su WhatsApp.';
     }
   } catch (ex) {
     err.textContent = ex.message + ' Revise su conexión e intente de nuevo; sus respuestas siguen en la pantalla.';
