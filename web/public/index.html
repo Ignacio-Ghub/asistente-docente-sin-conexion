@@ -341,6 +341,9 @@ $('#entrar').onclick = () => {
   escribir('codigo', c);
   $('#bienvenida').style.display = 'none'; $('main').style.display = ''; $('nav').style.display = '';
 };
+// El enlace que reciben los docentes trae el código (?codigo=...): se guarda y se quita de la barra.
+const codigoEnlace = new URLSearchParams(location.search).get('codigo');
+if (codigoEnlace) { escribir('codigo', codigoEnlace.trim()); history.replaceState(null, '', location.pathname); }
 if (!leer('codigo', '')) mostrarBienvenida();
 
 fetch('/api/estado').then(r => r.json()).then(j => {

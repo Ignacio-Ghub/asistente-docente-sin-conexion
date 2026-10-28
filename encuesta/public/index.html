@@ -21,6 +21,10 @@
   .portada { position:relative; overflow:hidden; color:#fff; padding:34px 20px 72px;
     background:radial-gradient(circle at 85% 15%, rgba(255,200,69,.28) 0, transparent 38%), linear-gradient(135deg, var(--marino) 0%, var(--marino2) 100%); }
   .portada .contenido { max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .marca { display:flex; align-items:center; gap:12px; margin-bottom:22px; }
+  .marca img { height:34px; width:auto; }
+  .marca span { font-size:13px; line-height:1.3; opacity:.88; border-left:1px solid rgba(255,255,255,.35); padding-left:12px; }
+  .marca b { display:block; font-size:14px; opacity:1; }
   .etiqueta { display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22);
     padding:5px 12px; border-radius:30px; font-size:13px; font-weight:700; letter-spacing:.2px; }
   .portada h1 { font-size:clamp(26px, 6.4vw, 36px); line-height:1.15; margin:16px 0 10px; font-weight:800; }
@@ -100,6 +104,11 @@
   .gracias h2 { color:var(--marino); font-size:24px; margin:0 0 8px; }
   @keyframes aparecer { from { transform:scale(.6); opacity:0; } to { transform:scale(1); opacity:1; } }
 
+  .probar { border-top:5px solid var(--amarillo); }
+  .probar h2 { color:var(--marino); font-size:21px; margin:0 0 8px; }
+  .probar > p { margin:0 0 16px; }
+  .aviso-prueba { background:#EEF4FC; border-radius:14px; padding:12px 14px; margin-top:16px; font-size:15px; }
+  .aviso-prueba p { margin:0 0 8px; } .aviso-prueba p:last-child { margin:0; }
   footer { text-align:center; font-size:13px; color:var(--suave); padding:6px 16px 30px; }
 </style>
 </head>
@@ -108,6 +117,10 @@
 <div class="pct" id="porcentaje" aria-hidden="true">0 %</div>
 <header class="portada">
   <div class="contenido">
+    <div class="marca">
+      <img src="logo-jiba.png" alt="JIBA">
+      <span><b>Jesús Ignacio Briceño</b>Cooperación al desarrollo e IA</span>
+    </div>
     <span class="etiqueta">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
       Unos 10 minutos
@@ -265,8 +278,24 @@
   <h2>¡Muchas gracias!</h2>
   <p>Sus respuestas nos ayudan a construir herramientas útiles para su escuela.</p>
 </div>
+
+<div class="tarjeta probar" id="probar" hidden>
+  <h2>Ya puede probar el asistente</h2>
+  <p>El asistente le propone borradores de planes de clase y de evaluaciones cortas según el currículo, y le avisa qué estudiantes necesitan refuerzo. Usted revisa, corrige y decide.</p>
+  <a class="enviar" href="https://asistente-docente-prueba.vercel.app/?codigo=aula2026" target="_blank" rel="noopener" style="text-decoration:none">Probar el asistente
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  <p class="nota" style="margin:10px 0 0;text-align:center">Código de acceso: <b>aula2026</b> (ya va incluido en el enlace)</p>
+  <div class="aviso-prueba">
+    <p><b>Esta versión de prueba funciona con internet</b>, para que pueda usarla desde su teléfono. La versión para la escuela funciona sin internet, en una laptop, y sigue funcionando con su batería cuando se va la electricidad.</p>
+    <p>Si quiere verla funcionando sin internet, coordinamos una videollamada corta.</p>
+    <p class="nota">Use nombres inventados para los estudiantes.</p>
+  </div>
+  <p class="nota" id="aviso-contacto" style="text-align:center;margin:12px 0 0"></p>
+</div>
 </main>
-<footer>Sus respuestas se guardan de forma confidencial.</footer>
+<footer>Una iniciativa de Jesús Ignacio Briceño · JIBA<br>
+  <a href="https://ignaciobriceno.com" target="_blank" rel="noopener" style="color:var(--azul);font-weight:700;text-decoration:none">ignaciobriceno.com</a><br>
+  Sus respuestas se guardan de forma confidencial.</footer>
 
 <script>
 const form = document.getElementById('encuesta');
@@ -339,6 +368,13 @@ form.onsubmit = async e => {
     if (!res.ok || !j.ok) throw new Error(j.error || 'No se pudo enviar.');
     form.hidden = true; document.getElementById('gracias').hidden = false; window.scrollTo(0, 0);
     document.querySelector('.progreso').hidden = true; document.getElementById('porcentaje').hidden = true;
+    if (r.probar === 'Sí') {
+      document.getElementById('probar').hidden = false;
+      const c = r.contacto || '';
+      document.getElementById('aviso-contacto').textContent = /@/.test(c)
+        ? 'También le enviamos este enlace a su correo.'
+        : c ? 'Le escribiremos por WhatsApp para coordinar la prueba.' : '';
+    }
   } catch (ex) {
     err.textContent = ex.message + ' Revise su conexión e intente de nuevo; sus respuestas siguen en la pantalla.';
     err.hidden = false; boton.disabled = false; boton.firstChild.textContent = 'Enviar respuestas ';
