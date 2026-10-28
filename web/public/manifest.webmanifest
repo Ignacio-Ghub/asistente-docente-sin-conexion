@@ -1,6 +1,6 @@
 {
   "name": "Asistente docente",
-  "short_name": "Asistente",
+  "short_name": "Asistente docente",
   "description": "Planes de clase, evaluaciones y seguimiento según el programa oficial. Funciona sin conexión.",
   "lang": "es",
   "start_url": "/",

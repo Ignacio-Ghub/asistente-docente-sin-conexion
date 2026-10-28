@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#0F2747">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Asistente">
+<meta name="apple-mobile-web-app-title" content="Asistente docente">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -100,7 +100,7 @@
 <main>
 <div class="tarjeta noimprimir" id="instalar" style="display:none;border-color:var(--azul)">
   <h3 style="margin:0 0 6px">Úselo también sin internet</h3>
-  <p style="margin:0 0 6px">Agregue el asistente a la pantalla de inicio de su teléfono. Así se abre como una aplicación y, aunque no haya conexión, puede usar <b>Seguimiento</b> y <b>Guardados</b>.</p>
+  <p style="margin:0 0 6px">Agregue el asistente a la pantalla de inicio de su teléfono. Así se abre como una aplicación y, aunque no haya conexión, puede usar <b>Seguimiento</b>, <b>Guardados</b> y armar planes y evaluaciones con el programa oficial de su grado. Consejo: cuando tenga señal, prepare y guarde los planes de la semana.</p>
   <p class="nota" id="instalar-pasos" style="margin:0"></p>
   <div class="acciones"><button class="sec" id="instalar-si" style="display:none">Agregar a la pantalla de inicio</button><button class="quitar" id="instalar-no" style="padding:8px 14px">Ahora no</button></div>
 </div>
@@ -313,6 +313,7 @@ async function generar(accion, boton) {
   if (!d.tema) { alert('Escriba el tema de la clase.'); return; }
   boton.disabled = true; const txt = boton.textContent; boton.textContent = accion === 'evaluacion' ? 'Preparando y revisando la clave… (puede tardar)' : accion === 'repaso' ? 'Preparando el repaso… (puede tardar un minuto)' : 'Preparando borrador… (puede tardar un minuto)';
   salida.style.display = 'block'; salida.innerHTML = '<p class="nota">El asistente está preparando el borrador…</p>';
+  if (!navigator.onLine) { await mostrarSinConexion(accion, d, salida); boton.disabled = false; boton.textContent = txt; return; }
   try {
     const r = await fetch('/api/' + accion, {method:'POST', headers:{'Content-Type':'application/json', 'X-Codigo':codigo()}, body:JSON.stringify(d)});
     const j = await r.json();
@@ -329,10 +330,81 @@ async function generar(accion, boton) {
     salida.querySelector('[data-compartir]').onclick = () => compartir(titulo, salida.querySelector('.resultado').innerText);
     salida.querySelectorAll('.valorar button').forEach(b => b.onclick = () => valorar(b, tipo, d));
   } catch (e) {
-    const sinRed = !navigator.onLine || e instanceof TypeError;
-    salida.innerHTML = `<p class="alerta">${sinRed ? 'Sin conexión. Para preparar un borrador nuevo necesita internet. Sus guardados y el seguimiento funcionan igual.' : e.message}</p>`;
+    if (!navigator.onLine || e instanceof TypeError) await mostrarSinConexion(accion, d, salida);
+    else salida.innerHTML = `<p class="alerta">${e.message}</p>`;
   }
   boton.disabled = false; boton.textContent = txt;
+}
+
+// Sin conexión: el modelo no está disponible, pero el programa oficial sí (guardado en el teléfono).
+// Se arma una guía con los contenidos oficiales que corresponden al tema para que el docente complete su plan.
+const sinTildes = t => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const PALABRAS_VACIAS = new Set('para como sobre entre desde hasta este esta estos estas clase tema temas segun'.split(' '));
+async function programaOficial(d) {
+  const archivo = (d.nivel === 'Media General' ? 'media-' : 'primaria-');
+  const grados = d.multigrado ? [...new Set((d.grados_multi || '').match(/[1-6]/g) || [])].map(n => ({1:'1er',2:'2do',3:'3er',4:'4to',5:'5to',6:'6to'})[n])
+                              : [String(d.grado || '').split(' ')[0]];
+  const res = [];
+  for (const g of grados) {
+    try {
+      const j = await (await fetch('/curriculo/' + archivo + g + '.json')).json();
+      if (j.areas[d.area]) res.push({grado: g + (d.nivel === 'Media General' ? ' año' : ' grado'), bloques: j.areas[d.area]});
+    } catch (e) {}
+  }
+  return res;
+}
+function relacionados(bloques, tema) {
+  const raices = sinTildes(tema).split(/[^a-zñ0-9]+/).filter(p => p.length >= 4 && !PALABRAS_VACIAS.has(p)).map(p => p.slice(0, 5));
+  // Cada bloque suma por las palabras del tema que aparecen en su título y en sus contenidos; quedan los mejores.
+  const cuenta = t => raices.filter(r => sinTildes(t).includes(r)).length;
+  const elegidos = [];
+  for (const b of bloques) {
+    const enBloque = cuenta(b.bloque);
+    const items = b.items.filter(i => enBloque || cuenta(i));
+    const puntos = enBloque * 3 + Math.max(0, ...b.items.map(cuenta));
+    if (items.length) elegidos.push({bloque: b.bloque, items: items.slice(0, 8), puntos});
+  }
+  elegidos.sort((x, y) => y.puntos - x.puntos);
+  return elegidos.filter(e => e.puntos >= (elegidos[0]?.puntos || 0) / 2).slice(0, 2);
+}
+const listaHTML = bs => bs.map(b => `<p><b>${b.bloque}</b></p><ul>${b.items.map(i => `<li>${i}</li>`).join('')}</ul>`).join('');
+async function mostrarSinConexion(accion, d, salida) {
+  const programa = await programaOficial(d);
+  const m = Math.max(10, +d.minutos || 45), ini = Math.round(m * 0.15), cie = Math.round(m * 0.2), des = m - ini - cie;
+  let contenidos = '';
+  for (const p of programa) {
+    const rel = relacionados(p.bloques, d.tema);
+    contenidos += (programa.length > 1 ? `<p><b>${p.grado}</b></p>` : '') + (rel.length ? listaHTML(rel)
+      : '<p>No encontramos su tema con esas palabras. Elija los contenidos en la lista completa del programa, más abajo.</p>');
+  }
+  if (!programa.length) contenidos = '<p>Esta área no tiene programa oficial guardado en el teléfono. Escriba aquí los contenidos que trabajará.</p>';
+  const completo = programa.map(p => `<details class="guardado"><summary><b>Programa oficial completo: ${p.grado}, ${d.area}</b></summary>${listaHTML(p.bloques)}</details>`).join('');
+  const datos = `<p><b>Grado:</b> ${d.multigrado ? 'Multigrado (' + (d.grados_multi || '') + ')' : d.grado} · <b>Área:</b> ${d.area} · <b>Duración:</b> ${m} minutos</p>`;
+  const multi = d.multigrado ? '<li>Actividad común para todos y luego una tarea para cada grado; los mayores apoyan a los menores.</li>' : '';
+  const tipoNota = d.tipo_clase === 'corta' ? '<p><i>Clase corta: quédese solo con lo esencial y una actividad principal.</i></p>'
+    : d.tipo_clase === 'recuperar' ? `<p><i>Recuperar ${d.clases_perdidas || 'varias'} clases: empiece comprobando qué saben y priorice lo que es base para lo que sigue.</i></p>` : '';
+  let cuerpo;
+  if (accion === 'plan') cuerpo = `<h3>Plan de clase: ${d.tema}</h3>${datos}${tipoNota}
+    <h3>1. Propósito</h3><p>Al final de la clase, los estudiantes podrán …</p>
+    <h3>2. Contenidos del programa oficial</h3>${contenidos}
+    <h3>3. Inicio (${ini} minutos)</h3><ul><li>Pregunta o situación de la vida diaria que despierte interés: …</li></ul>
+    <h3>4. Desarrollo (${des} minutos)</h3><ul>${multi}<li>Explicación con un ejemplo en la pizarra: …</li><li>Práctica en parejas o grupos: …</li><li>Revisión entre todos: …</li></ul>
+    <h3>5. Cierre (${cie} minutos)</h3><ul><li>Dos o tres preguntas orales para comprobar lo aprendido: …</li></ul>
+    <h3>6. Para quien va atrasado</h3><p>…</p>
+    <h3>7. Tarea para casa sin electricidad</h3><p>Algo breve para hacer de día, con lo que hay en casa: …</p>`;
+  else if (accion === 'evaluacion') cuerpo = `<h3>Evaluación: ${d.tema}</h3>${datos}
+    <p><b>Lo que se evalúa</b> (del programa oficial):</p>${contenidos}
+    <h3>Preguntas (en voz alta o en la pizarra)</h3><ol><li>Recordar: …</li><li>Recordar: …</li><li>Aplicar a una situación concreta: …</li><li>Aplicar a una situación concreta: …</li><li>Explicar con sus palabras: …</li></ol>
+    <h3>Clave para el docente</h3><ol><li>Respuesta esperada: … · Error que indica refuerzo: …</li><li>…</li><li>…</li><li>…</li><li>…</li></ol>`;
+  else cuerpo = `<h3>Repaso: ${d.tema}</h3>${datos}<p>El repaso con explicaciones necesita conexión. Mientras tanto, estos son los contenidos del programa oficial relacionados con su tema:</p>${contenidos}`;
+  const tipo = {plan:'Plan de clase', evaluacion:'Evaluación', repaso:'Repaso del contenido'}[accion];
+  salida.innerHTML = `<p class="revisado"><b>Sin conexión.</b> Le preparamos una guía con el programa oficial de su grado para que arme su ${accion === 'evaluacion' ? 'evaluación' : accion === 'repaso' ? 'repaso' : 'plan'}. Toque el texto para completar donde dice «…» y guárdelo. Con conexión, el asistente le propone un borrador completo.</p>
+    <div class="resultado" contenteditable="true">${cuerpo}</div>${completo}
+    <div class="acciones"><button class="principal" style="margin-top:0">Guardar en este teléfono</button>
+      <button class="sec" data-compartir>Compartir por WhatsApp</button></div>`;
+  const titulo = `${tipo}: ${d.tema} (${d.multigrado ? 'multigrado' : d.grado}, ${d.area})`;
+  salida.querySelector('.acciones .principal').onclick = ev => guardar(tipo, d, salida.querySelector('.resultado').innerHTML, ev.target);
+  salida.querySelector('[data-compartir]').onclick = () => compartir(titulo, salida.querySelector('.resultado').innerText);
 }
 
 // Compartir con un colega: en el teléfono abre el menú de compartir (WhatsApp incluido); si no, WhatsApp Web.
