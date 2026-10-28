@@ -143,14 +143,14 @@ document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
 });
 form.multigrado.onchange = () => $('#multi').style.display = form.multigrado.checked ? 'block' : 'none';
 
-// Grados y áreas según el nivel (Currículo de Primaria 2007 y Media General 2015-2016, MPPE).
+// Grados y áreas según el nivel. Contenidos oficiales: documentos del MPPE para el año escolar vigente
+// (Prácticas del Lenguaje, Matemática, Ciencias Naturales e Identidad, de 1.er grado a 5.º año).
+const CON_CONTENIDOS = ['Prácticas del Lenguaje','Matemática','Ciencias Naturales','Identidad'];
 const NIVELES = {
   'Primaria': {etiqueta:'Grado', grados:['1er grado','2do grado','3er grado','4to grado','5to grado','6to grado'],
-    areas:['Lengua, comunicación y cultura','Matemática, Ciencias, Naturaleza y Sociedad','Ciencias Sociales, Ciudadanía e Identidad','Educación Física, Deportes y Recreación'],
-    conCurriculo:['4to grado','5to grado']},
+    areas:['Prácticas del Lenguaje','Matemática','Ciencias Naturales','Identidad','Educación Física']},
   'Media General': {etiqueta:'Año', grados:['1er año','2do año','3er año','4to año','5to año'],
-    areas:['Ciencias Naturales','Educación Física','Lengua','Lengua Extranjera','Matemática','Memoria, Territorio y Ciudadanía','Orientación y Convivencia','Arte y Patrimonio'],
-    conEnfoque:['Ciencias Naturales','Educación Física','Lengua','Matemática','Memoria, Territorio y Ciudadanía']},
+    areas:['Prácticas del Lenguaje','Matemática','Ciencias Naturales','Identidad','Educación Física','Lengua Extranjera','Arte y Patrimonio','Orientación y Convivencia']},
 };
 function opciones(sel, lista) { sel.innerHTML = lista.map(x => `<option>${x}</option>`).join(''); }
 function cambiarNivel() {
@@ -160,15 +160,9 @@ function cambiarNivel() {
   notaCurriculo();
 }
 function notaCurriculo() {
-  const n = NIVELES[form.nivel.value];
-  let txt;
-  if (n.conCurriculo) txt = n.conCurriculo.includes(form.grado.value)
-    ? 'Usa los contenidos oficiales de este grado (Currículo de Primaria, MPPE 2007).'
-    : 'Aún no está cargado el currículo de este grado: el plan no cita contenidos oficiales. Revísalo con tu programa.';
-  else txt = n.conEnfoque.includes(form.area.value)
-    ? 'Usa el enfoque oficial del área (MPPE, Media General 2015-2016), sin contenidos por año: revísalo con tu programa.'
-    : 'Aún no está cargado el documento de esta área: revisa el plan con tu programa.';
-  $('#nota-curriculo').textContent = txt;
+  $('#nota-curriculo').textContent = CON_CONTENIDOS.includes(form.area.value)
+    ? 'Usa los contenidos y aprendizajes esperados oficiales del Ministerio de Educación para este ' + (form.nivel.value === 'Primaria' ? 'grado' : 'año') + '.'
+    : 'Esta área no tiene un documento oficial de contenidos cargado: el plan no cita contenidos oficiales. Revíselo con su programa.';
 }
 form.nivel.onchange = cambiarNivel;
 form.grado.onchange = notaCurriculo;

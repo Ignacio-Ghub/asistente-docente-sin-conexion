@@ -43,7 +43,7 @@ SISTEMA = (
 )
 
 # Orientaciones por área, tomadas del enfoque de cada área en el currículo oficial
-# (Primaria 2007 y cambio curricular de Media General 2015-2016).
+# (documentos del MPPE para el año escolar vigente; Educación Física según el currículo de primaria).
 ORIENTACION_AREA = {
     "educación física": (
         "Es una clase práctica de movimiento, no de pupitre ni de cuaderno. Estructura "
@@ -79,7 +79,7 @@ def orientacion_area(area):
         return ORIENTACION_AREA["lengua"]
     if "ciencias naturales" in a:
         return ORIENTACION_AREA["ciencias"]
-    if "sociales" in a or "memoria" in a or "ciudadanía" in a:
+    if "identidad" in a or "sociales" in a or "ciudadanía" in a:
         return ORIENTACION_AREA["sociales"]
     return ""
 
@@ -90,21 +90,21 @@ def es_educacion_fisica(area):
 
 
 def curriculo_de(nivel, grado, area):
-    """Texto oficial del área para ese grado, si lo tenemos cargado; si no, None."""
-    if nivel == "Media General":
-        archivo = CURRICULO / "media-general.json"
-    else:
-        if not grado.strip():
-            return None
-        archivo = CURRICULO / "primaria-{}.json".format(grado.split()[0])
+    """Contenidos y aprendizajes esperados oficiales del área para ese grado o año; si no hay, None.
+
+    Fuente: documentos del MPPE para el año escolar vigente (https://www.mppe.gob.ve/periodo-escolar-2025-2026/).
+    """
+    if not grado.strip():
+        return None
+    prefijo = "media" if nivel == "Media General" else "primaria"
+    archivo = CURRICULO / "{}-{}.json".format(prefijo, grado.split()[0])
     if not archivo.exists():
         return None
     datos = json.loads(archivo.read_text(encoding="utf-8"))
     texto = datos["areas"].get(area)
     if not texto:
         return None
-    tipo = datos.get("tipo", "contenidos del grado")
-    return "Fuente ({}): {}\n{}".format(tipo, datos["fuente"], texto[:6000])
+    return "Fuente: {}\n{}".format(datos["fuentes"][area], texto[:14000])
 
 
 def leer_registro():
@@ -177,8 +177,8 @@ def contexto_clase(d):
         base += "\nOrientación del área: " + orient + "\n"
     cur = curriculo_de(nivel, d.get("grado", ""), d.get("area", ""))
     if cur:
-        base += ("\nCurrículo oficial de esta área y grado (elige de aquí los contenidos "
-                 "que corresponden al tema):\n" + cur + "\n")
+        base += ("\nContenidos y aprendizajes esperados oficiales del MPPE para esta área y grado "
+                 "(elige de aquí los que corresponden al tema):\n" + cur + "\n")
     return base
 
 
@@ -317,7 +317,7 @@ class Manejador(SimpleHTTPRequestHandler):
         d = json.loads(self.rfile.read(largo) or b"{}")
         try:
             cur = curriculo_de(d.get("nivel", "Primaria"), d.get("grado", ""), d.get("area", ""))
-            curriculo = None if cur is None else ("enfoque" if "enfoque del área" in cur else "contenidos")
+            curriculo = None if cur is None else "contenidos"
             if self.path == "/api/plan":
                 return self.responder({"texto": preguntar_modelo(prompt_plan(d)),
                                        "curriculo": curriculo})

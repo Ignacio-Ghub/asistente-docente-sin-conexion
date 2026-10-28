@@ -8,14 +8,17 @@ Funciona sin internet. Una laptop hace de servidor y los teléfonos de los docen
 3. **Seguimiento:** el docente anota los aciertos y aparece un aviso cuando un estudiante saca menos del 60 % en las dos últimas evaluaciones. El aviso sale de una regla simple, no de la IA.
 4. **Guardados:** los planes y evaluaciones se guardan en el equipo y se pueden consultar sin electricidad ni internet. «Descargar archivo» crea una copia para imprimirla cuando haya electricidad.
 
-## Currículo oficial cargado (carpeta `curriculo/`)
-| Nivel | Qué hay | Fuente |
-|---|---|---|
-| Primaria, 4.º y 5.º grado | Finalidad y contenidos de las 4 áreas | Currículo del Subsistema de Educación Primaria Bolivariana (MPPE, 2007), en transcripciones publicadas |
-| Media General | Enfoque de 5 áreas, sin contenidos por año | MPPE, Proceso de cambio curricular en Educación Media (2015-2016), publicado por SITEAL/UNESCO |
-| Primaria 1.º, 2.º, 3.º y 6.º; resto de Media General | **Nada aún** | Hay que pedírselo a los docentes |
+## Contenidos oficiales cargados (carpeta `curriculo/`)
+Fuente: documentos del Ministerio del Poder Popular para la Educación para el año escolar vigente, publicados en https://www.mppe.gob.ve/periodo-escolar-2025-2026/ («Propuestas de contenidos para la enseñanza y aprendizajes esperados»). Revisado el 28/10/2026.
 
-Cuando hay currículo cargado, el plan cita el contenido oficial que trabaja. Cuando no lo hay, la pantalla lo avisa.
+| Área | Documento | Niveles |
+|---|---|---|
+| Prácticas del Lenguaje | Documento para la consulta, septiembre 2025 | 1.er a 6.º grado y 1.er a 5.º año |
+| Matemática | Octubre 2026 | 1.er a 6.º grado y 1.er a 5.º año |
+| Ciencias Naturales | Octubre 2026 | 1.er a 6.º grado y 1.er a 5.º año |
+| Identidad | Documento para la consulta, septiembre 2025 | 1.er a 6.º grado y 1.er a 5.º año |
+
+El plan cita los contenidos y aprendizajes esperados del grado o año. Educación Física y las demás áreas de Media General no tienen documento de contenidos publicado ahí: la pantalla lo avisa. Los archivos del currículo de 2007 que se usaban antes están archivados aparte.
 
 ## Instalar el modelo (una sola vez, con internet)
 1. Descargar e instalar Ollama desde https://ollama.com/download (Mac o Windows).

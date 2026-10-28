@@ -71,9 +71,9 @@
   .chip input:checked + span::before { border-color:var(--marino); background:var(--marino); box-shadow:inset 0 0 0 3px #fff; }
   .chip input:focus-visible + span { outline:3px solid var(--amarillo); outline-offset:2px; }
 
-  input[type=text], input[type=number], input[type=email], input[type=tel], textarea { width:100%; padding:13px 14px; border:1.5px solid var(--borde); border-radius:14px; font-size:16px;
+  input[type=text], input[type=number], input[type=email], input[type=tel], select, textarea { width:100%; padding:13px 14px; border:1.5px solid var(--borde); border-radius:14px; font-size:16px;
     background:#FBFCFE; color:var(--texto); font-family:inherit; transition:border-color .15s, background .15s; }
-  input[type=text]:focus, input[type=number]:focus, input[type=email]:focus, input[type=tel]:focus, textarea:focus { outline:none; border-color:var(--azul); background:#fff; box-shadow:0 0 0 4px rgba(47,123,217,.12); }
+  input[type=text]:focus, input[type=number]:focus, input[type=email]:focus, input[type=tel]:focus, select:focus, textarea:focus { outline:none; border-color:var(--azul); background:#fff; box-shadow:0 0 0 4px rgba(47,123,217,.12); }
   textarea { min-height:96px; resize:vertical; }
 
   /* Ordenar del 1 al 5 */
@@ -149,22 +149,24 @@
       <div class="numero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg></div>
       <div><h2>Su escuela</h2><small>Sección 1 de 5</small></div>
     </div>
-    <div class="pregunta"><label class="enunciado" for="estado_municipio"><span class="n">1.</span>Estado y municipio de la escuela</label><input type="text" id="estado_municipio" name="estado_municipio" placeholder="Ej.: Mérida, municipio Rangel"></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">2.</span>¿La escuela es rural o urbana?</span>
+    <div class="pregunta"><label class="enunciado" for="estado"><span class="n">1.</span>Estado</label><select id="estado" name="estado"><option value="">Elija el estado</option></select></div>
+    <div class="pregunta"><label class="enunciado" for="municipio"><span class="n">2.</span>Municipio</label><select id="municipio" name="municipio" disabled><option value="">Primero elija el estado</option></select></div>
+    <div class="pregunta"><label class="enunciado" for="nombre_escuela"><span class="n">3.</span>Nombre de la escuela</label><input type="text" id="nombre_escuela" name="nombre_escuela" placeholder="Ej.: Escuela Bolivariana …"></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">4.</span>¿La escuela es rural o urbana?</span>
       <div class="opciones">
         <label class="chip"><input type="radio" name="tipo_escuela" value="Rural"><span>Rural</span></label>
         <label class="chip"><input type="radio" name="tipo_escuela" value="Urbana"><span>Urbana</span></label>
         <label class="chip"><input type="radio" name="tipo_escuela" value="Mixta"><span>Mixta</span></label></div></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">3.</span>¿Qué grado o grados atiende? <span class="nota">Puede marcar varios.</span></span>
+    <div class="pregunta"><span class="enunciado"><span class="n">5.</span>¿Qué grado o grados atiende? <span class="nota">Puede marcar varios.</span></span>
       <div class="opciones lista">
         <label class="chip"><input type="checkbox" name="grados" value="Inicial"><span>Inicial</span></label>
         <label class="chip"><input type="checkbox" name="grados" value="1.º a 6.º grado"><span>Primaria (1.º a 6.º grado)</span></label>
         <label class="chip"><input type="checkbox" name="grados" value="1.º a 5.º año"><span>Media General (1.º a 5.º año)</span></label></div></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">4.</span>¿Atiende un aula multigrado?</span>
+    <div class="pregunta"><span class="enunciado"><span class="n">6.</span>¿Atiende un aula multigrado?</span>
       <div class="opciones">
         <label class="chip"><input type="radio" name="multigrado" value="Sí"><span>Sí</span></label>
         <label class="chip"><input type="radio" name="multigrado" value="No"><span>No</span></label></div></div>
-    <div class="pregunta"><label class="enunciado" for="estudiantes"><span class="n">5.</span>¿Cuántos estudiantes tiene en total?</label><input type="number" id="estudiantes" name="estudiantes" min="0" inputmode="numeric" placeholder="Ej.: 18"></div>
+    <div class="pregunta"><label class="enunciado" for="estudiantes"><span class="n">7.</span>¿Cuántos estudiantes tiene en total?</label><input type="number" id="estudiantes" name="estudiantes" min="0" inputmode="numeric" placeholder="Ej.: 18"></div>
   </section>
 
   <section class="tarjeta">
@@ -172,24 +174,24 @@
       <div class="numero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></div>
       <div><h2>Electricidad, conexión y equipos</h2><small>Sección 2 de 5</small></div>
     </div>
-    <div class="pregunta"><span class="enunciado"><span class="n">6.</span>En una semana normal, ¿cuántos días se va la electricidad en la escuela?</span>
+    <div class="pregunta"><span class="enunciado"><span class="n">8.</span>En una semana normal, ¿cuántos días se va la electricidad en la escuela?</span>
       <div class="opciones">
         <label class="chip"><input type="radio" name="dias_sin_electricidad" value="Nunca"><span>Nunca</span></label>
         <label class="chip"><input type="radio" name="dias_sin_electricidad" value="1-2 días"><span>1 o 2 días</span></label>
         <label class="chip"><input type="radio" name="dias_sin_electricidad" value="3-4 días"><span>3 o 4 días</span></label>
         <label class="chip"><input type="radio" name="dias_sin_electricidad" value="Todos los días"><span>Todos los días</span></label></div></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">7.</span>Cuando se va, ¿cuánto suele durar el corte?</span>
+    <div class="pregunta"><span class="enunciado"><span class="n">9.</span>Cuando se va, ¿cuánto suele durar el corte?</span>
       <div class="opciones">
         <label class="chip"><input type="radio" name="duracion_corte" value="Menos de 1 hora"><span>Menos de 1 hora</span></label>
         <label class="chip"><input type="radio" name="duracion_corte" value="1-4 horas"><span>Entre 1 y 4 horas</span></label>
         <label class="chip"><input type="radio" name="duracion_corte" value="Más de 4 horas"><span>Más de 4 horas</span></label>
         <label class="chip"><input type="radio" name="duracion_corte" value="Varios días"><span>Varios días</span></label></div></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">8.</span>¿Hay internet en la escuela?</span>
+    <div class="pregunta"><span class="enunciado"><span class="n">10.</span>¿Hay internet en la escuela?</span>
       <div class="opciones">
         <label class="chip"><input type="radio" name="internet" value="No hay"><span>No hay</span></label>
         <label class="chip"><input type="radio" name="internet" value="Hay pero falla mucho"><span>Hay, pero falla mucho</span></label>
         <label class="chip"><input type="radio" name="internet" value="Funciona bien"><span>Funciona bien</span></label></div></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">9.</span>¿Qué equipos tiene usted a mano? <span class="nota">Puede marcar varios.</span></span>
+    <div class="pregunta"><span class="enunciado"><span class="n">11.</span>¿Qué equipos tiene usted a mano? <span class="nota">Puede marcar varios.</span></span>
       <div class="opciones">
         <label class="chip"><input type="checkbox" name="equipos" value="Teléfono Android"><span>Teléfono Android</span></label>
         <label class="chip"><input type="checkbox" name="equipos" value="iPhone"><span>iPhone</span></label>
@@ -197,7 +199,7 @@
         <label class="chip"><input type="checkbox" name="equipos" value="Otra laptop"><span>Otra laptop</span></label>
         <label class="chip"><input type="checkbox" name="equipos" value="Computadora de la escuela"><span>Computadora de la escuela</span></label>
         <label class="chip"><input type="checkbox" name="equipos" value="Ninguno"><span>Ninguno</span></label></div></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">10.</span>¿La escuela tiene planta eléctrica, panel solar o batería de respaldo? <span class="nota">Puede marcar varios.</span></span>
+    <div class="pregunta"><span class="enunciado"><span class="n">12.</span>¿La escuela tiene planta eléctrica, panel solar o batería de respaldo? <span class="nota">Puede marcar varios.</span></span>
       <div class="opciones">
         <label class="chip"><input type="checkbox" name="respaldo" value="Planta eléctrica"><span>Planta eléctrica</span></label>
         <label class="chip"><input type="checkbox" name="respaldo" value="Panel solar"><span>Panel solar</span></label>
@@ -211,25 +213,25 @@
       <div class="numero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V5a2 2 0 0 1 2-2h12v15H6a2 2 0 0 0-2 1.5z"/><path d="M4 19.5A2 2 0 0 0 6 21h12"/><path d="M9 7h6M9 11h4"/></svg></div>
       <div><h2>Su trabajo diario</h2><small>Sección 3 de 5</small></div>
     </div>
-    <div class="pregunta"><span class="enunciado"><span class="n">11.</span>¿Cuántas horas a la semana dedica a preparar sus clases?</span>
+    <div class="pregunta"><span class="enunciado"><span class="n">13.</span>¿Cuántas horas a la semana dedica a preparar sus clases?</span>
       <div class="opciones">
         <label class="chip"><input type="radio" name="horas_planificacion" value="Menos de 2"><span>Menos de 2 horas</span></label>
         <label class="chip"><input type="radio" name="horas_planificacion" value="2-5"><span>Entre 2 y 5</span></label>
         <label class="chip"><input type="radio" name="horas_planificacion" value="5-10"><span>Entre 5 y 10</span></label>
         <label class="chip"><input type="radio" name="horas_planificacion" value="Más de 10"><span>Más de 10</span></label></div></div>
-    <div class="pregunta"><label class="enunciado" for="documento"><span class="n">12.</span>¿Qué documento usa para planificar?</label><input type="text" id="documento" name="documento" placeholder="Ej.: el currículo de primaria, un libro de texto…"></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">13.</span>¿Dónde guarda las notas y los registros de sus estudiantes? <span class="nota">Puede marcar varios.</span></span>
+    <div class="pregunta"><label class="enunciado" for="documento"><span class="n">14.</span>¿Qué documento usa para planificar?</label><input type="text" id="documento" name="documento" placeholder="Ej.: el currículo de primaria, un libro de texto…"></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">15.</span>¿Dónde guarda las notas y los registros de sus estudiantes? <span class="nota">Puede marcar varios.</span></span>
       <div class="opciones">
         <label class="chip"><input type="checkbox" name="registros" value="Cuaderno"><span>Cuaderno</span></label>
         <label class="chip"><input type="checkbox" name="registros" value="Carpeta"><span>Carpeta</span></label>
         <label class="chip"><input type="checkbox" name="registros" value="Teléfono"><span>Teléfono</span></label>
         <label class="chip"><input type="checkbox" name="registros" value="Computadora"><span>Computadora</span></label>
         <label class="chip"><input type="checkbox" name="registros" value="Otro"><span>Otro</span></label></div></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">14.</span>¿Ha perdido alguna vez registros o trabajos por un corte de electricidad o una falla del equipo?</span>
+    <div class="pregunta"><span class="enunciado"><span class="n">16.</span>¿Ha perdido alguna vez registros o trabajos por un corte de electricidad o una falla del equipo?</span>
       <div class="opciones">
         <label class="chip"><input type="radio" name="perdio_registros" value="Sí"><span>Sí</span></label>
         <label class="chip"><input type="radio" name="perdio_registros" value="No"><span>No</span></label></div></div>
-    <div class="pregunta"><label class="enunciado" for="rezago"><span class="n">15.</span>¿Cómo sabe hoy qué estudiantes se están quedando atrás?</label><textarea id="rezago" name="rezago" placeholder="Cuéntenos con sus palabras"></textarea></div>
+    <div class="pregunta"><label class="enunciado" for="rezago"><span class="n">17.</span>¿Cómo sabe hoy qué estudiantes se están quedando atrás?</label><textarea id="rezago" name="rezago" placeholder="Cuéntenos con sus palabras"></textarea></div>
   </section>
 
   <section class="tarjeta">
@@ -237,11 +239,11 @@
       <div class="numero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/></svg></div>
       <div><h2>Sus necesidades</h2><small>Sección 4 de 5</small></div>
     </div>
-    <div class="pregunta"><label class="enunciado" for="mas_le_cuesta"><span class="n">16.</span>¿Qué es lo que más tiempo le quita o más le cuesta en su trabajo?</label><textarea id="mas_le_cuesta" name="mas_le_cuesta" placeholder="Cuéntenos con sus palabras"></textarea></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">17.</span>Ordene estas herramientas, todas sin internet, del 1 (la más útil) al 5 (la menos útil). <span class="nota">Use cada número una sola vez.</span></span>
+    <div class="pregunta"><label class="enunciado" for="mas_le_cuesta"><span class="n">18.</span>¿Qué es lo que más tiempo le quita o más le cuesta en su trabajo?</label><textarea id="mas_le_cuesta" name="mas_le_cuesta" placeholder="Cuéntenos con sus palabras"></textarea></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">19.</span>Ordene estas herramientas, todas sin internet, del 1 (la más útil) al 5 (la menos útil). <span class="nota">Use cada número una sola vez.</span></span>
       <div class="orden" id="orden"></div>
       <p class="error" id="error-orden" hidden>Cada número del 1 al 5 debe usarse una sola vez.</p></div>
-    <div class="pregunta"><label class="enunciado" for="otra_herramienta"><span class="n">18.</span>¿Qué otra herramienta le gustaría tener que no esté en la lista?</label><textarea id="otra_herramienta" name="otra_herramienta" placeholder="Opcional"></textarea></div>
+    <div class="pregunta"><label class="enunciado" for="otra_herramienta"><span class="n">20.</span>¿Qué otra herramienta le gustaría tener que no esté en la lista?</label><textarea id="otra_herramienta" name="otra_herramienta" placeholder="Opcional"></textarea></div>
   </section>
 
   <section class="tarjeta">
@@ -249,26 +251,24 @@
       <div class="numero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg></div>
       <div><h2>Sobre el asistente</h2><small>Sección 5 de 5</small></div>
     </div>
-    <div class="pregunta"><span class="enunciado"><span class="n">19.</span>Si una herramienta le propone un borrador de plan de clase y usted lo revisa y corrige, ¿lo usaría?</span>
+    <div class="pregunta"><span class="enunciado"><span class="n">21.</span>Si una herramienta le propone un borrador de plan de clase y usted lo revisa y corrige, ¿lo usaría?</span>
       <div class="opciones">
         <label class="chip"><input type="radio" name="usaria" value="Sí"><span>Sí</span></label>
         <label class="chip"><input type="radio" name="usaria" value="Tal vez"><span>Tal vez</span></label>
         <label class="chip"><input type="radio" name="usaria" value="No"><span>No</span></label></div>
       <label class="nota" for="por_que" style="display:block;margin:12px 0 6px">¿Por qué?</label><textarea id="por_que" name="por_que"></textarea></div>
-    <div class="pregunta"><label class="enunciado" for="preocupaciones"><span class="n">20.</span>¿Le preocupa algo de usar inteligencia artificial en su trabajo?</label><textarea id="preocupaciones" name="preocupaciones"></textarea></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">21.</span>¿Le gustaría probar el prototipo y darnos su opinión?</span>
+    <div class="pregunta"><label class="enunciado" for="preocupaciones"><span class="n">22.</span>¿Le preocupa algo de usar inteligencia artificial en su trabajo?</label><textarea id="preocupaciones" name="preocupaciones"></textarea></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">23.</span>¿Le gustaría probar el prototipo y darnos su opinión?</span>
       <div class="opciones">
         <label class="chip"><input type="radio" name="probar" value="Sí"><span>Sí, me gustaría</span></label>
         <label class="chip"><input type="radio" name="probar" value="No"><span>No por ahora</span></label></div>
       <div id="bloque-contacto" hidden>
-        <p class="nota" style="margin:14px 0 4px">¿Dónde le enviamos el enlace para probarlo? Deje al menos uno; si deja los dos, le llegará a ambos.</p>
-        <label class="enunciado" for="correo" style="margin:10px 0 6px;font-size:15px">Correo electrónico</label>
+        <label class="enunciado" for="correo" style="margin:14px 0 6px;font-size:15px">Correo electrónico</label>
         <input type="email" id="correo" name="correo" inputmode="email" autocomplete="email" placeholder="Ej.: maestra@gmail.com">
         <label class="enunciado" for="whatsapp" style="margin:12px 0 6px;font-size:15px">WhatsApp</label>
         <input type="tel" id="whatsapp" name="whatsapp" inputmode="tel" autocomplete="tel" placeholder="Ej.: 0414 123 4567">
-        <p class="error" id="error-contacto" hidden>Deje su correo o su WhatsApp para enviarle el enlace.</p>
       </div></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">22.</span>¿Nos autoriza a citar sus respuestas, sin su nombre, en solicitudes de financiamiento?</span>
+    <div class="pregunta"><span class="enunciado"><span class="n">24.</span>¿Nos autoriza a citar sus respuestas, sin su nombre, en solicitudes de financiamiento?</span>
       <div class="opciones">
         <label class="chip"><input type="radio" name="autoriza" value="Sí"><span>Sí</span></label>
         <label class="chip"><input type="radio" name="autoriza" value="No"><span>No</span></label></div></div>
@@ -296,6 +296,15 @@
 
 <script>
 const form = document.getElementById('encuesta');
+// Estados y municipios de Venezuela (24 entidades, 335 municipios).
+const MUNICIPIOS = {"Amazonas":["Alto Orinoco","Atabapo","Atures","Autana","Manapiare","Maroa","Río Negro"],"Anzoátegui":["Anaco","Aragua","Bolívar","Bruzual","Cajigal","Carvajal","Diego Bautista Urbaneja","Freites","Guanipa","Guanta","Independencia","Libertad","McGregor","Miranda","Monagas","Peñalver","Píritu","San Juan de Capistrano","Santa Ana","Simón Rodríguez","Sotillo"],"Apure":["Achaguas","Biruaca","Muñoz","Pedro Camejo","Páez","Rómulo Gallegos","San Fernando"],"Aragua":["Bolívar","Camatagua","Francisco Linares Alcántara","Girardot","José Félix Ribas","José Rafael Revenga","José Ángel Lamas","Libertador","Mario Briceño Iragorry","Ocumare de la Costa de Oro","San Casimiro","San Sebastián","Santiago Mariño","Santos Michelena","Sucre","Tovar","Urdaneta","Zamora"],"Barinas":["Alberto Arvelo Torrealba","Andrés Eloy Blanco","Antonio José de Sucre","Arismendi","Barinas","Bolívar","Cruz Paredes","Ezequiel Zamora","Obispos","Pedraza","Rojas","Sosa"],"Bolívar":["Angostura","Caroní","Cedeño","El Callao","Gran Sabana","Heres","Padre Pedro Chien","Píar","Roscio","Sifontes","Sucre"],"Carabobo":["Bejuma","Carlos Arvelo","Diego Ibarra","Guacara","Libertador","Los Guayos","Miranda","Montalbán","Mora","Naguanagua","Puerto Cabello","San Diego","San Joaquín","Valencia"],"Cojedes":["Anzoátegui","Girardot","Lima Blanco","Pao de San Juan Bautista","Ricaurte","Rómulo Gallegos","San Carlos","Tinaco","Tinaquillo"],"Delta Amacuro":["Antonio Díaz","Casacoima","Pedernales","Tucupita"],"Distrito Capital":["Libertador"],"Falcón":["Acosta","Bolívar","Buchivacoa","Carirubana","Colina","Dabajuro","Democracia","Falcón","Federación","Jacura","Los Taques","Manaure","Mauroa","Miranda","Monseñor Iturriza","Palmasola","Petit","Píritu","San Francisco","Silva","Sucre","Tocópero","Unión","Urumaco","Zamora"],"Guárico":["Camaguán","Chaguaramas","El Socorro","Infante","Las Mercedes","Mellado","Miranda","Monagas","Ortiz","Ribas","Roscio","San Gerónimo de Guayabal","San José de Guaribe","Santa María de Ipire","Zaraza"],"La Guaira":["Vargas"],"Lara":["Andrés Eloy Blanco","Crespo","Iribarren","Jiménez","Morán","Palavecino","Simón Planas","Torres","Urdaneta"],"Miranda":["Acevedo","Andrés Bello","Baruta","Brión","Buroz","Carrizal","Chacao","Cristóbal Rojas","El Hatillo","Guaicaipuro","Independencia","Lander","Los Salias","Paz Castillo","Pedro Gual","Plaza","Páez","Simón Bolívar","Sucre","Urdaneta","Zamora"],"Monagas":["Acosta","Aguasay","Bolívar","Caripe","Cedeño","Ezequiel Zamora","Libertador","Maturín","Piar","Punceres","Santa Bárbara","Sotillo","Uracoa"],"Mérida":["Alberto Adriani","Andrés Bello","Antonio Pinto Salinas","Aricagua","Arzobispo Chacón","Campo Elías","Caracciolo Parra Olmedo","Cardenal Quintero","Guaraque","Julio César Salas","Justo Briceño","Libertador","Miranda","Obispo Ramos de Lora","Padre Noguera","Pueblo Llano","Rangel","Rivas Dávila","Santos Marquina","Sucre","Tovar","Tulio Febres Cordero","Zea"],"Nueva Esparta":["Antolín del Campo","Arismendi","Díaz","García","Gómez","Maneiro","Marcano","Mariño","Península de Macanao","Tubores","Villalba"],"Portuguesa":["Agua Blanca","Araure","Esteller","Guanare","Guanarito","Monseñor José Vicente de Unda","Ospino","Papelón","Páez","San Genaro de Boconoíto","San Rafael de Onoto","Santa Rosalía","Sucre","Turén"],"Sucre":["Andrés Eloy Blanco","Andrés Mata","Arismendi","Benítez","Bermúdez","Bolívar","Cajigal","Cruz Salmerón Acosta","Libertador","Mariño","Mejía","Montes","Ribero","Sucre","Valdez"],"Trujillo":["Andrés Bello","Boconó","Bolívar","Candelaria","Carache","Escuque","José Felipe Márquez Cañizalez","Juan Vicente Campos Elías","La Ceiba","Miranda","Monte Carmelo","Motatán","Pampanito","Pampán","Rafael Rangel","San Rafael de Carvajal","Sucre","Trujillo","Urdaneta","Valera"],"Táchira":["Andrés Bello","Antonio Rómulo Costa","Ayacucho","Bolívar","Cárdenas","Córdoba","Fernández Feo","Francisco de Miranda","García de Hevia","Guásimos","Independencia","José María Vargas","Junín","Jáuregui","Libertad","Libertador","Lobatera","Michelena","Panamericano","Pedro María Ureña","Rafael Urdaneta","Samuel Darío Maldonado","San Cristóbal","San Judas Tadeo","Seboruco","Simón Rodríguez","Sucre","Torbes","Uribante"],"Yaracuy":["Arístides Bastidas","Bolívar","Bruzual","Cocorote","Independencia","José Antonio Páez","La Trinidad","Manuel Monge","Nirgua","Peña","San Felipe","Sucre","Urachiche","Veroes"],"Zulia":["Almirante Padilla","Baralt","Cabimas","Catatumbo","Colón","Francisco Javier Pulgar","Jesús Enrique Lossada","Jesús María Semprún","La Cañada de Urdaneta","Lagunillas","Machiques de Perijá","Mara","Maracaibo","Miranda","Páez","Rosario de Perijá","San Francisco","Santa Rita","Simón Bolívar","Sucre","Valmore Rodríguez"]};
+const selEstado = document.getElementById('estado'), selMunicipio = document.getElementById('municipio');
+selEstado.innerHTML += Object.keys(MUNICIPIOS).map(e => `<option>${e}</option>`).join('');
+selEstado.addEventListener('change', () => {
+  const lista = MUNICIPIOS[selEstado.value] || [];
+  selMunicipio.innerHTML = '<option value="">' + (lista.length ? 'Elija el municipio' : 'Primero elija el estado') + '</option>' + lista.map(m => `<option>${m}</option>`).join('');
+  selMunicipio.disabled = !lista.length;
+});
 
 // Pregunta 17: cada herramienta recibe un puesto del 1 al 5.
 const HERRAMIENTAS = [
@@ -333,7 +342,7 @@ function respuestas() {
 }
 
 // Avance: preguntas con alguna respuesta sobre el total de preguntas (17 cuenta como una).
-const PREGUNTAS = ['estado_municipio','tipo_escuela','grados','multigrado','estudiantes','dias_sin_electricidad','duracion_corte','internet','equipos','respaldo',
+const PREGUNTAS = ['estado','municipio','nombre_escuela','tipo_escuela','grados','multigrado','estudiantes','dias_sin_electricidad','duracion_corte','internet','equipos','respaldo',
   'horas_planificacion','documento','registros','perdio_registros','rezago','mas_le_cuesta','orden','otra_herramienta','usaria','preocupaciones','probar','autoriza'];
 function actualizarAvance() {
   const r = respuestas();
@@ -357,9 +366,6 @@ form.onsubmit = async e => {
   if (ordenMal) { document.getElementById('orden').scrollIntoView({block:'center'}); return; }
   const respondidas = Object.values(r).filter(v => Array.isArray(v) ? v.length : v).length;
   if (respondidas < 3) { err.textContent = 'Responda al menos algunas preguntas antes de enviar.'; err.hidden = false; return; }
-  const sinContacto = r.probar === 'Sí' && !r.correo && !r.whatsapp;
-  document.getElementById('error-contacto').hidden = !sinContacto;
-  if (sinContacto) { document.getElementById('correo').scrollIntoView({block:'center'}); return; }
   const boton = document.getElementById('enviar'); boton.disabled = true; boton.firstChild.textContent = 'Enviando… ';
   try {
     const res = await fetch('/api/enviar', {method:'POST', headers:{'Content-Type':'application/json'},
@@ -368,7 +374,7 @@ form.onsubmit = async e => {
     if (!res.ok || !j.ok) throw new Error(j.error || 'No se pudo enviar.');
     form.hidden = true; document.getElementById('gracias').hidden = false; window.scrollTo(0, 0);
     document.querySelector('.progreso').hidden = true; document.getElementById('porcentaje').hidden = true;
-    if (r.probar === 'Sí') {
+    if (r.probar === 'Sí' && (r.correo || r.whatsapp)) {
       document.getElementById('revise').hidden = false;
       document.getElementById('revise-titulo').textContent = r.correo && r.whatsapp
         ? 'Revise su correo y su WhatsApp.' : r.correo ? 'Revise su correo.' : 'Revise su WhatsApp.';
