@@ -79,7 +79,8 @@
   <p style="margin:0 0 8px">Gracias por probar el asistente. Esta versión de prueba funciona con internet, para que pueda usarla desde su teléfono.</p>
   <p class="nota">Use nombres inventados para los estudiantes. Lo que guarde queda solo en este teléfono.</p>
   <label for="codigo">Contraseña de acceso</label>
-  <input id="codigo" autocomplete="off" placeholder="Está en el mensaje que le enviamos">
+  <input id="codigo" autocomplete="off" placeholder="Está en el mensaje que le enviamos" onkeydown="if(event.key==='Enter')$('#entrar').click()">
+  <p class="nota" id="codigo-error" style="color:#B3261E;font-weight:700;margin:6px 0 0"></p>
   <button class="principal" id="entrar">Entrar</button>
 </div>
 <nav>
@@ -179,7 +180,7 @@
 </section>
 </main>
 <footer>
-  <div class="opinion-caja noimprimir" style="max-width:760px;margin:0 auto 18px"><p>¿Ya lo probó? Nos encantaría conocer su opinión.</p><p class="nota" style="font-weight:600;color:var(--suave);margin:0 0 10px">Cuéntenos qué le pareció. Es anónima, toma solo un minuto y nos ayuda mucho a mejorarlo.</p><button class="sec" onclick="abrirOpinion()">Dar mi opinión</button></div>
+  <div class="opinion-caja noimprimir" id="caja-opinion" style="max-width:760px;margin:0 auto 18px"><p>¿Ya lo probó? Nos encantaría conocer su opinión.</p><p class="nota" style="font-weight:600;color:var(--suave);margin:0 0 10px">Cuéntenos qué le pareció. Es anónima, toma solo un minuto y nos ayuda mucho a mejorarlo.</p><button class="sec" onclick="abrirOpinion()">Dar mi opinión</button></div>
   <a href="https://ignaciobriceno.com" target="_blank" rel="noopener"><img src="logo-jiba-azul.png" alt="JIBA"></a>
   Una iniciativa de Jesús Ignacio Briceño Alarcón · <a href="https://ignaciobriceno.com" target="_blank" rel="noopener">ignaciobriceno.com</a>
 </footer>
@@ -431,15 +432,16 @@ $('#descargar-reg').onclick = () => {
 $('#r-fecha').valueAsDate = new Date();
 
 // Código de acceso: lo pide una vez y lo recuerda en este teléfono.
-function mostrarBienvenida() { $('#bienvenida').style.display = 'block'; $('main').style.display = 'none'; $('nav').style.display = 'none'; }
+function mostrarBienvenida() { $('#bienvenida').style.display = 'block'; $('main').style.display = 'none'; $('nav').style.display = 'none'; $('#caja-opinion').style.display = 'none'; }
 $('#entrar').onclick = async () => {
-  const c = $('#codigo').value.trim(); if (!c) return;
+  const c = $('#codigo').value.trim(), err = $('#codigo-error'); err.textContent = '';
+  if (!c) { err.textContent = 'Escriba la contraseña que está en el mensaje que le enviamos.'; return; }
   try {
     const j = await (await fetch('/api/estado', {headers:{'X-Codigo': c}})).json();
-    if (!j.acceso) { alert('La contraseña no es correcta. Revise el mensaje que le enviamos.'); return; }
-  } catch (e) { alert('No hay conexión. Intente de nuevo.'); return; }
+    if (!j.acceso) { err.textContent = 'La contraseña no es correcta. Revise el mensaje que le enviamos.'; return; }
+  } catch (e) { err.textContent = 'No hay conexión. Intente de nuevo en un momento.'; return; }
   escribir('codigo', c);
-  $('#bienvenida').style.display = 'none'; $('main').style.display = ''; $('nav').style.display = '';
+  $('#bienvenida').style.display = 'none'; $('main').style.display = ''; $('nav').style.display = ''; $('#caja-opinion').style.display = '';
 };
 // El enlace que reciben los docentes trae el código (?codigo=...): se guarda y se quita de la barra.
 const codigoEnlace = new URLSearchParams(location.search).get('codigo');
