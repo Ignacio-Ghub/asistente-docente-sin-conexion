@@ -1,7 +1,7 @@
 // Permite abrir el asistente sin conexión: guarda la página y la usa cuando no hay internet.
 // Las respuestas de /api nunca se guardan (las genera el modelo y necesitan conexión).
-const CACHE = 'asistente-v1';
-const BASE = ['/', '/logo-jiba-azul.png'];
+const CACHE = 'asistente-v2';
+const BASE = ['/', '/logo-jiba-azul.png', '/manifest.webmanifest', '/icono-192.png', '/icono-512.png', '/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(BASE)).then(() => self.skipWaiting()));

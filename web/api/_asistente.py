@@ -186,17 +186,47 @@ def prompt_plan(d):
                   "tiempos y una variante más fácil y otra más difícil.\n"
                   "6. Vuelta a la calma y reflexión.\n"
                   "7. Seguridad e inclusión.\n"
-                  "8. Qué observar para evaluar.\n")
+                  "8. Qué observar para evaluar.\n"
+                  "9. Para casa: una actividad física sencilla que se pueda hacer de día, sin electricidad.\n")
     else:
         partes = ("1. Propósito (una frase: qué podrán hacer al final).\n"
                   "2. Contenido del currículo que se trabaja (cítalo si está arriba).\n"
                   "3. Inicio: pregunta o situación que despierte interés.\n"
                   "4. Desarrollo: actividades paso a paso, con tiempos y organización.\n"
                   "5. Cierre: cómo comprueba el docente lo que aprendieron.\n"
-                  "6. Para quien va atrasado: una idea de refuerzo.\n")
+                  "6. Para quien va atrasado: una idea de refuerzo.\n"
+                  "7. Tarea para casa sin electricidad: breve, para hacer de día, sin internet y con lo que "
+                  "hay en cualquier casa (cuaderno, objetos, conversar con la familia).\n")
+    extra += modo_clase(d)
     return (contexto_clase(d) + extra +
             "\nEscribe un borrador de plan de clase breve con estas partes:\n" + partes +
             "Termina con: «Borrador para revisar y ajustar por el docente.»")
+
+
+def modo_clase(d):
+    """Clase corta o de recuperación: los cortes de electricidad acortan y hacen perder clases."""
+    tipo = d.get("tipo_clase", "normal")
+    if tipo == "corta":
+        return ("Es una clase corta (cortes de electricidad u horario reducido): trabaja solo lo esencial "
+                "del contenido, con una actividad principal y un cierre rápido para comprobar lo aprendido.\n")
+    if tipo == "recuperar":
+        return ("El grupo perdió {n} clases de esta área (por cortes de electricidad u otras causas) y el "
+                "tema indica lo que quedó pendiente. Propón cómo recuperarlo en esta clase: empieza con una "
+                "comprobación rápida de lo que ya saben, prioriza los contenidos que son base para lo que "
+                "sigue, junta lo que se pueda trabajar a la vez e indica qué se puede retomar más adelante "
+                "o dejar como práctica en casa.\n").format(n=d.get("clases_perdidas") or "varias")
+    return ""
+
+
+def prompt_repaso(d):
+    return (contexto_clase(d) +
+            "\nEl docente quiere repasar este contenido antes de dar la clase (puede que no sea su "
+            "especialidad). Escribe un repaso breve, de no más de una página, con estas partes:\n"
+            "1. Lo esencial del tema: las ideas clave explicadas con sencillez y con exactitud.\n"
+            "2. Un ejemplo explicado paso a paso, adecuado al grado.\n"
+            "3. Errores frecuentes de los estudiantes y cómo ayudarlos a corregirlos.\n"
+            "4. Tres preguntas que suelen hacer los estudiantes, con una respuesta corta para cada una.\n"
+            "Si no estás seguro de un dato, no lo incluyas. No escribas un plan de clase.")
 
 
 def prompt_evaluacion(d):

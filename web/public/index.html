@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Asistente docente</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0F2747">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Asistente">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -93,6 +98,12 @@
   <button data-tab="guardados">Guardados</button>
 </nav>
 <main>
+<div class="tarjeta noimprimir" id="instalar" style="display:none;border-color:var(--azul)">
+  <h3 style="margin:0 0 6px">Úselo también sin internet</h3>
+  <p style="margin:0 0 6px">Agregue el asistente a la pantalla de inicio de su teléfono. Así se abre como una aplicación y, aunque no haya conexión, puede usar <b>Seguimiento</b> y <b>Guardados</b>.</p>
+  <p class="nota" id="instalar-pasos" style="margin:0"></p>
+  <div class="acciones"><button class="sec" id="instalar-si" style="display:none">Agregar a la pantalla de inicio</button><button class="quitar" id="instalar-no" style="padding:8px 14px">Ahora no</button></div>
+</div>
 
 <!-- Datos de la clase: compartidos por Planificar y Evaluar -->
 <section id="plan" class="activo">
@@ -117,9 +128,20 @@
       <option>Electricidad a ratos, sin internet</option>
       <option>Electricidad estable, sin internet</option>
     </select>
+    <label>Tipo de clase</label>
+    <select name="tipo_clase">
+      <option value="normal">Clase completa</option>
+      <option value="corta">Clase corta (por cortes de electricidad u horario reducido)</option>
+      <option value="recuperar">Recuperar clases perdidas</option>
+    </select>
+    <div id="recuperar" style="display:none"><label>¿Cuántas clases de esta área se perdieron?</label><input name="clases_perdidas" type="number" min="1" value="2">
+      <p class="nota" style="margin:6px 0 0">En «Tema», escriba los temas que quedaron pendientes.</p></div>
     <label>Minutos de clase</label><input name="minutos" type="number" value="45">
     <button class="principal" type="submit" data-accion="plan">Proponer plan de clase</button>
+    <button class="sec" type="button" id="btn-repaso" style="width:100%;margin-top:10px;padding:13px">Repasar el contenido antes de la clase</button>
+    <p class="nota" style="margin:6px 0 0;text-align:center">Una explicación breve del tema para usted, con los errores frecuentes de los estudiantes.</p>
   </form>
+  <div class="tarjeta" id="salida-repaso" style="display:none"></div>
   <div class="tarjeta" id="salida-plan" style="display:none"></div>
 </section>
 
@@ -289,7 +311,7 @@ async function generar(accion, boton) {
   const salida = $('#salida-' + accion);
   const d = datosClase();
   if (!d.tema) { alert('Escriba el tema de la clase.'); return; }
-  boton.disabled = true; const txt = boton.textContent; boton.textContent = accion === 'evaluacion' ? 'Preparando y revisando la clave… (puede tardar)' : 'Preparando borrador… (puede tardar un minuto)';
+  boton.disabled = true; const txt = boton.textContent; boton.textContent = accion === 'evaluacion' ? 'Preparando y revisando la clave… (puede tardar)' : accion === 'repaso' ? 'Preparando el repaso… (puede tardar un minuto)' : 'Preparando borrador… (puede tardar un minuto)';
   salida.style.display = 'block'; salida.innerHTML = '<p class="nota">El asistente está preparando el borrador…</p>';
   try {
     const r = await fetch('/api/' + accion, {method:'POST', headers:{'Content-Type':'application/json', 'X-Codigo':codigo()}, body:JSON.stringify(d)});
@@ -300,12 +322,12 @@ async function generar(accion, boton) {
       <p class="aviso-ia">Borrador generado por IA. Puede tocar el texto para corregirlo. Usted decide qué usar. <a href="#" onclick="abrirOpinion();return false" style="color:var(--azul);font-weight:700">Dar mi opinión</a></p>
       <div class="acciones"><button class="principal" style="margin-top:0">Guardar en este teléfono</button>
         <button class="sec" data-compartir>Compartir por WhatsApp</button></div>
-      <div class="valorar noimprimir">¿Le sirvió este borrador? <button data-v="Muy útil">Sí</button><button data-v="Algo útil">Más o menos</button><button data-v="Poco útil">No</button></div>`;
-    const tipo = accion === 'plan' ? 'Plan de clase' : 'Evaluación';
+      <div class="valorar noimprimir">${accion === 'repaso' ? '¿Le sirvió este repaso?' : '¿Le sirvió este borrador?'} <button>Sí</button><button>Más o menos</button><button>No</button></div>`;
+    const tipo = {plan:'Plan de clase', evaluacion:'Evaluación', repaso:'Repaso del contenido'}[accion];
     const titulo = `${tipo}: ${d.tema} (${d.multigrado ? 'multigrado' : d.grado}, ${d.area})`;
     salida.querySelector('.acciones .principal').onclick = ev => guardar(tipo, d, salida.querySelector('.resultado').innerHTML, ev.target);
     salida.querySelector('[data-compartir]').onclick = () => compartir(titulo, salida.querySelector('.resultado').innerText);
-    salida.querySelectorAll('.valorar button').forEach(b => b.onclick = () => valorar(b, accion === 'plan' ? 'Planificar' : 'Evaluar', d));
+    salida.querySelectorAll('.valorar button').forEach(b => b.onclick = () => valorar(b, tipo, d));
   } catch (e) {
     const sinRed = !navigator.onLine || e instanceof TypeError;
     salida.innerHTML = `<p class="alerta">${sinRed ? 'Sin conexión. Para preparar un borrador nuevo necesita internet. Sus guardados y el seguimiento funcionan igual.' : e.message}</p>`;
@@ -321,12 +343,13 @@ async function compartir(titulo, texto) {
 }
 
 // Valoración de un toque: anónima, va a la misma base de opiniones.
-async function valorar(boton, que, d) {
+async function valorar(boton, borrador, d) {
   const caja = boton.parentElement;
   caja.querySelectorAll('button').forEach(b => b.disabled = true);
   try {
     const r = await fetch('/api/opinion', {method:'POST', headers:{'Content-Type':'application/json', 'X-Codigo':codigo()},
-      body: JSON.stringify({probo:[que], util:boton.dataset.v, usaria:'', mejoras:`Valoración rápida: ${boton.textContent} · ${d.multigrado ? 'multigrado ' + (d.grados_multi || '') : d.grado} · ${d.area} · ${d.tema}`})});
+      body: JSON.stringify({tipo:'Valoración rápida', valoracion:boton.textContent, borrador,
+        grado: d.multigrado ? 'Multigrado: ' + (d.grados_multi || '') : d.grado, area:d.area, tema:d.tema})});
     if (!(await r.json()).ok) throw new Error();
     caja.innerHTML = '¡Gracias por su valoración!';
   } catch (e) { caja.innerHTML = 'Sin conexión: no se pudo enviar la valoración, pero su borrador está aquí.'; }
@@ -358,7 +381,7 @@ async function cargarGuardados() {
       <div class="acciones"><button class="sec" data-wa="${x.id}">Compartir por WhatsApp</button>
       <button class="sec" data-descargar="${x.id}">Descargar archivo</button>
       <button class="sec" data-borrar="${x.id}">Borrar</button></div></details>`).join('')
-    : '<p class="nota">Aún no ha guardado nada.</p>';
+    : '<p class="nota">Aún no ha guardado nada. Cuando prepare un plan, una evaluación o un repaso, pulse «Guardar en este teléfono» y aparecerá aquí, también sin internet.</p>';
   $('#lista-guardados').querySelectorAll('[data-borrar]').forEach(b => b.onclick = async () => {
     if (!confirm('¿Borrar este documento?')) return;
     escribir('guardados', leer('guardados', []).filter(x => x.id != b.dataset.borrar));
@@ -378,6 +401,12 @@ async function cargarGuardados() {
 }
 form.onsubmit = e => { e.preventDefault(); generar('plan', e.submitter || form.querySelector('button')); };
 $('#btn-eval').onclick = e => generar('evaluacion', e.target);
+$('#btn-repaso').onclick = e => generar('repaso', e.target);
+form.tipo_clase.onchange = () => {
+  $('#recuperar').style.display = form.tipo_clase.value === 'recuperar' ? 'block' : 'none';
+  if (form.tipo_clase.value === 'corta' && +form.minutos.value > 30) form.minutos.value = 25;
+  if (form.tipo_clase.value !== 'corta' && +form.minutos.value < 35) form.minutos.value = 45;
+};
 
 // Regla de aviso temprano: simple y visible, sin IA, para que el docente la entienda.
 const REGLA = {umbral:0.6, evaluaciones:2};
@@ -499,6 +528,22 @@ fetch('/api/estado').then(r => r.json()).then(j => {
   $('#estado').textContent = j.simulado ? 'Modo de prueba' : j.ok ? 'Prueba en línea · listo' : 'No disponible';
 }).catch(() => $('#estado').textContent = 'Sin conexión');
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+
+// Aviso para agregar el asistente a la pantalla de inicio (así abre sin internet como una aplicación).
+let pedidoInstalar = null;
+const instalado = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+const esIphone = /iphone|ipad|ipod/i.test(navigator.userAgent);
+function mostrarInstalar() {
+  if (instalado || leer('instalar-no', false)) return;
+  $('#instalar-pasos').textContent = esIphone
+    ? 'En el iPhone: ábralo en Safari, toque el botón Compartir (el cuadrado con la flecha) y elija «Agregar a inicio».'
+    : 'En Android: ábralo en Chrome, toque el menú ⋮ y elija «Agregar a la pantalla principal» o «Instalar aplicación». Si lo abrió desde WhatsApp, primero toque ⋮ y «Abrir en Chrome».';
+  $('#instalar').style.display = 'block';
+}
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); pedidoInstalar = e; $('#instalar-si').style.display = ''; mostrarInstalar(); });
+$('#instalar-si').onclick = async () => { if (!pedidoInstalar) return; pedidoInstalar.prompt(); await pedidoInstalar.userChoice; $('#instalar').style.display = 'none'; };
+$('#instalar-no').onclick = () => { escribir('instalar-no', true); $('#instalar').style.display = 'none'; };
+mostrarInstalar();
 
 // Opinión anónima: se envía sin nombre ni datos personales.
 function abrirOpinion() { document.getElementById('opinion-estado').textContent = ''; document.getElementById('opinion').showModal(); }

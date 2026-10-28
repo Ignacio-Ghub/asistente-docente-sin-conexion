@@ -23,8 +23,13 @@ class handler(BaseHTTPRequestHandler):
             d = json.loads(self.rfile.read(largo) or b"{}")
         except ValueError:
             return responder(self, {"ok": False}, 400)
-        datos = {"probo": [str(x) for x in d.get("probo", [])][:3], "util": str(d.get("util", ""))[:20],
-                 "usaria": str(d.get("usaria", ""))[:20], "mejoras": str(d.get("mejoras", ""))[:1900]}
+        # Dos tipos: la opinión del botón «Dar mi opinión» y la valoración rápida de un borrador.
+        datos = {"tipo": "Valoración rápida" if d.get("tipo") == "Valoración rápida" else "Opinión",
+                 "probo": [str(x) for x in d.get("probo", [])][:4], "util": str(d.get("util", ""))[:20],
+                 "usaria": str(d.get("usaria", ""))[:20], "mejoras": str(d.get("mejoras", ""))[:1900],
+                 "valoracion": str(d.get("valoracion", ""))[:20], "borrador": str(d.get("borrador", ""))[:40],
+                 "grado": str(d.get("grado", ""))[:100], "area": str(d.get("area", ""))[:60],
+                 "tema": str(d.get("tema", ""))[:300]}
         pedido = urllib.request.Request(N8N, data=json.dumps({"s": SECRETO, "r": datos}).encode(),
                                         headers={"Content-Type": "application/json", "User-Agent": "curl/8.7.1"}, method="POST")
         try:
