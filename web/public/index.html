@@ -130,28 +130,43 @@
 
 <section id="seguimiento">
   <div class="tarjeta">
-    <h3 style="margin-top:0">Quién necesita refuerzo</h3>
+    <h3 style="margin-top:0">Cómo funciona el seguimiento</h3>
+    <ol style="margin:0 0 8px;padding-left:22px;line-height:1.6">
+      <li><b>Agregue a sus estudiantes</b>, una sola vez.</li>
+      <li>Después de cada evaluación, <b>anote cuántas preguntas acertó cada uno</b> y pulse «Guardar resultados».</li>
+      <li>El asistente le <b>avisa quién necesita refuerzo</b> y guarda el <b>historial</b> de cada estudiante.</li>
+    </ol>
+    <p class="nota" style="margin:0">Todo queda guardado en este teléfono y no se envía a internet. En esta prueba, use nombres inventados.</p>
+  </div>
+  <div class="tarjeta">
+    <h3 style="margin-top:0">1. Sus estudiantes</h3>
+    <div id="lista-est"></div>
+    <div class="fila">
+      <div><label for="e-nombre">Nombre</label><input id="e-nombre" placeholder="Ej.: Ana"></div>
+      <div><label for="e-grado">Grado</label><input id="e-grado" placeholder="Ej.: 3er grado"></div>
+    </div>
+    <button class="sec" id="agregar-est" style="margin-top:12px">Agregar estudiante</button>
+  </div>
+  <div class="tarjeta">
+    <h3 style="margin-top:0">2. Anotar resultados de una evaluación</h3>
+    <div class="fila">
+      <div><label for="r-tema">Tema evaluado</label><input id="r-tema" placeholder="Ej.: fracciones"></div>
+      <div><label for="r-total">Preguntas</label><input id="r-total" type="number" value="5" min="1"></div>
+    </div>
+    <label for="r-fecha">Fecha</label><input id="r-fecha" type="date">
+    <table id="tabla-res"><thead><tr><th>Estudiante</th><th>Aciertos</th></tr></thead><tbody></tbody></table>
+    <button class="principal" id="guardar-res">Guardar resultados</button>
+    <p class="revisado" id="msg-res" style="display:none;margin-top:10px"></p>
+  </div>
+  <div class="tarjeta">
+    <h3 style="margin-top:0">3. Quién necesita refuerzo</h3>
     <div id="avisos"><p class="nota">Aún no hay avisos.</p></div>
     <p class="nota" id="regla"></p>
   </div>
   <div class="tarjeta">
-    <h3 style="margin-top:0">Anotar resultados de una evaluación</h3>
-    <div class="fila">
-      <div><label>Tema evaluado</label><input id="r-tema" placeholder="Ej.: fracciones"></div>
-      <div><label>Preguntas</label><input id="r-total" type="number" value="5" min="1"></div>
-    </div>
-    <label>Fecha</label><input id="r-fecha" type="date">
-    <table id="tabla-res"><thead><tr><th>Estudiante</th><th>Aciertos</th></tr></thead><tbody></tbody></table>
-    <button class="principal" id="guardar-res">Guardar resultados</button>
-  </div>
-  <div class="tarjeta">
-    <h3 style="margin-top:0">Agregar estudiante</h3>
-    <div class="fila">
-      <div><label>Nombre</label><input id="e-nombre"></div>
-      <div><label>Grado</label><input id="e-grado" placeholder="3ro"></div>
-    </div>
-    <button class="sec" id="agregar-est" style="margin-top:12px">Agregar</button>
-    <p class="nota">Los nombres y resultados se guardan solo en este teléfono. No se envían a internet. Use nombres inventados en esta prueba.</p>
+    <h3 style="margin-top:0">4. Historial de resultados</h3>
+    <div id="historial"><p class="nota">Aún no hay resultados guardados.</p></div>
+    <div class="acciones"><button class="sec" id="descargar-reg">Descargar el registro</button></div>
   </div>
 </section>
 
@@ -164,14 +179,14 @@
 </section>
 </main>
 <footer>
-  <div class="opinion-caja noimprimir" style="max-width:760px;margin:0 auto 18px"><p>¿Ya lo probó? Su opinión nos ayuda a mejorarlo.</p><button class="sec" onclick="abrirOpinion()">Dar mi opinión</button></div>
+  <div class="opinion-caja noimprimir" style="max-width:760px;margin:0 auto 18px"><p>¿Ya lo probó? Nos encantaría conocer su opinión.</p><p class="nota" style="font-weight:600;color:var(--suave);margin:0 0 10px">Cuéntenos qué le pareció. Es anónima, toma solo un minuto y nos ayuda mucho a mejorarlo.</p><button class="sec" onclick="abrirOpinion()">Dar mi opinión</button></div>
   <a href="https://ignaciobriceno.com" target="_blank" rel="noopener"><img src="logo-jiba-azul.png" alt="JIBA"></a>
   Una iniciativa de Jesús Ignacio Briceño Alarcón · <a href="https://ignaciobriceno.com" target="_blank" rel="noopener">ignaciobriceno.com</a>
 </footer>
 <dialog id="opinion">
   <form id="form-opinion" method="dialog">
     <h3 style="margin:0 0 4px">Dar mi opinión</h3>
-    <p class="nota" style="margin:0 0 10px">Es anónima: no pedimos su nombre ni sus datos. Toma un minuto.</p>
+    <p class="nota" style="margin:0 0 10px">Gracias por tomarse un momento. Su opinión es anónima: no pedimos su nombre ni sus datos, y toma solo un minuto.</p>
     <label>¿Qué probó?</label>
     <div class="opciones-op"><label><input type="checkbox" name="probo" value="Planificar"> Planificar</label><label><input type="checkbox" name="probo" value="Evaluar"> Evaluar</label><label><input type="checkbox" name="probo" value="Seguimiento"> Seguimiento</label></div>
     <label>¿Le resultó útil?</label>
@@ -345,6 +360,7 @@ function calcularAvisos(reg) {
 function leerRegistro() { return leer('registro', {estudiantes:[], evaluaciones:[]}); }
 
 let registro = {estudiantes:[]};
+const pct = e => Math.round(e.aciertos / e.total * 100);
 async function cargarRegistro() {
   const reg = leerRegistro();
   registro = {...reg, avisos:calcularAvisos(reg), regla:REGLA};
@@ -353,26 +369,64 @@ async function cargarRegistro() {
   $('#avisos').innerHTML = registro.avisos.length
     ? registro.avisos.map(a => `<div class="alerta"><b>${a.estudiante}</b> ${a.grado ? '(' + a.grado + ')' : ''}<br><span class="nota">${a.detalle}</span></div>`).join('')
     : '<p class="nota">Nadie con aviso por ahora.</p>';
-  $('#tabla-res tbody').innerHTML = registro.estudiantes.map(e =>
+  $('#lista-est').innerHTML = reg.estudiantes.length
+    ? '<div class="acciones" style="margin:0 0 6px">' + reg.estudiantes.map(e =>
+        `<span class="guardado" style="margin:0;display:inline-flex;gap:8px;align-items:center">${e.nombre}${e.grado ? ' <span class="nota">' + e.grado + '</span>' : ''}<button class="sec" style="padding:2px 9px" data-quitar="${e.id}" aria-label="Quitar a ${e.nombre}">×</button></span>`).join('') + '</div>'
+    : '<p class="nota">Todavía no ha agregado estudiantes.</p>';
+  $('#lista-est').querySelectorAll('[data-quitar]').forEach(b => b.onclick = () => {
+    if (!confirm('¿Quitar a este estudiante y sus resultados?')) return;
+    const r = leerRegistro(), id = +b.dataset.quitar;
+    r.estudiantes = r.estudiantes.filter(x => x.id !== id); r.evaluaciones = r.evaluaciones.filter(x => x.estudiante !== id);
+    escribir('registro', r); cargarRegistro();
+  });
+  $('#tabla-res tbody').innerHTML = reg.estudiantes.map(e =>
     `<tr><td>${e.nombre} <span class="nota">${e.grado}</span></td><td><input type="number" min="0" data-id="${e.id}"></td></tr>`).join('')
-    || '<tr><td colspan="2" class="nota">Agrega estudiantes abajo.</td></tr>';
+    || '<tr><td colspan="2" class="nota">Primero agregue a sus estudiantes en el paso 1.</td></tr>';
+  $('#historial').innerHTML = reg.estudiantes.some(e => reg.evaluaciones.some(v => v.estudiante === e.id))
+    ? reg.estudiantes.map(e => {
+        const ev = reg.evaluaciones.filter(v => v.estudiante === e.id).sort((a, b) => a.fecha.localeCompare(b.fecha));
+        if (!ev.length) return '';
+        const prom = Math.round(ev.reduce((s, v) => s + pct(v), 0) / ev.length);
+        return `<details class="guardado"><summary><b>${e.nombre}</b> <span class="nota">· ${ev.length} ${ev.length > 1 ? 'evaluaciones' : 'evaluación'} · promedio ${prom} %</span></summary>
+          <table><thead><tr><th>Fecha</th><th>Tema</th><th>Aciertos</th></tr></thead><tbody>${ev.map(v =>
+            `<tr><td>${v.fecha}</td><td>${v.tema}</td><td>${v.aciertos}/${v.total} (${pct(v)} %)</td></tr>`).join('')}</tbody></table></details>`;
+      }).join('')
+    : '<p class="nota">Aún no hay resultados guardados.</p>';
 }
 $('#agregar-est').onclick = async () => {
-  const nombre = $('#e-nombre').value.trim(); if (!nombre) return;
+  const nombre = $('#e-nombre').value.trim(); if (!nombre) { $('#e-nombre').focus(); return; }
   const reg = leerRegistro();
-  reg.estudiantes.push({id: Math.max(0, ...reg.estudiantes.map(e => e.id)) + 1, nombre, grado:$('#e-grado').value});
+  reg.estudiantes.push({id: Math.max(0, ...reg.estudiantes.map(e => e.id)) + 1, nombre, grado:$('#e-grado').value.trim()});
   escribir('registro', reg);
-  $('#e-nombre').value = ''; cargarRegistro();
+  $('#e-nombre').value = ''; $('#e-nombre').focus(); cargarRegistro();
 };
 $('#guardar-res').onclick = async () => {
   const total = +$('#r-total').value, tema = $('#r-tema').value.trim(), fecha = $('#r-fecha').value;
   const resultados = [...document.querySelectorAll('#tabla-res input')].filter(i => i.value !== '')
     .map(i => ({estudiante:i.dataset.id, aciertos:Math.min(+i.value, total)}));
-  if (!tema || !fecha || !resultados.length) { alert('Completa tema, fecha y al menos un resultado.'); return; }
+  if (!tema || !fecha || !resultados.length) { alert('Complete el tema, la fecha y al menos un resultado.'); return; }
   const reg = leerRegistro();
   for (const r of resultados) reg.evaluaciones.push({estudiante:+r.estudiante, aciertos:r.aciertos, total, tema, fecha});
   escribir('registro', reg);
+  $('#r-tema').value = '';
   cargarRegistro();
+  const m = $('#msg-res'); m.style.display = 'block';
+  m.textContent = `✓ Resultados guardados: ${resultados.length} estudiante${resultados.length > 1 ? 's' : ''}. Puede verlos en el historial, más abajo.`;
+  setTimeout(() => m.style.display = 'none', 6000);
+};
+$('#descargar-reg').onclick = () => {
+  const reg = leerRegistro();
+  if (!reg.evaluaciones.length) { alert('Aún no hay resultados guardados.'); return; }
+  const filas = reg.evaluaciones.slice().sort((a, b) => a.fecha.localeCompare(b.fecha)).map(v => {
+    const e = reg.estudiantes.find(x => x.id === v.estudiante) || {nombre:'?', grado:''};
+    return `<tr><td>${v.fecha}</td><td>${e.nombre}</td><td>${e.grado}</td><td>${v.tema}</td><td>${v.aciertos}/${v.total}</td><td>${pct(v)} %</td></tr>`;
+  }).join('');
+  const pagina = `<!doctype html><meta charset="utf-8"><title>Registro de resultados</title><body style="font-family:sans-serif;max-width:800px;margin:auto">
+    <h2>Registro de resultados</h2><table border="1" cellpadding="6" style="border-collapse:collapse;width:100%">
+    <tr><th>Fecha</th><th>Estudiante</th><th>Grado</th><th>Tema</th><th>Aciertos</th><th>%</th></tr>${filas}</table></body>`;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([pagina], {type:'text/html'}));
+  a.download = 'registro-de-resultados.html'; a.click();
 };
 $('#r-fecha').valueAsDate = new Date();
 

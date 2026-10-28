@@ -119,7 +119,7 @@
   <div class="contenido">
     <div class="marca">
       <img src="logo-jiba.png" alt="JIBA">
-      <span><b>Jesús Ignacio Briceño Alarcón</b>Cooperación al desarrollo e IA</span>
+      <span><b>Jesús Ignacio Briceño Alarcón</b>Consultor en cooperación al desarrollo e IA ética</span>
     </div>
     <span class="etiqueta">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
@@ -285,13 +285,10 @@
   <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
   <h2>¡Muchas gracias!</h2>
   <p>Sus respuestas nos ayudan a construir herramientas útiles para su escuela.</p>
-  <div class="aviso-prueba" id="revise" hidden style="text-align:left;margin-top:18px">
-    <p style="margin:0"><b id="revise-titulo"></b></p>
-    <p style="margin:6px 0 0">Allí le enviamos el enlace para probar el asistente y cómo usarlo.</p>
-  </div>
+  <div class="aviso-prueba" id="revise" hidden style="text-align:left;margin-top:18px"></div>
 </div>
 </main>
-<footer>Una iniciativa de Jesús Ignacio Briceño Alarcón · JIBA<br>
+<footer>Una iniciativa de Jesús Ignacio Briceño Alarcón · JIBA<br>Consultor en cooperación al desarrollo e IA ética<br>
   <a href="https://ignaciobriceno.com" target="_blank" rel="noopener" style="color:var(--azul);font-weight:700;text-decoration:none">ignaciobriceno.com</a><br>
   Sus respuestas se guardan de forma confidencial.</footer>
 
@@ -375,10 +372,13 @@ form.onsubmit = async e => {
     if (!res.ok || !j.ok) throw new Error(j.error || 'No se pudo enviar.');
     form.hidden = true; document.getElementById('gracias').hidden = false; window.scrollTo(0, 0);
     document.querySelector('.progreso').hidden = true; document.getElementById('porcentaje').hidden = true;
-    if (r.probar === 'Sí' && (r.correo || r.whatsapp)) {
-      document.getElementById('revise').hidden = false;
-      document.getElementById('revise-titulo').textContent = r.correo && r.whatsapp
-        ? 'Revise su correo y su WhatsApp.' : r.correo ? 'Revise su correo.' : 'Revise su WhatsApp.';
+    // Lo que sigue, según lo que respondió: siempre se le dice qué esperar.
+    if (r.probar === 'Sí') {
+      const caja = document.getElementById('revise'), partes = [];
+      if (r.correo) partes.push('<p style="margin:0 0 6px"><b>Revise su correo.</b> Le enviamos el enlace para probar el asistente, su contraseña y cómo usarlo. Si no lo ve en unos minutos, revise también la carpeta de correo no deseado (spam).</p>');
+      if (r.whatsapp) partes.push('<p style="margin:0 0 6px"><b>Revise su WhatsApp.</b> En breve le escribiremos con el enlace para probar el asistente y su contraseña.</p>');
+      if (!partes.length) partes.push('<p style="margin:0">Como no dejó su correo ni su WhatsApp, no podemos enviarle el enlace para probar el asistente. Si más adelante quiere probarlo, puede responder la encuesta de nuevo y dejar uno de los dos.</p>');
+      caja.innerHTML = partes.join(''); caja.hidden = false;
     }
   } catch (ex) {
     err.textContent = ex.message + ' Revise su conexión e intente de nuevo; sus respuestas siguen en la pantalla.';
