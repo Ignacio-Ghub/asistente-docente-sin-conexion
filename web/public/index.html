@@ -45,7 +45,8 @@
   button.principal { margin-top:16px; width:100%; padding:15px; border:0; border-radius:16px; background:linear-gradient(135deg, var(--marino), var(--marino2)); color:#fff;
     font-size:17px; font-weight:800; font-family:inherit; cursor:pointer; box-shadow:0 10px 24px rgba(15,39,71,.22); }
   button.principal:disabled { opacity:.6; }
-  button.sec { padding:9px 16px; border:1.5px solid var(--marino); border-radius:30px; background:#fff; color:var(--marino); font-size:15px; font-weight:700; font-family:inherit; }
+  button.sec { padding:10px 18px; border:0; border-radius:30px; background:linear-gradient(135deg, var(--marino), var(--marino2)); color:#fff; font-size:15px; font-weight:700; font-family:inherit; cursor:pointer; }
+  button.quitar { padding:2px 9px; border:1.5px solid var(--marino); border-radius:30px; background:#fff; color:var(--marino); font-weight:700; font-family:inherit; cursor:pointer; }
   .resultado { white-space:normal; line-height:1.6; }
   .resultado h3 { font-size:17px; margin:16px 0 4px; color:var(--marino); }
   .resultado ul, .resultado ol { padding-left:22px; margin:4px 0; }
@@ -289,9 +290,9 @@ async function generar(accion, boton) {
   boton.disabled = true; const txt = boton.textContent; boton.textContent = accion === 'evaluacion' ? 'Preparando y revisando la clave… (puede tardar)' : 'Preparando borrador… (puede tardar un minuto)';
   salida.style.display = 'block'; salida.innerHTML = '<p class="nota">El asistente está preparando el borrador…</p>';
   try {
-    const r = await fetch('/api/' + accion, {method:'POST', headers:{'Content-Type':'application/json', 'X-Codigo':leer('codigo', '')}, body:JSON.stringify(d)});
+    const r = await fetch('/api/' + accion, {method:'POST', headers:{'Content-Type':'application/json', 'X-Codigo':codigo()}, body:JSON.stringify(d)});
     const j = await r.json();
-    if (j.codigo) { escribir('codigo', ''); mostrarBienvenida(); }
+    if (j.codigo) { guardarCodigo(''); mostrarBienvenida(); }
     if (j.error) throw new Error(j.error);
     salida.innerHTML = revisionHTML(j.revision) + `<div class="resultado" contenteditable="true">${formatear(j.texto)}</div>
       <p class="aviso-ia">Borrador generado por IA. Puede tocar el texto para corregirlo. Usted decide qué usar. <a href="#" onclick="abrirOpinion();return false" style="color:var(--azul);font-weight:700">Dar mi opinión</a></p>
@@ -372,7 +373,7 @@ async function cargarRegistro() {
     : '<p class="nota">Nadie con aviso por ahora.</p>';
   $('#lista-est').innerHTML = reg.estudiantes.length
     ? '<div class="acciones" style="margin:0 0 6px">' + reg.estudiantes.map(e =>
-        `<span class="guardado" style="margin:0;display:inline-flex;gap:8px;align-items:center">${e.nombre}${e.grado ? ' <span class="nota">' + e.grado + '</span>' : ''}<button class="sec" style="padding:2px 9px" data-quitar="${e.id}" aria-label="Quitar a ${e.nombre}">×</button></span>`).join('') + '</div>'
+        `<span class="guardado" style="margin:0;display:inline-flex;gap:8px;align-items:center">${e.nombre}${e.grado ? ' <span class="nota">' + e.grado + '</span>' : ''}<button class="quitar" data-quitar="${e.id}" aria-label="Quitar a ${e.nombre}">×</button></span>`).join('') + '</div>'
     : '<p class="nota">Todavía no ha agregado estudiantes.</p>';
   $('#lista-est').querySelectorAll('[data-quitar]').forEach(b => b.onclick = () => {
     if (!confirm('¿Quitar a este estudiante y sus resultados?')) return;
@@ -431,7 +432,11 @@ $('#descargar-reg').onclick = () => {
 };
 $('#r-fecha').valueAsDate = new Date();
 
-// Código de acceso: lo pide una vez y lo recuerda en este teléfono.
+// Contraseña: se pide cada vez que se abre el asistente (correo, WhatsApp o computador) y solo dura mientras
+// la pestaña está abierta. Los estudiantes y resultados sí quedan guardados en el teléfono.
+function codigo() { try { return sessionStorage.getItem('asistente.codigo') || ''; } catch (e) { return ''; } }
+function guardarCodigo(c) { try { sessionStorage.setItem('asistente.codigo', c); } catch (e) {} }
+try { localStorage.removeItem('asistente.codigo'); } catch (e) {}  // versiones anteriores la recordaban
 function mostrarBienvenida() { $('#bienvenida').style.display = 'block'; $('main').style.display = 'none'; $('nav').style.display = 'none'; $('#caja-opinion').style.display = 'none'; }
 $('#entrar').onclick = async () => {
   const c = $('#codigo').value.trim(), err = $('#codigo-error'); err.textContent = '';
@@ -440,13 +445,11 @@ $('#entrar').onclick = async () => {
     const j = await (await fetch('/api/estado', {headers:{'X-Codigo': c}})).json();
     if (!j.acceso) { err.textContent = 'La contraseña no es correcta. Revise el mensaje que le enviamos.'; return; }
   } catch (e) { err.textContent = 'No hay conexión. Intente de nuevo en un momento.'; return; }
-  escribir('codigo', c);
+  guardarCodigo(c);
   $('#bienvenida').style.display = 'none'; $('main').style.display = ''; $('nav').style.display = ''; $('#caja-opinion').style.display = '';
 };
-// El enlace que reciben los docentes trae el código (?codigo=...): se guarda y se quita de la barra.
-const codigoEnlace = new URLSearchParams(location.search).get('codigo');
-if (codigoEnlace) { escribir('codigo', codigoEnlace.trim()); history.replaceState(null, '', location.pathname); }
-if (!leer('codigo', '')) mostrarBienvenida();
+if (location.search) history.replaceState(null, '', location.pathname);
+if (!codigo()) mostrarBienvenida();
 
 fetch('/api/estado').then(r => r.json()).then(j => {
   $('#estado').textContent = j.simulado ? 'Modo de prueba' : j.ok ? 'Prueba en línea · listo' : 'No disponible';
@@ -461,7 +464,7 @@ document.getElementById('enviar-opinion').onclick = async () => {
   if (!datos.probo.length && !datos.util && !datos.usaria && !datos.mejoras) { est.textContent = 'Responda al menos una pregunta.'; return; }
   est.textContent = 'Enviando…';
   try {
-    const r = await fetch('/api/opinion', {method:'POST', headers:{'Content-Type':'application/json', 'X-Codigo':leer('codigo', '')}, body:JSON.stringify(datos)});
+    const r = await fetch('/api/opinion', {method:'POST', headers:{'Content-Type':'application/json', 'X-Codigo':codigo()}, body:JSON.stringify(datos)});
     const j = await r.json(); if (!j.ok) throw new Error();
     f.reset(); est.textContent = '¡Gracias! Su opinión fue enviada.';
     setTimeout(() => document.getElementById('opinion').close(), 1500);
