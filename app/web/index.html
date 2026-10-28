@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asistente docente</title>
+<style>
+  /* Todo local: sin fuentes ni librerías externas, para que funcione sin internet. */
+  :root { --marino:#132C4E; --azul:#378ADD; --fondo:#F4F7FB; --borde:#D5DEEA; --texto:#1B2433; --suave:#5B6B80; --alerta:#B4442B; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--fondo); color:var(--texto); font-size:17px; }
+  header { background:var(--marino); color:#fff; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  header h1 { font-size:19px; margin:0; font-weight:600; }
+  #estado { font-size:13px; padding:4px 10px; border-radius:20px; background:rgba(255,255,255,.15); white-space:nowrap; }
+  nav { display:flex; background:#fff; border-bottom:1px solid var(--borde); position:sticky; top:0; z-index:2; }
+  nav button { flex:1; border:0; background:none; padding:13px 4px; font-size:15px; color:var(--suave); border-bottom:3px solid transparent; }
+  nav button.activo { color:var(--marino); border-bottom-color:var(--azul); font-weight:600; }
+  main { max-width:760px; margin:0 auto; padding:16px; }
+  section { display:none; } section.activo { display:block; }
+  .tarjeta { background:#fff; border:1px solid var(--borde); border-radius:16px; padding:16px; margin-bottom:14px; }
+  label { display:block; font-size:14px; color:var(--suave); margin:10px 0 4px; }
+  input, select, textarea { width:100%; padding:11px 12px; border:1px solid var(--borde); border-radius:10px; font-size:16px; background:#fff; color:var(--texto); font-family:inherit; }
+  .fila { display:flex; gap:10px; } .fila > div { flex:1; }
+  .check { display:flex; align-items:center; gap:8px; margin-top:12px; font-size:15px; }
+  .check input { width:auto; }
+  button.principal { margin-top:14px; width:100%; padding:13px; border:0; border-radius:30px; background:var(--marino); color:#fff; font-size:16px; font-weight:600; }
+  button.principal:disabled { opacity:.55; }
+  button.sec { padding:9px 16px; border:1px solid var(--marino); border-radius:30px; background:#fff; color:var(--marino); font-size:15px; }
+  .resultado { white-space:normal; line-height:1.55; }
+  .resultado h3 { font-size:16px; margin:14px 0 4px; color:var(--marino); }
+  .resultado ul, .resultado ol { padding-left:22px; margin:4px 0; }
+  .aviso-ia { font-size:13px; color:var(--suave); border-top:1px dashed var(--borde); margin-top:12px; padding-top:8px; }
+  .acciones { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  table { width:100%; border-collapse:collapse; font-size:15px; }
+  td, th { padding:8px 4px; border-bottom:1px solid var(--borde); text-align:left; }
+  td input { padding:7px; width:70px; }
+  .alerta { border-left:4px solid var(--alerta); background:#FFF5F2; padding:10px 12px; border-radius:8px; margin:8px 0; }
+  .revisado { font-size:14px; color:#1E6B45; background:#EFF8F2; border-radius:8px; padding:8px 12px; }
+  .guardado { border:1px solid var(--borde); border-radius:12px; padding:10px 12px; margin:8px 0; }
+  .guardado summary { cursor:pointer; }
+  nav button { font-size:14px; }
+  .nota { font-size:13px; color:var(--suave); }
+  @media print { header, nav, form, .acciones, .noimprimir { display:none !important; } .tarjeta { border:0; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Asistente docente</h1>
+  <span id="estado">Revisando…</span>
+</header>
+<nav>
+  <button data-tab="plan" class="activo">Planificar</button>
+  <button data-tab="evaluar">Evaluar</button>
+  <button data-tab="seguimiento">Seguimiento</button>
+  <button data-tab="guardados">Guardados</button>
+</nav>
+<main>
+
+<!-- Datos de la clase: compartidos por Planificar y Evaluar -->
+<section id="plan" class="activo">
+  <form class="tarjeta" id="form-clase">
+    <div class="fila">
+      <div><label>Nivel</label>
+        <select name="nivel"><option>Primaria</option><option>Media General</option></select></div>
+      <div><label id="lbl-grado">Grado</label><select name="grado"></select></div>
+    </div>
+    <label>Estudiantes</label><input name="estudiantes" type="number" min="1" value="18">
+    <label class="check"><input type="checkbox" name="multigrado"> Aula multigrado (varios grados a la vez)</label>
+    <div id="multi" style="display:none"><label>¿Qué grados?</label><input name="grados_multi" placeholder="Ej.: 1ro, 2do y 3er grado"></div>
+    <label>Área</label>
+    <select name="area"></select>
+    <p class="nota" id="nota-curriculo"></p>
+    <label>Tema</label><input name="tema" required placeholder="Ej.: juegos para mejorar la concentración">
+    <label>Materiales y espacio disponibles (opcional)</label>
+    <input name="materiales" placeholder="Ej.: un balón, patio de tierra, pizarra">
+    <label>Condiciones del aula</label>
+    <select name="condiciones">
+      <option>Sin electricidad ni internet, solo pizarra y cuadernos</option>
+      <option>Electricidad a ratos, sin internet</option>
+      <option>Electricidad estable, sin internet</option>
+    </select>
+    <label>Minutos de clase</label><input name="minutos" type="number" value="45">
+    <button class="principal" type="submit" data-accion="plan">Proponer plan de clase</button>
+  </form>
+  <div class="tarjeta" id="salida-plan" style="display:none"></div>
+</section>
+
+<section id="evaluar">
+  <div class="tarjeta">
+    <p style="margin:0">Usa los mismos datos de la clase de la pestaña <b>Planificar</b>.</p>
+    <p class="nota" id="resumen-clase"></p>
+    <button class="principal" data-accion="evaluacion" id="btn-eval">Crear evaluación</button>
+  </div>
+  <div class="tarjeta" id="salida-evaluacion" style="display:none"></div>
+</section>
+
+<section id="seguimiento">
+  <div class="tarjeta">
+    <h3 style="margin-top:0">Quién necesita refuerzo</h3>
+    <div id="avisos"><p class="nota">Aún no hay avisos.</p></div>
+    <p class="nota" id="regla"></p>
+  </div>
+  <div class="tarjeta">
+    <h3 style="margin-top:0">Anotar resultados de una evaluación</h3>
+    <div class="fila">
+      <div><label>Tema evaluado</label><input id="r-tema" placeholder="Ej.: fracciones"></div>
+      <div><label>Preguntas</label><input id="r-total" type="number" value="5" min="1"></div>
+    </div>
+    <label>Fecha</label><input id="r-fecha" type="date">
+    <table id="tabla-res"><thead><tr><th>Estudiante</th><th>Aciertos</th></tr></thead><tbody></tbody></table>
+    <button class="principal" id="guardar-res">Guardar resultados</button>
+  </div>
+  <div class="tarjeta">
+    <h3 style="margin-top:0">Agregar estudiante</h3>
+    <div class="fila">
+      <div><label>Nombre</label><input id="e-nombre"></div>
+      <div><label>Grado</label><input id="e-grado" placeholder="3ro"></div>
+    </div>
+    <button class="sec" id="agregar-est" style="margin-top:12px">Agregar</button>
+    <p class="nota">Los nombres y resultados se guardan solo en este equipo. No salen a internet.</p>
+  </div>
+</section>
+
+<section id="guardados">
+  <div class="tarjeta">
+    <h3 style="margin-top:0">Planes y evaluaciones guardados</h3>
+    <p class="nota">Se guardan en este equipo y se pueden consultar sin luz ni internet. «Descargar archivo» crea una copia para imprimirla cuando haya electricidad.</p>
+    <div id="lista-guardados"></div>
+  </div>
+</section>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const form = $('#form-clase');
+
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button, section').forEach(x => x.classList.remove('activo'));
+  b.classList.add('activo'); $('#' + b.dataset.tab).classList.add('activo');
+  if (b.dataset.tab === 'evaluar') resumir();
+  if (b.dataset.tab === 'seguimiento') cargarRegistro();
+  if (b.dataset.tab === 'guardados') cargarGuardados();
+});
+form.multigrado.onchange = () => $('#multi').style.display = form.multigrado.checked ? 'block' : 'none';
+
+// Grados y áreas según el nivel (Currículo de Primaria 2007 y Media General 2015-2016, MPPE).
+const NIVELES = {
+  'Primaria': {etiqueta:'Grado', grados:['1er grado','2do grado','3er grado','4to grado','5to grado','6to grado'],
+    areas:['Lengua, comunicación y cultura','Matemática, Ciencias, Naturaleza y Sociedad','Ciencias Sociales, Ciudadanía e Identidad','Educación Física, Deportes y Recreación'],
+    conCurriculo:['4to grado','5to grado']},
+  'Media General': {etiqueta:'Año', grados:['1er año','2do año','3er año','4to año','5to año'],
+    areas:['Ciencias Naturales','Educación Física','Lengua','Lengua Extranjera','Matemática','Memoria, Territorio y Ciudadanía','Orientación y Convivencia','Arte y Patrimonio'],
+    conEnfoque:['Ciencias Naturales','Educación Física','Lengua','Matemática','Memoria, Territorio y Ciudadanía']},
+};
+function opciones(sel, lista) { sel.innerHTML = lista.map(x => `<option>${x}</option>`).join(''); }
+function cambiarNivel() {
+  const n = NIVELES[form.nivel.value];
+  $('#lbl-grado').textContent = n.etiqueta;
+  opciones(form.grado, n.grados); opciones(form.area, n.areas);
+  notaCurriculo();
+}
+function notaCurriculo() {
+  const n = NIVELES[form.nivel.value];
+  let txt;
+  if (n.conCurriculo) txt = n.conCurriculo.includes(form.grado.value)
+    ? 'Usa los contenidos oficiales de este grado (Currículo de Primaria, MPPE 2007).'
+    : 'Aún no está cargado el currículo de este grado: el plan no cita contenidos oficiales. Revísalo con tu programa.';
+  else txt = n.conEnfoque.includes(form.area.value)
+    ? 'Usa el enfoque oficial del área (MPPE, Media General 2015-2016), sin contenidos por año: revísalo con tu programa.'
+    : 'Aún no está cargado el documento de esta área: revisa el plan con tu programa.';
+  $('#nota-curriculo').textContent = txt;
+}
+form.nivel.onchange = cambiarNivel;
+form.grado.onchange = notaCurriculo;
+form.area.onchange = notaCurriculo;
+cambiarNivel();
+
+function datosClase() {
+  const d = Object.fromEntries(new FormData(form));
+  d.multigrado = form.multigrado.checked;
+  return d;
+}
+function resumir() {
+  const d = datosClase();
+  $('#resumen-clase').textContent = d.tema
+    ? `${d.multigrado ? 'Multigrado ' + (d.grados_multi || '') : d.grado} · ${d.area} · ${d.tema}`
+    : 'Primero escribe el tema en Planificar.';
+  $('#btn-eval').disabled = !d.tema;
+}
+
+// Convierte el texto del modelo (markdown simple) en HTML seguro.
+function formatear(t) {
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const neg = s => s.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  let html = '', lista = null;
+  const cerrar = () => { if (lista) { html += `</${lista}>`; lista = null; } };
+  for (let l of esc(t).split('\n')) {
+    l = l.trim();
+    if (!l) { cerrar(); continue; }
+    let m;
+    if ((m = l.match(/^#{1,4}\s+(.*)/))) { cerrar(); html += `<h3>${neg(m[1])}</h3>`; }
+    else if ((m = l.match(/^[-*•]\s+(.*)/))) { if (lista !== 'ul') { cerrar(); html += '<ul>'; lista = 'ul'; } html += `<li>${neg(m[1])}</li>`; }
+    else if ((m = l.match(/^\d+[.)]\s+(.*)/))) { if (lista !== 'ol') { cerrar(); html += '<ol>'; lista = 'ol'; } html += `<li>${neg(m[1])}</li>`; }
+    else { cerrar(); html += `<p>${neg(l)}</p>`; }
+  }
+  cerrar(); return html;
+}
+
+// Resultado de la segunda revisión de la clave (solo existe en Evaluar).
+function revisionHTML(rev) {
+  if (rev === undefined || rev === 'no_aplica') return '';
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  if (rev === null) return '<p class="alerta">No se pudo hacer la revisión automática. Revisa la clave con más cuidado.</p>';
+  if (!rev.length) return '<p class="revisado">Revisión automática: no encontró errores en la clave. Igual conviene que la revises.</p>';
+  return `<div class="alerta"><b>Revisa estas respuestas de la clave:</b><ul>${
+    rev.map(x => `<li>Pregunta ${esc(x.pregunta)}: ${esc(x.motivo)}</li>`).join('')}</ul></div>`;
+}
+
+async function generar(accion, boton) {
+  const salida = $('#salida-' + accion);
+  const d = datosClase();
+  if (!d.tema) { alert('Escribe el tema de la clase.'); return; }
+  boton.disabled = true; const txt = boton.textContent; boton.textContent = accion === 'evaluacion' ? 'Preparando y revisando la clave… (puede tardar)' : 'Preparando borrador… (puede tardar un minuto)';
+  salida.style.display = 'block'; salida.innerHTML = '<p class="nota">El asistente está pensando en este equipo, sin internet…</p>';
+  try {
+    const r = await fetch('/api/' + accion, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d)});
+    const j = await r.json();
+    if (j.error) throw new Error(j.error);
+    salida.innerHTML = revisionHTML(j.revision) + `<div class="resultado" contenteditable="true">${formatear(j.texto)}</div>
+      <p class="aviso-ia">Borrador generado por IA en este equipo. Puedes tocar el texto para corregirlo. Tú decides qué usar.</p>
+      <div class="acciones"><button class="principal" style="margin-top:0">Guardar en este equipo</button></div>`;
+    const tipo = accion === 'plan' ? 'Plan de clase' : 'Evaluación';
+    salida.querySelector('.acciones button').onclick = ev => guardar(tipo, d, salida.querySelector('.resultado').innerHTML, ev.target);
+  } catch (e) { salida.innerHTML = `<p class="alerta">${e.message}</p>`; }
+  boton.disabled = false; boton.textContent = txt;
+}
+
+// Guardados: quedan en este equipo para usarlos sin luz ni internet, o imprimirlos después.
+async function guardar(tipo, d, html, boton) {
+  const titulo = `${tipo}: ${d.tema} (${d.multigrado ? 'multigrado' : d.grado}, ${d.area})`;
+  await fetch('/api/guardar', {method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({tipo, titulo, html, fecha:new Date().toISOString().slice(0,10)})});
+  boton.textContent = 'Guardado ✓'; boton.disabled = true;
+}
+async function cargarGuardados() {
+  const docs = await (await fetch('/api/guardados')).json();
+  $('#lista-guardados').innerHTML = docs.length ? docs.map(x =>
+    `<details class="guardado"><summary><b>${x.titulo}</b><br><span class="nota">${x.fecha}</span></summary>
+      <div class="resultado">${x.html}</div>
+      <div class="acciones"><button class="sec" data-descargar="${x.id}">Descargar archivo</button>
+      <button class="sec" data-borrar="${x.id}">Borrar</button></div></details>`).join('')
+    : '<p class="nota">Aún no has guardado nada.</p>';
+  $('#lista-guardados').querySelectorAll('[data-borrar]').forEach(b => b.onclick = async () => {
+    if (!confirm('¿Borrar este documento?')) return;
+    await fetch('/api/borrar', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id:b.dataset.borrar})});
+    cargarGuardados();
+  });
+  $('#lista-guardados').querySelectorAll('[data-descargar]').forEach(b => b.onclick = () => {
+    const x = docs.find(y => y.id == b.dataset.descargar);
+    const pagina = `<!doctype html><meta charset="utf-8"><title>${x.titulo}</title><body style="font-family:sans-serif;max-width:700px;margin:auto"><h2>${x.titulo}</h2>${x.html}</body>`;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([pagina], {type:'text/html'}));
+    a.download = x.titulo.replace(/[^\wáéíóúñ ]+/gi, '').slice(0, 60) + '.html'; a.click();
+  });
+}
+form.onsubmit = e => { e.preventDefault(); generar('plan', e.submitter || form.querySelector('button')); };
+$('#btn-eval').onclick = e => generar('evaluacion', e.target);
+
+let registro = {estudiantes:[]};
+async function cargarRegistro() {
+  registro = await (await fetch('/api/registro')).json();
+  const g = registro.regla;
+  $('#regla').textContent = `Regla del aviso: menos de ${g.umbral*100} % de aciertos en las ${g.evaluaciones} últimas evaluaciones. Es una regla simple, no una decisión de la IA.`;
+  $('#avisos').innerHTML = registro.avisos.length
+    ? registro.avisos.map(a => `<div class="alerta"><b>${a.estudiante}</b> ${a.grado ? '(' + a.grado + ')' : ''}<br><span class="nota">${a.detalle}</span></div>`).join('')
+    : '<p class="nota">Nadie con aviso por ahora.</p>';
+  $('#tabla-res tbody').innerHTML = registro.estudiantes.map(e =>
+    `<tr><td>${e.nombre} <span class="nota">${e.grado}</span></td><td><input type="number" min="0" data-id="${e.id}"></td></tr>`).join('')
+    || '<tr><td colspan="2" class="nota">Agrega estudiantes abajo.</td></tr>';
+}
+$('#agregar-est').onclick = async () => {
+  const nombre = $('#e-nombre').value.trim(); if (!nombre) return;
+  await fetch('/api/estudiante', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({nombre, grado:$('#e-grado').value})});
+  $('#e-nombre').value = ''; cargarRegistro();
+};
+$('#guardar-res').onclick = async () => {
+  const total = +$('#r-total').value, tema = $('#r-tema').value.trim(), fecha = $('#r-fecha').value;
+  const resultados = [...document.querySelectorAll('#tabla-res input')].filter(i => i.value !== '')
+    .map(i => ({estudiante:i.dataset.id, aciertos:Math.min(+i.value, total)}));
+  if (!tema || !fecha || !resultados.length) { alert('Completa tema, fecha y al menos un resultado.'); return; }
+  await fetch('/api/resultados', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({tema, total, fecha, resultados})});
+  cargarRegistro();
+};
+$('#r-fecha').valueAsDate = new Date();
+
+fetch('/api/estado').then(r => r.json()).then(j => {
+  $('#estado').textContent = j.simulado ? 'Modo de prueba' : j.ok ? 'Sin internet · listo' : 'Modelo no disponible';
+}).catch(() => $('#estado').textContent = 'Sin conexión al equipo');
+</script>
+</body>
+</html>
