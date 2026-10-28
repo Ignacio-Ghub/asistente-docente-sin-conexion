@@ -15,10 +15,17 @@
   header { color:#fff; padding:18px 16px 16px;
     background:radial-gradient(circle at 88% 10%, rgba(255,200,69,.25) 0, transparent 40%), linear-gradient(135deg, var(--marino) 0%, var(--marino2) 100%); }
   .cabecera { max-width:760px; margin:0 auto; }
-  .marca { display:flex; align-items:center; gap:12px; }
-  .marca img { height:30px; width:auto; }
-  .marca span { font-size:12.5px; line-height:1.3; opacity:.9; border-left:1px solid rgba(255,255,255,.35); padding-left:12px; }
-  .marca b { display:block; font-size:13.5px; }
+  .icono-app { flex:none; width:46px; height:46px; border-radius:14px; display:grid; place-items:center; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); }
+  .icono-app svg { width:30px; height:30px; }
+  .titulo .nombre { display:flex; align-items:center; gap:12px; }
+  .opinion-caja { text-align:center; background:#fff; border:1px dashed var(--borde); border-radius:16px; padding:14px; margin:0 0 16px; }
+  .opinion-caja p { margin:0 0 8px; font-weight:700; color:var(--marino); }
+  dialog { border:0; border-radius:20px; padding:20px; width:min(520px, 92vw); box-shadow:0 20px 60px rgba(15,39,71,.35); }
+  dialog::backdrop { background:rgba(15,39,71,.45); }
+  .opciones-op { display:flex; flex-wrap:wrap; gap:8px; margin:4px 0 6px; }
+  .opciones-op label { display:flex; align-items:center; gap:6px; border:1.5px solid var(--borde); border-radius:12px; padding:9px 12px; margin:0; font-weight:600; font-size:15px; }
+  .opciones-op input { width:auto; }
+  footer img { height:34px; width:auto; display:block; margin:0 auto 8px; }
   .titulo { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:14px; }
   header h1 { font-size:24px; margin:0; font-weight:800; }
   header h1 em { font-style:normal; color:var(--amarillo); }
@@ -61,8 +68,10 @@
 <body>
 <header>
   <div class="cabecera">
-    <div class="marca"><img src="logo-jiba.png" alt="JIBA"><span><b>Jesús Ignacio Briceño Alarcón</b>Cooperación al desarrollo e IA</span></div>
-    <div class="titulo"><h1>Asistente <em>docente</em></h1><span id="estado">Revisando…</span></div>
+    <div class="titulo">
+      <div class="nombre"><span class="icono-app"><svg viewBox="0 0 200 200" fill="none" stroke="#fff" stroke-width="12" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="18" y="40" width="164" height="100" rx="12"/><path d="M58 166h84M100 140v26"/><path d="M106 60l-22 36h28l-18 30" stroke="#FFC845"/></svg></span>
+      <h1>Asistente <em>docente</em></h1></div>
+      <span id="estado">Revisando…</span></div>
   </div>
 </header>
 <div class="tarjeta" id="bienvenida" style="display:none;margin:16px auto;max-width:728px">
@@ -154,7 +163,28 @@
   </div>
 </section>
 </main>
-<footer>Una iniciativa de Jesús Ignacio Briceño Alarcón · JIBA<br><a href="https://ignaciobriceno.com" target="_blank" rel="noopener">ignaciobriceno.com</a></footer>
+<footer>
+  <div class="opinion-caja noimprimir" style="max-width:760px;margin:0 auto 18px"><p>¿Ya lo probó? Su opinión nos ayuda a mejorarlo.</p><button class="sec" onclick="abrirOpinion()">Dar mi opinión</button></div>
+  <a href="https://ignaciobriceno.com" target="_blank" rel="noopener"><img src="logo-jiba-azul.png" alt="JIBA"></a>
+  Una iniciativa de Jesús Ignacio Briceño Alarcón · <a href="https://ignaciobriceno.com" target="_blank" rel="noopener">ignaciobriceno.com</a>
+</footer>
+<dialog id="opinion">
+  <form id="form-opinion" method="dialog">
+    <h3 style="margin:0 0 4px">Dar mi opinión</h3>
+    <p class="nota" style="margin:0 0 10px">Es anónima: no pedimos su nombre ni sus datos. Toma un minuto.</p>
+    <label>¿Qué probó?</label>
+    <div class="opciones-op"><label><input type="checkbox" name="probo" value="Planificar"> Planificar</label><label><input type="checkbox" name="probo" value="Evaluar"> Evaluar</label><label><input type="checkbox" name="probo" value="Seguimiento"> Seguimiento</label></div>
+    <label>¿Le resultó útil?</label>
+    <div class="opciones-op"><label><input type="radio" name="util" value="Muy útil"> Muy útil</label><label><input type="radio" name="util" value="Algo útil"> Algo útil</label><label><input type="radio" name="util" value="Poco útil"> Poco útil</label></div>
+    <label>¿Lo usaría en sus clases?</label>
+    <div class="opciones-op"><label><input type="radio" name="usaria" value="Sí"> Sí</label><label><input type="radio" name="usaria" value="Tal vez"> Tal vez</label><label><input type="radio" name="usaria" value="No"> No</label></div>
+    <label for="mejoras">¿Qué mejoraría o qué le faltó?</label>
+    <textarea id="mejoras" name="mejoras" rows="3"></textarea>
+    <button class="principal" type="button" id="enviar-opinion">Enviar opinión</button>
+    <button class="sec" type="button" style="width:100%;margin-top:8px" onclick="document.getElementById('opinion').close()">Cerrar</button>
+    <p class="nota" id="opinion-estado" style="text-align:center;margin:10px 0 0"></p>
+  </form>
+</dialog>
 
 <script>
 const $ = s => document.querySelector(s);
@@ -248,7 +278,7 @@ async function generar(accion, boton) {
     if (j.codigo) { escribir('codigo', ''); mostrarBienvenida(); }
     if (j.error) throw new Error(j.error);
     salida.innerHTML = revisionHTML(j.revision) + `<div class="resultado" contenteditable="true">${formatear(j.texto)}</div>
-      <p class="aviso-ia">Borrador generado por IA. Puede tocar el texto para corregirlo. Usted decide qué usar.</p>
+      <p class="aviso-ia">Borrador generado por IA. Puede tocar el texto para corregirlo. Usted decide qué usar. <a href="#" onclick="abrirOpinion();return false" style="color:var(--azul);font-weight:700">Dar mi opinión</a></p>
       <div class="acciones"><button class="principal" style="margin-top:0">Guardar en este teléfono</button></div>`;
     const tipo = accion === 'plan' ? 'Plan de clase' : 'Evaluación';
     salida.querySelector('.acciones button').onclick = ev => guardar(tipo, d, salida.querySelector('.resultado').innerHTML, ev.target);
@@ -365,6 +395,22 @@ if (!leer('codigo', '')) mostrarBienvenida();
 fetch('/api/estado').then(r => r.json()).then(j => {
   $('#estado').textContent = j.simulado ? 'Modo de prueba' : j.ok ? 'Prueba en línea · listo' : 'No disponible';
 }).catch(() => $('#estado').textContent = 'Sin conexión');
+
+// Opinión anónima: se envía sin nombre ni datos personales.
+function abrirOpinion() { document.getElementById('opinion-estado').textContent = ''; document.getElementById('opinion').showModal(); }
+document.getElementById('enviar-opinion').onclick = async () => {
+  const f = document.getElementById('form-opinion'), est = document.getElementById('opinion-estado');
+  const datos = { probo: [...f.querySelectorAll('[name=probo]:checked')].map(x => x.value),
+    util: f.util.value, usaria: f.usaria.value, mejoras: f.mejoras.value.trim() };
+  if (!datos.probo.length && !datos.util && !datos.usaria && !datos.mejoras) { est.textContent = 'Responda al menos una pregunta.'; return; }
+  est.textContent = 'Enviando…';
+  try {
+    const r = await fetch('/api/opinion', {method:'POST', headers:{'Content-Type':'application/json', 'X-Codigo':leer('codigo', '')}, body:JSON.stringify(datos)});
+    const j = await r.json(); if (!j.ok) throw new Error();
+    f.reset(); est.textContent = '¡Gracias! Su opinión fue enviada.';
+    setTimeout(() => document.getElementById('opinion').close(), 1500);
+  } catch (e) { est.textContent = 'No se pudo enviar. Revise su conexión e intente de nuevo.'; }
+};
 </script>
 </body>
 </html>
