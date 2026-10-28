@@ -6,6 +6,7 @@ desde su teléfono, a cualquier hora. Los guardados y el seguimiento quedan en e
 navegador del teléfono; este servidor no guarda nada.
 """
 import json
+import re
 import os
 from http.server import BaseHTTPRequestHandler
 from pathlib import Path
@@ -26,7 +27,9 @@ SISTEMA = (
     "condiciones del aula (sin electricidad, sin internet, sin fotocopias) y propone solo lo que "
     "se puede hacer con ellas. 5) Instrucciones concretas que el docente pueda aplicar "
     "mañana: tiempos, organización del grupo, qué dice y qué hace. 6) No inventes datos "
-    "ni cifras. Formato: texto simple con títulos y listas; sin emojis, sin saludos, sin "
+    "ni cifras. 7) Háblale al docente con naturalidad: no menciones cómo recibiste la información, ni "
+    "copias, documentos adjuntos o textos cortados; si un contenido no aparece en los oficiales, dilo en una "
+    "frase sencilla. Formato: texto simple con títulos y listas; sin emojis, sin saludos, sin "
     "LaTeX (fracciones como 1/2)."
 )
 
@@ -92,7 +95,7 @@ def curriculo_de(nivel, grado, area):
     texto = datos["areas"].get(area)
     if not texto:
         return None
-    return "Fuente: {}\n{}".format(datos["fuentes"][area], texto[:14000])
+    return "Fuente: {}\n{}".format(datos["fuentes"][area], texto[:30000])
 
 
 class Rechazo(Exception):
@@ -137,11 +140,33 @@ def contexto_clase(d):
     orient = orientacion_area(d.get("area", ""))
     if orient:
         base += "\nOrientación del área: " + orient + "\n"
+    if d.get("multigrado") and grados_del_aula(d):
+        for g in grados_del_aula(d):
+            cur = curriculo_de(nivel, g, d.get("area", ""))
+            if cur:
+                base += ("\nContenidos y aprendizajes esperados oficiales del MPPE para esta área en "
+                         + g + " (elige los que corresponden al tema):\n" + cur + "\n")
+        return base
     cur = curriculo_de(nivel, d.get("grado", ""), d.get("area", ""))
     if cur:
         base += ("\nContenidos y aprendizajes esperados oficiales del MPPE para esta área y grado "
                  "(elige de aquí los que corresponden al tema):\n" + cur + "\n")
     return base
+
+
+ORDINAL = {"1": "1er", "2": "2do", "3": "3er", "4": "4to", "5": "5to", "6": "6to"}
+
+
+def grados_del_aula(d):
+    """Grados de un aula multigrado a partir del texto del docente (ej.: «1er, 2do y 3er grado»)."""
+    unidad = "año" if d.get("nivel") == "Media General" else "grado"
+    numeros = re.findall(r"([1-6])\s*(?:er|ro|do|to|vo|º|°|\.?º)?", d.get("grados_multi", ""))
+    vistos = []
+    for n in numeros:
+        g = "{} {}".format(ORDINAL[n], unidad)
+        if g not in vistos:
+            vistos.append(g)
+    return vistos
 
 
 def prompt_plan(d):
