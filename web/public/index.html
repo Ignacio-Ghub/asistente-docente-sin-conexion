@@ -51,6 +51,8 @@
   .resultado h3 { font-size:17px; margin:16px 0 4px; color:var(--marino); }
   .resultado ul, .resultado ol { padding-left:22px; margin:4px 0; }
   .aviso-ia { font-size:13px; color:var(--suave); border-top:1px dashed var(--borde); margin-top:12px; padding-top:8px; }
+  .valorar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:12px; font-size:14px; font-weight:700; color:var(--marino); }
+  .valorar button { padding:7px 14px; border:1.5px solid var(--marino); border-radius:30px; background:#fff; color:var(--marino); font-weight:700; font-family:inherit; cursor:pointer; }
   .acciones { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
   table { width:100%; border-collapse:collapse; font-size:15px; }
   td, th { padding:8px 4px; border-bottom:1px solid var(--borde); text-align:left; }
@@ -277,16 +279,16 @@ function formatear(t) {
 function revisionHTML(rev) {
   if (rev === undefined || rev === 'no_aplica') return '';
   const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
-  if (rev === null) return '<p class="alerta">No se pudo hacer la revisión automática. Revisa la clave con más cuidado.</p>';
-  if (!rev.length) return '<p class="revisado">Revisión automática: no encontró errores en la clave. Igual conviene que la revises.</p>';
-  return `<div class="alerta"><b>Revisa estas respuestas de la clave:</b><ul>${
+  if (rev === null) return '<p class="alerta">No se pudo hacer la revisión automática. Revise la clave con más cuidado.</p>';
+  if (!rev.length) return '<p class="revisado">Revisión automática: no encontró errores en la clave. Igual conviene que la revise.</p>';
+  return `<div class="alerta"><b>Revise estas respuestas de la clave:</b><ul>${
     rev.map(x => `<li>Pregunta ${esc(x.pregunta)}: ${esc(x.motivo)}</li>`).join('')}</ul></div>`;
 }
 
 async function generar(accion, boton) {
   const salida = $('#salida-' + accion);
   const d = datosClase();
-  if (!d.tema) { alert('Escribe el tema de la clase.'); return; }
+  if (!d.tema) { alert('Escriba el tema de la clase.'); return; }
   boton.disabled = true; const txt = boton.textContent; boton.textContent = accion === 'evaluacion' ? 'Preparando y revisando la clave… (puede tardar)' : 'Preparando borrador… (puede tardar un minuto)';
   salida.style.display = 'block'; salida.innerHTML = '<p class="nota">El asistente está preparando el borrador…</p>';
   try {
@@ -296,11 +298,38 @@ async function generar(accion, boton) {
     if (j.error) throw new Error(j.error);
     salida.innerHTML = revisionHTML(j.revision) + `<div class="resultado" contenteditable="true">${formatear(j.texto)}</div>
       <p class="aviso-ia">Borrador generado por IA. Puede tocar el texto para corregirlo. Usted decide qué usar. <a href="#" onclick="abrirOpinion();return false" style="color:var(--azul);font-weight:700">Dar mi opinión</a></p>
-      <div class="acciones"><button class="principal" style="margin-top:0">Guardar en este teléfono</button></div>`;
+      <div class="acciones"><button class="principal" style="margin-top:0">Guardar en este teléfono</button>
+        <button class="sec" data-compartir>Compartir por WhatsApp</button></div>
+      <div class="valorar noimprimir">¿Le sirvió este borrador? <button data-v="Muy útil">Sí</button><button data-v="Algo útil">Más o menos</button><button data-v="Poco útil">No</button></div>`;
     const tipo = accion === 'plan' ? 'Plan de clase' : 'Evaluación';
-    salida.querySelector('.acciones button').onclick = ev => guardar(tipo, d, salida.querySelector('.resultado').innerHTML, ev.target);
-  } catch (e) { salida.innerHTML = `<p class="alerta">${e.message}</p>`; }
+    const titulo = `${tipo}: ${d.tema} (${d.multigrado ? 'multigrado' : d.grado}, ${d.area})`;
+    salida.querySelector('.acciones .principal').onclick = ev => guardar(tipo, d, salida.querySelector('.resultado').innerHTML, ev.target);
+    salida.querySelector('[data-compartir]').onclick = () => compartir(titulo, salida.querySelector('.resultado').innerText);
+    salida.querySelectorAll('.valorar button').forEach(b => b.onclick = () => valorar(b, accion === 'plan' ? 'Planificar' : 'Evaluar', d));
+  } catch (e) {
+    const sinRed = !navigator.onLine || e instanceof TypeError;
+    salida.innerHTML = `<p class="alerta">${sinRed ? 'Sin conexión. Para preparar un borrador nuevo necesita internet. Sus guardados y el seguimiento funcionan igual.' : e.message}</p>`;
+  }
   boton.disabled = false; boton.textContent = txt;
+}
+
+// Compartir con un colega: en el teléfono abre el menú de compartir (WhatsApp incluido); si no, WhatsApp Web.
+async function compartir(titulo, texto) {
+  const mensaje = titulo + '\n\n' + texto.trim() + '\n\nPreparado con el Asistente docente (borrador revisado por el docente).';
+  if (navigator.share) { try { await navigator.share({title: titulo, text: mensaje}); return; } catch (e) { if (e.name === 'AbortError') return; } }
+  window.open('https://wa.me/?text=' + encodeURIComponent(mensaje.slice(0, 6000)), '_blank');
+}
+
+// Valoración de un toque: anónima, va a la misma base de opiniones.
+async function valorar(boton, que, d) {
+  const caja = boton.parentElement;
+  caja.querySelectorAll('button').forEach(b => b.disabled = true);
+  try {
+    const r = await fetch('/api/opinion', {method:'POST', headers:{'Content-Type':'application/json', 'X-Codigo':codigo()},
+      body: JSON.stringify({probo:[que], util:boton.dataset.v, usaria:'', mejoras:`Valoración rápida: ${boton.textContent} · ${d.multigrado ? 'multigrado ' + (d.grados_multi || '') : d.grado} · ${d.area} · ${d.tema}`})});
+    if (!(await r.json()).ok) throw new Error();
+    caja.innerHTML = '¡Gracias por su valoración!';
+  } catch (e) { caja.innerHTML = 'Sin conexión: no se pudo enviar la valoración, pero su borrador está aquí.'; }
 }
 
 // En la versión en línea todo se guarda en el navegador del teléfono; el servidor no guarda nada.
@@ -310,7 +339,7 @@ function leer(clave, vacio) {
 }
 function escribir(clave, valor) {
   try { localStorage.setItem('asistente.' + clave, JSON.stringify(valor)); }
-  catch (e) { alert('No se pudo guardar en este teléfono. Revisa que el navegador no esté en modo privado.'); }
+  catch (e) { alert('No se pudo guardar en este teléfono. Revise que el navegador no esté en modo privado.'); }
 }
 
 // Guardados: quedan en este teléfono para usarlos sin internet, o imprimirlos después.
@@ -326,13 +355,18 @@ async function cargarGuardados() {
   $('#lista-guardados').innerHTML = docs.length ? docs.map(x =>
     `<details class="guardado"><summary><b>${x.titulo}</b><br><span class="nota">${x.fecha}</span></summary>
       <div class="resultado">${x.html}</div>
-      <div class="acciones"><button class="sec" data-descargar="${x.id}">Descargar archivo</button>
+      <div class="acciones"><button class="sec" data-wa="${x.id}">Compartir por WhatsApp</button>
+      <button class="sec" data-descargar="${x.id}">Descargar archivo</button>
       <button class="sec" data-borrar="${x.id}">Borrar</button></div></details>`).join('')
-    : '<p class="nota">Aún no has guardado nada.</p>';
+    : '<p class="nota">Aún no ha guardado nada.</p>';
   $('#lista-guardados').querySelectorAll('[data-borrar]').forEach(b => b.onclick = async () => {
     if (!confirm('¿Borrar este documento?')) return;
     escribir('guardados', leer('guardados', []).filter(x => x.id != b.dataset.borrar));
     cargarGuardados();
+  });
+  $('#lista-guardados').querySelectorAll('[data-wa]').forEach(b => b.onclick = () => {
+    const x = docs.find(y => y.id == b.dataset.wa);
+    compartir(x.titulo, b.closest('details').querySelector('.resultado').innerText);
   });
   $('#lista-guardados').querySelectorAll('[data-descargar]').forEach(b => b.onclick = () => {
     const x = docs.find(y => y.id == b.dataset.descargar);
@@ -434,6 +468,10 @@ $('#r-fecha').valueAsDate = new Date();
 
 // Contraseña: se pide cada vez que se abre el asistente (correo, WhatsApp o computador) y solo dura mientras
 // la pestaña está abierta. Los estudiantes y resultados sí quedan guardados en el teléfono.
+async function huella(t) {
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('asistente-docente:' + t.toLowerCase()));
+  return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+}
 function codigo() { try { return sessionStorage.getItem('asistente.codigo') || ''; } catch (e) { return ''; } }
 function guardarCodigo(c) { try { sessionStorage.setItem('asistente.codigo', c); } catch (e) {} }
 try { localStorage.removeItem('asistente.codigo'); } catch (e) {}  // versiones anteriores la recordaban
@@ -444,7 +482,13 @@ $('#entrar').onclick = async () => {
   try {
     const j = await (await fetch('/api/estado', {headers:{'X-Codigo': c}})).json();
     if (!j.acceso) { err.textContent = 'La contraseña no es correcta. Revise el mensaje que le enviamos.'; return; }
-  } catch (e) { err.textContent = 'No hay conexión. Intente de nuevo en un momento.'; return; }
+    escribir('clave', await huella(c));
+  } catch (e) {
+    // Sin conexión: vale la contraseña con la que ya entró antes en este teléfono.
+    const guardada = leer('clave', '');
+    if (!guardada) { err.textContent = 'La primera vez necesita conexión a internet para entrar.'; return; }
+    if (guardada !== await huella(c)) { err.textContent = 'La contraseña no es correcta. Revise el mensaje que le enviamos.'; return; }
+  }
   guardarCodigo(c);
   $('#bienvenida').style.display = 'none'; $('main').style.display = ''; $('nav').style.display = ''; $('#caja-opinion').style.display = '';
 };
@@ -454,6 +498,7 @@ if (!codigo()) mostrarBienvenida();
 fetch('/api/estado').then(r => r.json()).then(j => {
   $('#estado').textContent = j.simulado ? 'Modo de prueba' : j.ok ? 'Prueba en línea · listo' : 'No disponible';
 }).catch(() => $('#estado').textContent = 'Sin conexión');
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 
 // Opinión anónima: se envía sin nombre ni datos personales.
 function abrirOpinion() { document.getElementById('opinion-estado').textContent = ''; document.getElementById('opinion').showModal(); }
