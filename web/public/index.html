@@ -2,227 +2,370 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Asistente docente</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tiza · asistente de clases</title>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#0F2747">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Asistente docente">
+<meta name="apple-mobile-web-app-title" content="Tiza">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  /* Versión de prueba en línea: mismo diseño que la encuesta a docentes. */
-  :root { --marino:#0F2747; --marino2:#1C3F6E; --azul:#2F7BD9; --amarillo:#FFC845; --fondo:#F2F5FA; --borde:#DCE3EE; --texto:#16202E; --suave:#5A6A80; --alerta:#C2412D; }
-  * { box-sizing:border-box; }
-  body { margin:0; font-family:"Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--fondo); color:var(--texto); font-size:17px; line-height:1.5; }
-  header { color:#fff; padding:18px 16px 16px;
-    background:radial-gradient(circle at 88% 10%, rgba(255,200,69,.25) 0, transparent 40%), linear-gradient(135deg, var(--marino) 0%, var(--marino2) 100%); }
-  .cabecera { max-width:760px; margin:0 auto; }
-  .icono-app { flex:none; width:46px; height:46px; border-radius:14px; display:grid; place-items:center; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); }
-  .icono-app svg { width:30px; height:30px; }
-  .titulo .nombre { display:flex; align-items:center; gap:12px; }
-  .opinion-caja { text-align:center; background:#fff; border:1px dashed var(--borde); border-radius:16px; padding:14px; margin:0 0 16px; }
-  .opinion-caja p { margin:0 0 8px; font-weight:700; color:var(--marino); }
-  dialog { border:0; border-radius:20px; padding:20px; width:min(520px, 92vw); box-shadow:0 20px 60px rgba(15,39,71,.35); }
-  dialog::backdrop { background:rgba(15,39,71,.45); }
-  .opciones-op { display:flex; flex-wrap:wrap; gap:8px; margin:4px 0 6px; }
-  .opciones-op label { display:flex; align-items:center; gap:6px; border:1.5px solid var(--borde); border-radius:12px; padding:9px 12px; margin:0; font-weight:600; font-size:15px; }
-  .opciones-op input { width:auto; }
-  footer img { height:34px; width:auto; display:block; margin:0 auto 8px; }
-  .titulo { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:14px; }
-  header h1 { font-size:24px; margin:0; font-weight:800; }
-  header h1 em { font-style:normal; color:var(--amarillo); }
-  #estado { font-size:12.5px; font-weight:700; padding:5px 11px; border-radius:20px; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22); white-space:nowrap; }
-  nav { display:flex; gap:6px; background:#fff; border-bottom:1px solid var(--borde); position:sticky; top:0; z-index:2; padding:8px; box-shadow:0 4px 14px rgba(15,39,71,.06); }
-  nav button { flex:1; border:0; background:none; padding:10px 4px; font-size:14px; font-weight:700; font-family:inherit; color:var(--suave); border-radius:12px; cursor:pointer; }
-  nav button.activo { color:#fff; background:var(--marino); }
-  main { max-width:760px; margin:0 auto; padding:16px 14px 30px; }
+  /* Tiza: diseño de aplicación para el teléfono. Letra base de 18 px, nada de lectura bajo 16 px y botones de al
+     menos 48 px de alto. Todo va en rem para respetar el tamaño de letra que el docente tiene en su teléfono. */
+  :root { --marino:#0F2747; --marino2:#1C3F6E; --azul:#2F7BD9; --amarillo:#FFC845; --fondo:#F2F5FA; --borde:#DCE3EE; --texto:#16202E; --suave:#4F5F75; --alerta:#C2412D; --verde:#1E6B45; }
+  @supports (font: -apple-system-body) { html { font: -apple-system-body; } }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { margin:0; font-family:"Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--fondo); color:var(--texto); font-size:1.125rem; line-height:1.55; }
+  button, input, select, textarea { font-family:inherit; }
+
+  /* Barra superior */
+  header { color:#fff; padding:calc(10px + env(safe-area-inset-top)) 16px 12px; background:linear-gradient(135deg, var(--marino) 0%, var(--marino2) 100%); position:sticky; top:0; z-index:5; }
+  .barra { max-width:760px; margin:0 auto; display:flex; align-items:center; gap:12px; }
+  .logo { flex:none; width:2.75rem; height:2.75rem; border-radius:14px; display:grid; place-items:center; background:rgba(255,255,255,.12); }
+  .logo svg { width:2rem; height:2rem; }
+  .marca { flex:1; min-width:0; }
+  .marca b { display:block; font-size:1.5rem; font-weight:800; line-height:1.1; }
+  #estado { display:block; font-size:.9rem; font-weight:700; opacity:.85; }
+  #btn-perfil { flex:none; width:3rem; height:3rem; border-radius:50%; border:2px solid rgba(255,255,255,.5); background:var(--amarillo); color:var(--marino); font-size:1.1rem; font-weight:800; cursor:pointer; }
+
+  /* Menú inferior, al alcance del pulgar */
+  nav { position:fixed; left:0; right:0; bottom:0; z-index:5; background:#fff; border-top:1px solid var(--borde); box-shadow:0 -6px 18px rgba(15,39,71,.08);
+    display:flex; justify-content:center; padding:6px 6px calc(6px + env(safe-area-inset-bottom)); }
+  nav button { flex:1; max-width:190px; min-height:3.75rem; border:0; background:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    font-size:.95rem; font-weight:800; color:var(--suave); border-radius:16px; cursor:pointer; padding:4px 2px; }
+  nav button svg { width:1.6rem; height:1.6rem; }
+  nav button.activo { color:var(--marino); background:#E8EFFA; }
+
+  main { max-width:760px; margin:0 auto; padding:18px 16px calc(110px + env(safe-area-inset-bottom)); }
   section { display:none; } section.activo { display:block; }
-  .tarjeta { background:#fff; border:1px solid var(--borde); border-radius:20px; padding:18px; margin-bottom:16px; box-shadow:0 6px 20px rgba(15,39,71,.06); }
-  label { display:block; font-size:14px; font-weight:700; color:var(--texto); margin:12px 0 6px; }
-  input, select, textarea { width:100%; padding:12px 13px; border:1.5px solid var(--borde); border-radius:14px; font-size:16px; background:#FBFCFE; color:var(--texto); font-family:inherit; }
-  input:focus, select:focus, textarea:focus { outline:none; border-color:var(--azul); background:#fff; box-shadow:0 0 0 4px rgba(47,123,217,.12); }
-  .fila { display:flex; gap:10px; } .fila > div { flex:1; }
-  .check { display:flex; align-items:center; gap:8px; margin-top:12px; font-size:15px; font-weight:600; }
-  .check input { width:auto; }
-  button.principal { margin-top:16px; width:100%; padding:15px; border:0; border-radius:16px; background:linear-gradient(135deg, var(--marino), var(--marino2)); color:#fff;
-    font-size:17px; font-weight:800; font-family:inherit; cursor:pointer; box-shadow:0 10px 24px rgba(15,39,71,.22); }
+  h2 { font-size:1.6rem; font-weight:800; color:var(--marino); margin:4px 0 6px; line-height:1.2; }
+  h3 { font-size:1.25rem; color:var(--marino); margin:0 0 8px; }
+  .sub { font-size:1.05rem; color:var(--suave); margin:0 0 16px; font-weight:600; }
+  .tarjeta { background:#fff; border:1px solid var(--borde); border-radius:22px; padding:20px; margin-bottom:16px; box-shadow:0 6px 20px rgba(15,39,71,.06); }
+
+  /* Inicio: tarjetas grandes, sin tener que saber escribir instrucciones a la IA */
+  .accesos { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+  .acceso { display:flex; flex-direction:column; align-items:flex-start; gap:8px; text-align:left; min-height:9.5rem; padding:16px; border-radius:22px; border:1px solid var(--borde);
+    background:#fff; color:var(--texto); box-shadow:0 6px 20px rgba(15,39,71,.07); cursor:pointer; font-size:1rem; }
+  .acceso .ic { width:3rem; height:3rem; border-radius:16px; display:grid; place-items:center; background:var(--marino); color:#fff; }
+  .acceso .ic svg { width:1.7rem; height:1.7rem; }
+  .acceso:nth-child(2) .ic { background:var(--azul); } .acceso:nth-child(3) .ic { background:#E7A90E; } .acceso:nth-child(4) .ic { background:var(--verde); }
+  .acceso b { font-size:1.15rem; line-height:1.25; color:var(--marino); }
+  .acceso span { color:var(--suave); font-weight:600; line-height:1.35; }
+  @media (max-width:360px) { .accesos { grid-template-columns:1fr; } .acceso { min-height:0; } }
+
+  /* Formularios */
+  label { display:block; font-size:1.05rem; font-weight:800; color:var(--texto); margin:16px 0 6px; }
+  input, select, textarea { width:100%; min-height:3.25rem; padding:12px 14px; border:2px solid var(--borde); border-radius:14px; font-size:1.125rem; background:#FBFCFE; color:var(--texto); }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:var(--azul); background:#fff; box-shadow:0 0 0 4px rgba(47,123,217,.15); }
+  .fila { display:flex; gap:10px; } .fila > div { flex:1; min-width:0; }
+  .check { display:flex; align-items:center; gap:12px; margin-top:16px; font-size:1.05rem; font-weight:700; min-height:3rem; }
+  .check input { width:1.6rem; height:1.6rem; min-height:0; flex:none; accent-color:var(--marino); }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .chips label { margin:0; display:flex; align-items:center; min-height:3rem; padding:8px 16px; border:2px solid var(--borde); border-radius:30px; background:#fff; font-weight:700; cursor:pointer; }
+  .chips label.marcado { background:var(--marino); border-color:var(--marino); color:#fff; }
+  .chips input { position:absolute; opacity:0; width:1px; height:1px; min-height:0; }
+
+  /* Botones */
+  button.principal { width:100%; min-height:3.5rem; padding:14px; border:0; border-radius:18px; background:linear-gradient(135deg, var(--marino), var(--marino2)); color:#fff;
+    font-size:1.15rem; font-weight:800; cursor:pointer; box-shadow:0 10px 24px rgba(15,39,71,.22); }
   button.principal:disabled { opacity:.6; }
-  button.sec { padding:10px 18px; border:0; border-radius:30px; background:linear-gradient(135deg, var(--marino), var(--marino2)); color:#fff; font-size:15px; font-weight:700; font-family:inherit; cursor:pointer; }
-  button.quitar { padding:2px 9px; border:1.5px solid var(--marino); border-radius:30px; background:#fff; color:var(--marino); font-weight:700; font-family:inherit; cursor:pointer; }
-  .resultado { white-space:normal; line-height:1.6; }
-  .resultado h3 { font-size:17px; margin:16px 0 4px; color:var(--marino); }
-  .resultado ul, .resultado ol { padding-left:22px; margin:4px 0; }
-  .aviso-ia { font-size:13px; color:var(--suave); border-top:1px dashed var(--borde); margin-top:12px; padding-top:8px; }
-  .valorar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:12px; font-size:14px; font-weight:700; color:var(--marino); }
-  .valorar button { padding:7px 14px; border:1.5px solid var(--marino); border-radius:30px; background:#fff; color:var(--marino); font-weight:700; font-family:inherit; cursor:pointer; }
-  .acciones { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
-  table { width:100%; border-collapse:collapse; font-size:15px; }
-  td, th { padding:8px 4px; border-bottom:1px solid var(--borde); text-align:left; }
-  td input { padding:7px; width:70px; }
-  .alerta { border-left:4px solid var(--alerta); background:#FFF5F2; padding:10px 12px; border-radius:10px; margin:8px 0; }
-  .revisado { font-size:14px; color:#1E6B45; background:#EFF8F2; border-radius:10px; padding:8px 12px; }
-  .guardado { border:1.5px solid var(--borde); border-radius:14px; padding:10px 12px; margin:8px 0; }
-  .guardado summary { cursor:pointer; }
-  .nota { font-size:13px; color:var(--suave); font-weight:600; }
-  h3 { color:var(--marino); }
-  footer { text-align:center; font-size:13px; color:var(--suave); padding:0 16px 28px; }
-  footer a { color:var(--azul); font-weight:700; text-decoration:none; }
-  @media print { header, nav, form, .acciones, .noimprimir, footer { display:none !important; } .tarjeta { border:0; box-shadow:none; } }
+  button.sec { min-height:3rem; padding:10px 20px; border:0; border-radius:30px; background:linear-gradient(135deg, var(--marino), var(--marino2)); color:#fff; font-size:1.05rem; font-weight:800; cursor:pointer; }
+  button.borde { min-height:3rem; padding:10px 20px; border:2px solid var(--marino); border-radius:30px; background:#fff; color:var(--marino); font-size:1.05rem; font-weight:800; cursor:pointer; }
+  button.quitar { min-width:2.75rem; min-height:2.75rem; border:2px solid var(--marino); border-radius:30px; background:#fff; color:var(--marino); font-size:1.2rem; font-weight:800; cursor:pointer; }
+  .acciones { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+  .acciones > button { flex:1 1 auto; }
+
+  /* Pasos de «Preparar» */
+  .modos { display:flex; gap:8px; margin-bottom:14px; overflow-x:auto; }
+  .modos button { flex:1; min-height:3rem; padding:8px 10px; border:2px solid var(--borde); border-radius:30px; background:#fff; color:var(--marino); font-size:1rem; font-weight:800; cursor:pointer; white-space:nowrap; }
+  .modos button.activo { background:var(--marino); border-color:var(--marino); color:#fff; }
+  .progreso { display:flex; align-items:center; gap:12px; font-weight:800; color:var(--suave); font-size:1rem; }
+  .progreso .barra-p { flex:1; height:8px; background:var(--borde); border-radius:8px; overflow:hidden; }
+  .progreso .barra-p i { display:block; height:100%; background:var(--amarillo); border-radius:8px; transition:width .25s; }
+  .paso { display:none; } .paso.activo { display:block; }
+  .paso h3 { margin:14px 0 0; font-size:1.35rem; }
+  .botones-paso { display:flex; gap:10px; margin-top:22px; }
+  .botones-paso button.principal { flex:2; } .botones-paso button.borde { flex:1; }
+
+  /* Resultados */
+  .resultado { line-height:1.6; }
+  .resultado h3 { font-size:1.2rem; margin:18px 0 4px; }
+  .resultado ul, .resultado ol { padding-left:24px; margin:4px 0; }
+  .cargando { text-align:center; padding:24px 8px; font-weight:700; color:var(--marino); }
+  .giro { width:3rem; height:3rem; margin:0 auto 14px; border-radius:50%; border:5px solid var(--borde); border-top-color:var(--amarillo); animation:giro 1s linear infinite; }
+  @keyframes giro { to { transform:rotate(360deg); } }
+  .aviso-ia { font-size:1rem; color:var(--suave); border-top:1px dashed var(--borde); margin-top:14px; padding-top:10px; }
+  .valorar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:14px; font-size:1.05rem; font-weight:800; color:var(--marino); }
+  .valorar span { width:100%; }
+  .valorar button { flex:1; min-height:3rem; border:2px solid var(--marino); border-radius:30px; background:#fff; color:var(--marino); font-size:1rem; font-weight:800; cursor:pointer; }
+  table { width:100%; border-collapse:collapse; font-size:1.05rem; }
+  td, th { padding:10px 4px; border-bottom:1px solid var(--borde); text-align:left; }
+  td input { width:5.5rem; }
+  .alerta { border-left:5px solid var(--alerta); background:#FFF5F2; padding:12px 14px; border-radius:12px; margin:8px 0; }
+  .revisado { font-size:1.05rem; color:var(--verde); background:#EFF8F2; border-radius:12px; padding:12px 14px; }
+  .guardado { border:2px solid var(--borde); border-radius:16px; padding:12px 14px; margin:10px 0; background:#fff; }
+  .guardado summary { cursor:pointer; min-height:2.75rem; }
+  .nota { font-size:1rem; color:var(--suave); font-weight:600; }
+  .error { color:#B3261E; font-weight:800; font-size:1rem; margin:8px 0 0; }
+
+  /* Pantalla de entrada */
+  #bienvenida { display:none; min-height:100vh; padding:calc(40px + env(safe-area-inset-top)) 20px 40px; color:#fff;
+    background:radial-gradient(circle at 85% 8%, rgba(255,200,69,.28) 0, transparent 42%), linear-gradient(160deg, var(--marino) 0%, var(--marino2) 100%); }
+  #bienvenida .caja { max-width:460px; margin:0 auto; }
+  #bienvenida .logo { width:5rem; height:5rem; border-radius:24px; margin-bottom:18px; }
+  #bienvenida .logo svg { width:3.6rem; height:3.6rem; }
+  #bienvenida h1 { font-size:3rem; margin:0; line-height:1; font-weight:800; }
+  #bienvenida .lema { font-size:1.3rem; font-weight:700; color:var(--amarillo); margin:8px 0 18px; }
+  #bienvenida .tarjeta { color:var(--texto); }
+
+  dialog { border:0; border-radius:22px; padding:20px; width:min(520px, 94vw); max-height:90vh; box-shadow:0 20px 60px rgba(15,39,71,.35); }
+  dialog::backdrop { background:rgba(15,39,71,.5); }
+  .opinion-caja { text-align:center; background:#fff; border:2px dashed var(--borde); border-radius:20px; padding:18px; margin:6px 0 18px; }
+  .opinion-caja p { margin:0 0 8px; font-weight:800; color:var(--marino); }
+  .pie { text-align:center; font-size:1rem; color:var(--suave); padding:6px 0 10px; }
+  .pie img { height:36px; width:auto; display:block; margin:0 auto 8px; }
+  .pie a { color:var(--azul); font-weight:800; text-decoration:none; }
+  @media print { header, nav, form, .acciones, .noimprimir, .pie { display:none !important; } .tarjeta { border:0; box-shadow:none; } main { padding:0; } }
 </style>
 </head>
 <body>
+<!-- Logo de Tiza: una tiza con su trazo, lo que sigue funcionando cuando se va la electricidad -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="tiza" viewBox="0 0 48 48"><rect x="8" y="14" width="32" height="14" rx="3.5" fill="#FFC845" transform="rotate(-38 24 21)"/>
+    <path d="M8 41c4-4 8-4 12-1s8 3 12 0 6-2 8-1" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-inicio" viewBox="0 0 24 24"><path d="M3 11 12 3l9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-clase" viewBox="0 0 24 24"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-eval" viewBox="0 0 24 24"><rect x="4.5" y="4" width="15" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M9 3h6v3H9zM8.5 13l2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+  <symbol id="i-repaso" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+  <symbol id="i-est" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M2 20c0-3.6 3-6 7-6s7 2.4 7 6M16.5 5a3 3 0 0 1 0 6M18 14c2.4.5 4 2.6 4 5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  <symbol id="i-guard" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
+</svg>
+
+<div id="bienvenida">
+  <div class="caja">
+    <span class="logo"><svg><use href="#tiza"/></svg></span>
+    <h1>Tiza</h1>
+    <p class="lema">Su asistente de clases, con o sin conexión</p>
+    <p style="margin:0 0 20px;font-size:1.1rem">Planes de clase, evaluaciones y seguimiento de sus estudiantes, según el programa oficial del Ministerio de Educación.</p>
+    <div class="tarjeta">
+      <label for="codigo" style="margin-top:0">Contraseña de acceso</label>
+      <input id="codigo" autocomplete="off" placeholder="Está en su mensaje" onkeydown="if(event.key==='Enter')$('#entrar').click()">
+      <p class="error" id="codigo-error"></p>
+      <button class="principal" id="entrar" style="margin-top:14px">Entrar</button>
+      <p class="nota" style="margin:12px 0 0">Versión de prueba. Lo que guarde queda solo en este teléfono. Use nombres inventados para los estudiantes.</p>
+    </div>
+  </div>
+</div>
+
 <header>
-  <div class="cabecera">
-    <div class="titulo">
-      <div class="nombre"><span class="icono-app"><svg viewBox="0 0 200 200" fill="none" stroke="#fff" stroke-width="12" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="18" y="40" width="164" height="100" rx="12"/><path d="M58 166h84M100 140v26"/><path d="M106 60l-22 36h28l-18 30" stroke="#FFC845"/></svg></span>
-      <h1>Asistente <em>docente</em></h1></div>
-      <span id="estado">Revisando…</span></div>
+  <div class="barra">
+    <span class="logo"><svg><use href="#tiza"/></svg></span>
+    <div class="marca"><b>Tiza</b><span id="estado">Revisando…</span></div>
+    <button id="btn-perfil" aria-label="Mi perfil" onclick="irA('perfil')">?</button>
   </div>
 </header>
-<div class="tarjeta" id="bienvenida" style="display:none;margin:16px auto;max-width:728px">
-  <h3 style="margin-top:0">Bienvenida, bienvenido</h3>
-  <p style="margin:0 0 8px">Gracias por probar el asistente. Esta versión de prueba funciona con internet, para que pueda usarla desde su teléfono.</p>
-  <p class="nota">Use nombres inventados para los estudiantes. Lo que guarde queda solo en este teléfono.</p>
-  <label for="codigo">Contraseña de acceso</label>
-  <input id="codigo" autocomplete="off" placeholder="Está en el mensaje que le enviamos" onkeydown="if(event.key==='Enter')$('#entrar').click()">
-  <p class="nota" id="codigo-error" style="color:#B3261E;font-weight:700;margin:6px 0 0"></p>
-  <button class="principal" id="entrar">Entrar</button>
-</div>
-<nav>
-  <button data-tab="plan" class="activo">Planificar</button>
-  <button data-tab="evaluar">Evaluar</button>
-  <button data-tab="seguimiento">Seguimiento</button>
-  <button data-tab="guardados">Guardados</button>
-</nav>
+
 <main>
-<div class="tarjeta noimprimir" id="instalar" style="display:none;border-color:var(--azul)">
-  <h3 style="margin:0 0 6px">Úselo también sin internet</h3>
-  <p style="margin:0 0 6px">Agregue el asistente a la pantalla de inicio de su teléfono. Así se abre como una aplicación y, aunque no haya conexión, puede usar <b>Seguimiento</b>, <b>Guardados</b> y armar planes y evaluaciones con el programa oficial de su grado. Consejo: cuando tenga señal, prepare y guarde los planes de la semana.</p>
-  <p class="nota" id="instalar-pasos" style="margin:0"></p>
-  <div class="acciones"><button class="sec" id="instalar-si" style="display:none">Agregar a la pantalla de inicio</button><button class="quitar" id="instalar-no" style="padding:8px 14px">Ahora no</button></div>
-</div>
+<!-- INICIO -->
+<section id="inicio" class="activo">
+  <h2 id="saludo">Buenos días</h2>
+  <p class="sub" id="saludo-sub">¿Qué quiere hacer hoy?</p>
+  <div class="accesos">
+    <button class="acceso" onclick="abrirPreparar('plan')"><span class="ic"><svg><use href="#i-clase"/></svg></span><b>Preparar una clase</b><span>Un plan listo según el programa oficial</span></button>
+    <button class="acceso" onclick="abrirPreparar('evaluacion')"><span class="ic"><svg><use href="#i-eval"/></svg></span><b>Crear una evaluación</b><span>Preguntas con su clave de respuestas</span></button>
+    <button class="acceso" onclick="abrirPreparar('repaso')"><span class="ic"><svg><use href="#i-repaso"/></svg></span><b>Repasar un tema</b><span>Para usted, antes de dar la clase</span></button>
+    <button class="acceso" onclick="irA('estudiantes')"><span class="ic"><svg><use href="#i-est"/></svg></span><b>Mis estudiantes</b><span>Resultados y quién necesita refuerzo</span></button>
+  </div>
+  <div class="tarjeta noimprimir" id="aviso-perfil" style="display:none;border-color:var(--amarillo)">
+    <h3>Complete su perfil</h3>
+    <p style="margin:0 0 4px">Con su grado, sus áreas y su aula, Tiza llena los formularios por usted.</p>
+    <div class="acciones"><button class="sec" onclick="irA('perfil')">Completar mi perfil</button></div>
+  </div>
+  <div class="tarjeta noimprimir" id="instalar" style="display:none;border-color:var(--azul)">
+    <h3>Úsela también sin internet</h3>
+    <p style="margin:0 0 6px">Agregue Tiza a la pantalla de inicio de su teléfono. Así se abre como una aplicación y, aunque no haya conexión, puede ver a sus estudiantes, sus guardados y armar planes y evaluaciones con el programa oficial de su grado. Consejo: cuando tenga señal, prepare y guarde los planes de la semana.</p>
+    <p class="nota" id="instalar-pasos" style="margin:0"></p>
+    <div class="acciones"><button class="sec" id="instalar-si" style="display:none">Agregar a la pantalla de inicio</button><button class="borde" id="instalar-no">Ahora no</button></div>
+  </div>
+  <div class="opinion-caja noimprimir"><p>¿Ya la probó? Nos encantaría conocer su opinión.</p><p class="nota" style="margin:0 0 12px">Es anónima, toma solo un minuto y nos ayuda mucho a mejorar Tiza.</p><button class="sec" onclick="abrirOpinion()">Dar mi opinión</button></div>
+  <div class="pie">
+    <a href="https://ignaciobriceno.com" target="_blank" rel="noopener"><img src="logo-jiba-azul.png" alt="JIBA"></a>
+    Una iniciativa de Jesús Ignacio Briceño Alarcón · <a href="https://ignaciobriceno.com" target="_blank" rel="noopener">ignaciobriceno.com</a>
+  </div>
+</section>
 
-<!-- Datos de la clase: compartidos por Planificar y Evaluar -->
-<section id="plan" class="activo">
-  <form class="tarjeta" id="form-clase">
-    <div class="fila">
-      <div><label>Nivel</label>
-        <select name="nivel"><option>Primaria</option><option>Media General</option></select></div>
-      <div><label id="lbl-grado">Grado</label><select name="grado"></select></div>
+<!-- PREPARAR: plan, evaluación o repaso, en tres pasos cortos -->
+<section id="preparar">
+  <h2 id="titulo-preparar">Preparar una clase</h2>
+  <div class="modos noimprimir" role="tablist">
+    <button data-modo="plan" class="activo">Plan de clase</button><button data-modo="evaluacion">Evaluación</button><button data-modo="repaso">Repaso</button>
+  </div>
+  <form class="tarjeta" id="form-clase" novalidate>
+    <div class="progreso"><span id="paso-texto">Paso 1 de 3</span><span class="barra-p"><i id="paso-barra" style="width:33%"></i></span></div>
+
+    <div class="paso activo" data-paso="1">
+      <h3>¿Para quién es?</h3>
+      <div class="fila">
+        <div><label for="f-nivel">Nivel</label><select id="f-nivel" name="nivel"><option>Primaria</option><option>Media General</option></select></div>
+        <div><label for="f-grado" id="lbl-grado">Grado</label><select id="f-grado" name="grado"></select></div>
+      </div>
+      <label class="check"><input type="checkbox" name="multigrado"> Aula multigrado (varios grados a la vez)</label>
+      <div id="multi" style="display:none"><label for="f-gm">¿Qué grados?</label><input id="f-gm" name="grados_multi" placeholder="Ej.: 1ro, 2do y 3er grado"></div>
+      <label for="f-area">Área</label>
+      <select id="f-area" name="area"></select>
+      <p class="nota" id="nota-curriculo" style="margin:8px 0 0"></p>
+      <label for="f-est">Número de estudiantes</label><input id="f-est" name="estudiantes" type="number" inputmode="numeric" min="1" value="18">
     </div>
-    <label>Estudiantes</label><input name="estudiantes" type="number" min="1" value="18">
-    <label class="check"><input type="checkbox" name="multigrado"> Aula multigrado (varios grados a la vez)</label>
-    <div id="multi" style="display:none"><label>¿Qué grados?</label><input name="grados_multi" placeholder="Ej.: 1ro, 2do y 3er grado"></div>
-    <label>Área</label>
-    <select name="area"></select>
-    <p class="nota" id="nota-curriculo"></p>
-    <label>Tema</label><input name="tema" required placeholder="Ej.: juegos para mejorar la concentración">
-    <label>Materiales y espacio disponibles (opcional)</label>
-    <input name="materiales" placeholder="Ej.: un balón, patio de tierra, pizarra">
-    <label>Condiciones del aula</label>
-    <select name="condiciones">
-      <option>Sin electricidad ni internet, solo pizarra y cuadernos</option>
-      <option>Electricidad a ratos, sin internet</option>
-      <option>Electricidad estable, sin internet</option>
-    </select>
-    <label>Tipo de clase</label>
-    <select name="tipo_clase">
-      <option value="normal">Clase completa</option>
-      <option value="corta">Clase corta (por cortes de electricidad u horario reducido)</option>
-      <option value="recuperar">Recuperar clases perdidas</option>
-    </select>
-    <div id="recuperar" style="display:none"><label>¿Cuántas clases de esta área se perdieron?</label><input name="clases_perdidas" type="number" min="1" value="2">
-      <p class="nota" style="margin:6px 0 0">En «Tema», escriba los temas que quedaron pendientes.</p></div>
-    <label>Minutos de clase</label><input name="minutos" type="number" value="45">
-    <button class="principal" type="submit" data-accion="plan">Proponer plan de clase</button>
-    <button class="sec" type="button" id="btn-repaso" style="width:100%;margin-top:10px;padding:13px">Repasar el contenido antes de la clase</button>
-    <p class="nota" style="margin:6px 0 0;text-align:center">Una explicación breve del tema para usted, con los errores frecuentes de los estudiantes.</p>
+
+    <div class="paso" data-paso="2">
+      <h3>¿De qué trata?</h3>
+      <label for="f-tema">Tema</label><input id="f-tema" name="tema" placeholder="Ej.: las fracciones">
+      <p class="error" id="tema-error"></p>
+      <div class="solo-clase">
+        <label for="f-tipo">Tipo de clase</label>
+        <select id="f-tipo" name="tipo_clase">
+          <option value="normal">Clase completa</option>
+          <option value="corta">Clase corta (por cortes u horario reducido)</option>
+          <option value="recuperar">Recuperar clases perdidas</option>
+        </select>
+        <div id="recuperar" style="display:none"><label for="f-perd">¿Cuántas clases de esta área se perdieron?</label><input id="f-perd" name="clases_perdidas" type="number" inputmode="numeric" min="1" value="2">
+          <p class="nota" style="margin:6px 0 0">En «Tema», escriba los temas que quedaron pendientes.</p></div>
+        <label for="f-min">Minutos de clase</label><input id="f-min" name="minutos" type="number" inputmode="numeric" value="45">
+      </div>
+    </div>
+
+    <div class="paso" data-paso="3">
+      <h3>¿Con qué cuenta?</h3>
+      <label for="f-cond">Condiciones del aula</label>
+      <select id="f-cond" name="condiciones">
+        <option value="Sin electricidad ni internet, solo pizarra y cuadernos">Sin electricidad ni internet</option>
+        <option value="Electricidad a ratos, sin internet">Electricidad a ratos</option>
+        <option value="Electricidad estable, sin internet">Electricidad estable</option>
+      </select>
+      <label for="f-mat">Materiales y espacio disponibles (opcional)</label>
+      <input id="f-mat" name="materiales" placeholder="Ej.: un balón, patio de tierra, pizarra">
+    </div>
+
+    <div class="botones-paso">
+      <button type="button" class="borde" id="paso-atras" style="display:none">Atrás</button>
+      <button type="submit" class="principal" id="paso-sig">Siguiente</button>
+    </div>
   </form>
-  <div class="tarjeta" id="salida-repaso" style="display:none"></div>
-  <div class="tarjeta" id="salida-plan" style="display:none"></div>
+  <div class="tarjeta" id="salida" style="display:none"></div>
+  <div class="tarjeta noimprimir" id="despues" style="display:none">
+    <h3>Con los mismos datos</h3>
+    <div class="acciones" style="margin-top:0">
+      <button class="sec" data-otro="evaluacion">Crear la evaluación</button>
+      <button class="sec" data-otro="repaso">Repasar el tema</button>
+      <button class="sec" data-otro="plan">Preparar el plan</button>
+      <button class="borde" id="cambiar-datos">Cambiar los datos</button>
+    </div>
+  </div>
 </section>
 
-<section id="evaluar">
+<!-- MIS ESTUDIANTES -->
+<section id="estudiantes">
+  <h2>Mis estudiantes</h2>
+  <p class="sub">Anote los resultados y Tiza le avisa quién necesita refuerzo. Todo queda en este teléfono.</p>
   <div class="tarjeta">
-    <p style="margin:0">Usa los mismos datos de la clase de la pestaña <b>Planificar</b>.</p>
-    <p class="nota" id="resumen-clase"></p>
-    <button class="principal" data-accion="evaluacion" id="btn-eval">Crear evaluación</button>
-  </div>
-  <div class="tarjeta" id="salida-evaluacion" style="display:none"></div>
-</section>
-
-<section id="seguimiento">
-  <div class="tarjeta">
-    <h3 style="margin-top:0">Cómo funciona el seguimiento</h3>
-    <ol style="margin:0 0 8px;padding-left:22px;line-height:1.6">
-      <li><b>Agregue a sus estudiantes</b>, una sola vez.</li>
-      <li>Después de cada evaluación, <b>anote cuántas preguntas acertó cada uno</b> y pulse «Guardar resultados».</li>
-      <li>El asistente le <b>avisa quién necesita refuerzo</b> y guarda el <b>historial</b> de cada estudiante.</li>
-    </ol>
-    <p class="nota" style="margin:0">Todo queda guardado en este teléfono y no se envía a internet. En esta prueba, use nombres inventados.</p>
-  </div>
-  <div class="tarjeta">
-    <h3 style="margin-top:0">1. Sus estudiantes</h3>
+    <h3>1. Sus estudiantes</h3>
     <div id="lista-est"></div>
     <div class="fila">
       <div><label for="e-nombre">Nombre</label><input id="e-nombre" placeholder="Ej.: Ana"></div>
       <div><label for="e-grado">Grado</label><input id="e-grado" placeholder="Ej.: 3er grado"></div>
     </div>
-    <button class="sec" id="agregar-est" style="margin-top:12px">Agregar estudiante</button>
+    <div class="acciones"><button class="sec" id="agregar-est">Agregar estudiante</button></div>
   </div>
   <div class="tarjeta">
-    <h3 style="margin-top:0">2. Anotar resultados de una evaluación</h3>
+    <h3>2. Anotar resultados de una evaluación</h3>
     <div class="fila">
       <div><label for="r-tema">Tema evaluado</label><input id="r-tema" placeholder="Ej.: fracciones"></div>
-      <div><label for="r-total">Preguntas</label><input id="r-total" type="number" value="5" min="1"></div>
+      <div style="flex:0 0 7rem"><label for="r-total">Preguntas</label><input id="r-total" type="number" inputmode="numeric" value="5" min="1"></div>
     </div>
     <label for="r-fecha">Fecha</label><input id="r-fecha" type="date">
-    <table id="tabla-res"><thead><tr><th>Estudiante</th><th>Aciertos</th></tr></thead><tbody></tbody></table>
-    <button class="principal" id="guardar-res">Guardar resultados</button>
+    <table id="tabla-res" style="margin-top:12px"><thead><tr><th>Estudiante</th><th>Aciertos</th></tr></thead><tbody></tbody></table>
+    <p class="error" id="res-error"></p>
+    <button class="principal" id="guardar-res" style="margin-top:14px">Guardar resultados</button>
     <p class="revisado" id="msg-res" style="display:none;margin-top:10px"></p>
   </div>
   <div class="tarjeta">
-    <h3 style="margin-top:0">3. Quién necesita refuerzo</h3>
+    <h3>3. Quién necesita refuerzo</h3>
     <div id="avisos"><p class="nota">Aún no hay avisos.</p></div>
     <p class="nota" id="regla"></p>
   </div>
   <div class="tarjeta">
-    <h3 style="margin-top:0">4. Historial de resultados</h3>
+    <h3>4. Historial de resultados</h3>
     <div id="historial"><p class="nota">Aún no hay resultados guardados.</p></div>
     <div class="acciones"><button class="sec" id="descargar-reg">Descargar el registro</button></div>
   </div>
 </section>
 
+<!-- GUARDADOS -->
 <section id="guardados">
-  <div class="tarjeta">
-    <h3 style="margin-top:0">Planes y evaluaciones guardados</h3>
-    <p class="nota">Se guardan en este teléfono y se pueden consultar sin internet. «Descargar archivo» crea una copia para imprimirla cuando haya electricidad.</p>
-    <div id="lista-guardados"></div>
-  </div>
+  <h2>Guardados</h2>
+  <p class="sub">Sus planes, evaluaciones y repasos. Se abren sin internet; «Descargar archivo» crea una copia para imprimir cuando haya electricidad.</p>
+  <div id="lista-guardados"></div>
+</section>
+
+<!-- MI PERFIL: queda en el teléfono; solo se comparte si el docente lo marca -->
+<section id="perfil">
+  <h2 id="perfil-titulo">Mi perfil</h2>
+  <p class="sub" id="perfil-sub">Con su perfil, Tiza lo saluda por su nombre y llena los formularios por usted. Se guarda solo en este teléfono.</p>
+  <form class="tarjeta" id="form-perfil" novalidate>
+    <label for="p-nombre" style="margin-top:0">Su nombre</label><input id="p-nombre" name="nombre" autocomplete="name" placeholder="Ej.: María Rondón">
+    <label for="p-escuela">Escuela</label><input id="p-escuela" name="escuela" placeholder="Ej.: Escuela Básica Los Nevados">
+    <div class="fila">
+      <div><label for="p-estado">Estado</label><select id="p-estado" name="estado"><option value="">Elija</option></select></div>
+      <div><label for="p-municipio">Municipio</label><select id="p-municipio" name="municipio" disabled><option value="">Elija el estado</option></select></div>
+    </div>
+    <label>¿En qué nivel da clases?</label>
+    <div class="chips" id="p-niveles"><label><input type="checkbox" name="niveles" value="Primaria"> Primaria</label><label><input type="checkbox" name="niveles" value="Media General"> Media General</label></div>
+    <label>Grados o años que atiende</label>
+    <div class="chips" id="p-grados"><p class="nota" style="margin:0">Primero elija el nivel.</p></div>
+    <label>Áreas que da</label>
+    <div class="chips" id="p-areas"><p class="nota" style="margin:0">Primero elija el nivel.</p></div>
+    <label class="check"><input type="checkbox" name="multigrado"> Doy clases en un aula multigrado</label>
+    <label for="p-cond">Condiciones habituales del aula</label>
+    <select id="p-cond" name="condiciones">
+      <option value="Sin electricidad ni internet, solo pizarra y cuadernos">Sin electricidad ni internet</option>
+      <option value="Electricidad a ratos, sin internet">Electricidad a ratos</option>
+      <option value="Electricidad estable, sin internet">Electricidad estable</option>
+    </select>
+    <label for="p-min">Minutos que suele durar su clase</label><input id="p-min" name="minutos" type="number" inputmode="numeric" value="45">
+    <label class="check" style="align-items:flex-start"><input type="checkbox" name="compartir" style="margin-top:2px"> <span>Compartir mi nombre, escuela, municipio, grados y áreas con el equipo de Tiza, para saber dónde se usa y mejorarla. Nunca se comparte nada de sus estudiantes.</span></label>
+    <button class="principal" type="submit" style="margin-top:20px">Guardar mi perfil</button>
+    <button class="borde" type="button" id="perfil-luego" style="width:100%;margin-top:10px;display:none">Más tarde</button>
+    <p class="revisado" id="perfil-msg" style="display:none;margin:12px 0 0"></p>
+  </form>
+  <div class="opinion-caja noimprimir"><p>¿Qué le parece Tiza?</p><button class="sec" onclick="abrirOpinion()">Dar mi opinión</button></div>
 </section>
 </main>
-<footer>
-  <div class="opinion-caja noimprimir" id="caja-opinion" style="max-width:760px;margin:0 auto 18px"><p>¿Ya lo probó? Nos encantaría conocer su opinión.</p><p class="nota" style="font-weight:600;color:var(--suave);margin:0 0 10px">Cuéntenos qué le pareció. Es anónima, toma solo un minuto y nos ayuda mucho a mejorarlo.</p><button class="sec" onclick="abrirOpinion()">Dar mi opinión</button></div>
-  <a href="https://ignaciobriceno.com" target="_blank" rel="noopener"><img src="logo-jiba-azul.png" alt="JIBA"></a>
-  Una iniciativa de Jesús Ignacio Briceño Alarcón · <a href="https://ignaciobriceno.com" target="_blank" rel="noopener">ignaciobriceno.com</a>
-</footer>
+
+<nav class="noimprimir">
+  <button data-tab="inicio" class="activo"><svg><use href="#i-inicio"/></svg>Inicio</button>
+  <button data-tab="preparar"><svg><use href="#i-clase"/></svg>Preparar</button>
+  <button data-tab="estudiantes"><svg><use href="#i-est"/></svg>Estudiantes</button>
+  <button data-tab="guardados"><svg><use href="#i-guard"/></svg>Guardados</button>
+</nav>
+
 <dialog id="opinion">
   <form id="form-opinion" method="dialog">
-    <h3 style="margin:0 0 4px">Dar mi opinión</h3>
-    <p class="nota" style="margin:0 0 10px">Gracias por tomarse un momento. Su opinión es anónima: no pedimos su nombre ni sus datos, y toma solo un minuto.</p>
+    <h3 style="margin:0 0 4px">Dar mi opinión sobre Tiza</h3>
+    <p class="nota" style="margin:0 0 6px">Gracias por tomarse un momento. Su opinión es anónima: no pedimos su nombre ni sus datos.</p>
     <label>¿Qué probó?</label>
-    <div class="opciones-op"><label><input type="checkbox" name="probo" value="Planificar"> Planificar</label><label><input type="checkbox" name="probo" value="Evaluar"> Evaluar</label><label><input type="checkbox" name="probo" value="Seguimiento"> Seguimiento</label></div>
+    <div class="chips"><label><input type="checkbox" name="probo" value="Planificar"> Planes</label><label><input type="checkbox" name="probo" value="Evaluar"> Evaluaciones</label><label><input type="checkbox" name="probo" value="Repasar el contenido"> Repaso</label><label><input type="checkbox" name="probo" value="Seguimiento"> Estudiantes</label></div>
     <label>¿Le resultó útil?</label>
-    <div class="opciones-op"><label><input type="radio" name="util" value="Muy útil"> Muy útil</label><label><input type="radio" name="util" value="Algo útil"> Algo útil</label><label><input type="radio" name="util" value="Poco útil"> Poco útil</label></div>
-    <label>¿Lo usaría en sus clases?</label>
-    <div class="opciones-op"><label><input type="radio" name="usaria" value="Sí"> Sí</label><label><input type="radio" name="usaria" value="Tal vez"> Tal vez</label><label><input type="radio" name="usaria" value="No"> No</label></div>
+    <div class="chips"><label><input type="radio" name="util" value="Muy útil"> Muy útil</label><label><input type="radio" name="util" value="Algo útil"> Algo útil</label><label><input type="radio" name="util" value="Poco útil"> Poco útil</label></div>
+    <label>¿La usaría en sus clases?</label>
+    <div class="chips"><label><input type="radio" name="usaria" value="Sí"> Sí</label><label><input type="radio" name="usaria" value="Tal vez"> Tal vez</label><label><input type="radio" name="usaria" value="No"> No</label></div>
     <label for="mejoras">¿Qué mejoraría o qué le faltó?</label>
     <textarea id="mejoras" name="mejoras" rows="3"></textarea>
-    <button class="principal" type="button" id="enviar-opinion">Enviar opinión</button>
-    <button class="sec" type="button" style="width:100%;margin-top:8px" onclick="document.getElementById('opinion').close()">Cerrar</button>
+    <button class="principal" type="button" id="enviar-opinion" style="margin-top:16px">Enviar opinión</button>
+    <button class="borde" type="button" style="width:100%;margin-top:10px" onclick="document.getElementById('opinion').close()">Cerrar</button>
     <p class="nota" id="opinion-estado" style="text-align:center;margin:10px 0 0"></p>
   </form>
 </dialog>
@@ -230,15 +373,23 @@
 <script>
 const $ = s => document.querySelector(s);
 const form = $('#form-clase');
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
-  document.querySelectorAll('nav button, section').forEach(x => x.classList.remove('activo'));
-  b.classList.add('activo'); $('#' + b.dataset.tab).classList.add('activo');
-  if (b.dataset.tab === 'evaluar') resumir();
-  if (b.dataset.tab === 'seguimiento') cargarRegistro();
-  if (b.dataset.tab === 'guardados') cargarGuardados();
-});
-form.multigrado.onchange = () => $('#multi').style.display = form.multigrado.checked ? 'block' : 'none';
+// Navegación: menú inferior y tarjetas de inicio.
+function irA(tab) {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('activo', x.dataset.tab === tab));
+  document.querySelectorAll('main section').forEach(x => x.classList.toggle('activo', x.id === tab));
+  if (tab === 'inicio') saludar();
+  if (tab === 'estudiantes') cargarRegistro();
+  if (tab === 'guardados') cargarGuardados();
+  if (tab === 'perfil') cargarPerfil();
+  scrollTo(0, 0);
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => irA(b.dataset.tab));
+
+// Casillas tipo «pastilla»: se marcan con una clase (funciona también en teléfonos con navegadores viejos).
+function marcarChips(caja) { caja.querySelectorAll('label').forEach(l => { const i = l.querySelector('input'); if (i) l.classList.toggle('marcado', i.checked); }); }
+document.addEventListener('change', e => { const c = e.target.closest('.chips'); if (c) marcarChips(c); });
 
 // Grados y áreas según el nivel. Contenidos oficiales: documentos del MPPE para el año escolar vigente
 // (Prácticas del Lenguaje, Matemática, Ciencias Naturales e Identidad, de 1.er grado a 5.º año).
@@ -258,12 +409,17 @@ function cambiarNivel() {
 }
 function notaCurriculo() {
   $('#nota-curriculo').textContent = CON_CONTENIDOS.includes(form.area.value)
-    ? 'Usa los contenidos y aprendizajes esperados oficiales del Ministerio de Educación para este ' + (form.nivel.value === 'Primaria' ? 'grado' : 'año') + '.'
-    : 'Esta área no tiene un documento oficial de contenidos cargado: el plan no cita contenidos oficiales. Revíselo con su programa.';
+    ? 'Usa los contenidos oficiales del Ministerio de Educación para este ' + (form.nivel.value === 'Primaria' ? 'grado' : 'año') + '.'
+    : 'Esta área no tiene un documento oficial de contenidos cargado. Revise el resultado con su programa.';
 }
 form.nivel.onchange = cambiarNivel;
-form.grado.onchange = notaCurriculo;
 form.area.onchange = notaCurriculo;
+form.multigrado.onchange = () => $('#multi').style.display = form.multigrado.checked ? 'block' : 'none';
+form.tipo_clase.onchange = () => {
+  $('#recuperar').style.display = form.tipo_clase.value === 'recuperar' ? 'block' : 'none';
+  if (form.tipo_clase.value === 'corta' && +form.minutos.value > 30) form.minutos.value = 25;
+  if (form.tipo_clase.value !== 'corta' && +form.minutos.value < 35) form.minutos.value = 45;
+};
 cambiarNivel();
 
 function datosClase() {
@@ -271,17 +427,49 @@ function datosClase() {
   d.multigrado = form.multigrado.checked;
   return d;
 }
-function resumir() {
-  const d = datosClase();
-  $('#resumen-clase').textContent = d.tema
-    ? `${d.multigrado ? 'Multigrado ' + (d.grados_multi || '') : d.grado} · ${d.area} · ${d.tema}`
-    : 'Primero escribe el tema en Planificar.';
-  $('#btn-eval').disabled = !d.tema;
+
+// «Preparar» en pasos cortos. El repaso no necesita el paso del aula.
+const MODOS = {
+  plan: {titulo:'Preparar una clase', boton:'Preparar el plan', cargando:'Tiza está preparando su plan de clase…'},
+  evaluacion: {titulo:'Crear una evaluación', boton:'Crear la evaluación', cargando:'Tiza está preparando la evaluación y revisando la clave…'},
+  repaso: {titulo:'Repasar un tema', boton:'Preparar el repaso', cargando:'Tiza está preparando su repaso…'},
+};
+let modo = 'plan', paso = 1;
+const totalPasos = () => modo === 'repaso' ? 2 : 3;
+function elegirModo(m) {
+  modo = m;
+  $('#titulo-preparar').textContent = MODOS[m].titulo;
+  document.querySelectorAll('.modos button').forEach(b => b.classList.toggle('activo', b.dataset.modo === m));
+  document.querySelector('.solo-clase').style.display = m === 'repaso' ? 'none' : '';
+  irPaso(Math.min(paso, totalPasos()));
 }
+function irPaso(n) {
+  paso = n;
+  document.querySelectorAll('.paso').forEach(p => p.classList.toggle('activo', +p.dataset.paso === n));
+  $('#paso-texto').textContent = `Paso ${n} de ${totalPasos()}`;
+  $('#paso-barra').style.width = (n / totalPasos() * 100) + '%';
+  $('#paso-atras').style.display = n > 1 ? '' : 'none';
+  $('#paso-sig').textContent = n < totalPasos() ? 'Siguiente' : MODOS[modo].boton;
+}
+function abrirPreparar(m) {
+  irA('preparar');
+  form.style.display = ''; $('#salida').style.display = 'none'; $('#despues').style.display = 'none';
+  paso = 1; elegirModo(m || modo);
+}
+document.querySelectorAll('.modos button').forEach(b => b.onclick = () => abrirPreparar(b.dataset.modo));
+$('#paso-atras').onclick = () => { irPaso(paso - 1); scrollTo(0, 0); };
+form.onsubmit = e => {
+  e.preventDefault();
+  $('#tema-error').textContent = '';
+  if (paso === 2 && !form.tema.value.trim()) { $('#tema-error').textContent = 'Escriba el tema de la clase.'; form.tema.focus(); return; }
+  if (paso < totalPasos()) { irPaso(paso + 1); scrollTo(0, 0); return; }
+  generar(modo);
+};
+document.querySelectorAll('[data-otro]').forEach(b => b.onclick = () => { elegirModo(b.dataset.otro); generar(b.dataset.otro); });
+$('#cambiar-datos').onclick = () => abrirPreparar(modo);
 
 // Convierte el texto del modelo (markdown simple) en HTML seguro.
 function formatear(t) {
-  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const neg = s => s.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   let html = '', lista = null;
   const cerrar = () => { if (lista) { html += `</${lista}>`; lista = null; } };
@@ -297,43 +485,49 @@ function formatear(t) {
   cerrar(); return html;
 }
 
-// Resultado de la segunda revisión de la clave (solo existe en Evaluar).
+// Resultado de la segunda revisión de la clave (solo existe en la evaluación).
 function revisionHTML(rev) {
   if (rev === undefined || rev === 'no_aplica') return '';
-  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
   if (rev === null) return '<p class="alerta">No se pudo hacer la revisión automática. Revise la clave con más cuidado.</p>';
   if (!rev.length) return '<p class="revisado">Revisión automática: no encontró errores en la clave. Igual conviene que la revise.</p>';
   return `<div class="alerta"><b>Revise estas respuestas de la clave:</b><ul>${
     rev.map(x => `<li>Pregunta ${esc(x.pregunta)}: ${esc(x.motivo)}</li>`).join('')}</ul></div>`;
 }
 
-async function generar(accion, boton) {
-  const salida = $('#salida-' + accion);
-  const d = datosClase();
-  if (!d.tema) { alert('Escriba el tema de la clase.'); return; }
-  boton.disabled = true; const txt = boton.textContent; boton.textContent = accion === 'evaluacion' ? 'Preparando y revisando la clave… (puede tardar)' : accion === 'repaso' ? 'Preparando el repaso… (puede tardar un minuto)' : 'Preparando borrador… (puede tardar un minuto)';
-  salida.style.display = 'block'; salida.innerHTML = '<p class="nota">El asistente está preparando el borrador…</p>';
-  if (!navigator.onLine) { await mostrarSinConexion(accion, d, salida); boton.disabled = false; boton.textContent = txt; return; }
+const TIPOS = {plan:'Plan de clase', evaluacion:'Evaluación', repaso:'Repaso del contenido'};
+const tituloDe = (tipo, d) => `${tipo}: ${d.tema} (${d.multigrado ? 'multigrado' : d.grado}, ${d.area})`;
+function mostrarDespues(accion) {
+  document.querySelectorAll('[data-otro]').forEach(b => b.style.display = b.dataset.otro === accion ? 'none' : '');
+  $('#despues').style.display = 'block';
+}
+function activarResultado(salida, tipo, d) {
+  salida.querySelector('[data-guardar]').onclick = ev => guardar(tipo, d, salida.querySelector('.resultado').innerHTML, ev.currentTarget);
+  salida.querySelector('[data-compartir]').onclick = () => compartir(tituloDe(tipo, d), salida.querySelector('.resultado').innerText);
+}
+
+async function generar(accion) {
+  const salida = $('#salida'), d = datosClase(), tipo = TIPOS[accion];
+  form.style.display = 'none'; $('#despues').style.display = 'none';
+  salida.style.display = 'block'; scrollTo(0, 0);
+  salida.innerHTML = `<div class="cargando"><div class="giro"></div><p style="margin:0">${MODOS[accion].cargando}</p><p class="nota">Puede tardar un minuto.</p></div>`;
+  if (!navigator.onLine) { await mostrarSinConexion(accion, d, salida); mostrarDespues(accion); return; }
   try {
     const r = await fetch('/api/' + accion, {method:'POST', headers:{'Content-Type':'application/json', 'X-Codigo':codigo()}, body:JSON.stringify(d)});
     const j = await r.json();
     if (j.codigo) { guardarCodigo(''); mostrarBienvenida(); }
     if (j.error) throw new Error(j.error);
     salida.innerHTML = revisionHTML(j.revision) + `<div class="resultado" contenteditable="true">${formatear(j.texto)}</div>
-      <p class="aviso-ia">Borrador generado por IA. Puede tocar el texto para corregirlo. Usted decide qué usar. <a href="#" onclick="abrirOpinion();return false" style="color:var(--azul);font-weight:700">Dar mi opinión</a></p>
-      <div class="acciones"><button class="principal" style="margin-top:0">Guardar en este teléfono</button>
+      <p class="aviso-ia">Borrador hecho con IA. Toque el texto para corregirlo. Usted decide qué usar.</p>
+      <div class="acciones"><button class="principal" data-guardar>Guardar en este teléfono</button>
         <button class="sec" data-compartir>Compartir por WhatsApp</button></div>
-      <div class="valorar noimprimir">${accion === 'repaso' ? '¿Le sirvió este repaso?' : '¿Le sirvió este borrador?'} <button>Sí</button><button>Más o menos</button><button>No</button></div>`;
-    const tipo = {plan:'Plan de clase', evaluacion:'Evaluación', repaso:'Repaso del contenido'}[accion];
-    const titulo = `${tipo}: ${d.tema} (${d.multigrado ? 'multigrado' : d.grado}, ${d.area})`;
-    salida.querySelector('.acciones .principal').onclick = ev => guardar(tipo, d, salida.querySelector('.resultado').innerHTML, ev.target);
-    salida.querySelector('[data-compartir]').onclick = () => compartir(titulo, salida.querySelector('.resultado').innerText);
+      <div class="valorar noimprimir"><span>${accion === 'repaso' ? '¿Le sirvió este repaso?' : '¿Le sirvió este borrador?'}</span><button>Sí</button><button>Más o menos</button><button>No</button></div>`;
+    activarResultado(salida, tipo, d);
     salida.querySelectorAll('.valorar button').forEach(b => b.onclick = () => valorar(b, tipo, d));
   } catch (e) {
     if (!navigator.onLine || e instanceof TypeError) await mostrarSinConexion(accion, d, salida);
-    else salida.innerHTML = `<p class="alerta">${e.message}</p>`;
+    else salida.innerHTML = `<p class="alerta">${esc(e.message)}</p>`;
   }
-  boton.disabled = false; boton.textContent = txt;
+  mostrarDespues(accion);
 }
 
 // Sin conexión: el modelo no está disponible, pero el programa oficial sí (guardado en el teléfono).
@@ -371,6 +565,7 @@ const listaHTML = bs => bs.map(b => `<p><b>${b.bloque}</b></p><ul>${b.items.map(
 async function mostrarSinConexion(accion, d, salida) {
   const programa = await programaOficial(d);
   const m = Math.max(10, +d.minutos || 45), ini = Math.round(m * 0.15), cie = Math.round(m * 0.2), des = m - ini - cie;
+  const tema = esc(d.tema);
   let contenidos = '';
   for (const p of programa) {
     const rel = relacionados(p.bloques, d.tema);
@@ -379,12 +574,12 @@ async function mostrarSinConexion(accion, d, salida) {
   }
   if (!programa.length) contenidos = '<p>Esta área no tiene programa oficial guardado en el teléfono. Escriba aquí los contenidos que trabajará.</p>';
   const completo = programa.map(p => `<details class="guardado"><summary><b>Programa oficial completo: ${p.grado}, ${d.area}</b></summary>${listaHTML(p.bloques)}</details>`).join('');
-  const datos = `<p><b>Grado:</b> ${d.multigrado ? 'Multigrado (' + (d.grados_multi || '') + ')' : d.grado} · <b>Área:</b> ${d.area} · <b>Duración:</b> ${m} minutos</p>`;
+  const datos = `<p><b>Grado:</b> ${d.multigrado ? 'Multigrado (' + esc(d.grados_multi) + ')' : d.grado} · <b>Área:</b> ${d.area} · <b>Duración:</b> ${m} minutos</p>`;
   const multi = d.multigrado ? '<li>Actividad común para todos y luego una tarea para cada grado; los mayores apoyan a los menores.</li>' : '';
   const tipoNota = d.tipo_clase === 'corta' ? '<p><i>Clase corta: quédese solo con lo esencial y una actividad principal.</i></p>'
-    : d.tipo_clase === 'recuperar' ? `<p><i>Recuperar ${d.clases_perdidas || 'varias'} clases: empiece comprobando qué saben y priorice lo que es base para lo que sigue.</i></p>` : '';
+    : d.tipo_clase === 'recuperar' ? `<p><i>Recuperar ${esc(d.clases_perdidas) || 'varias'} clases: empiece comprobando qué saben y priorice lo que es base para lo que sigue.</i></p>` : '';
   let cuerpo;
-  if (accion === 'plan') cuerpo = `<h3>Plan de clase: ${d.tema}</h3>${datos}${tipoNota}
+  if (accion === 'plan') cuerpo = `<h3>Plan de clase: ${tema}</h3>${datos}${tipoNota}
     <h3>1. Propósito</h3><p>Al final de la clase, los estudiantes podrán …</p>
     <h3>2. Contenidos del programa oficial</h3>${contenidos}
     <h3>3. Inicio (${ini} minutos)</h3><ul><li>Pregunta o situación de la vida diaria que despierte interés: …</li></ul>
@@ -392,24 +587,21 @@ async function mostrarSinConexion(accion, d, salida) {
     <h3>5. Cierre (${cie} minutos)</h3><ul><li>Dos o tres preguntas orales para comprobar lo aprendido: …</li></ul>
     <h3>6. Para quien va atrasado</h3><p>…</p>
     <h3>7. Tarea para casa sin electricidad</h3><p>Algo breve para hacer de día, con lo que hay en casa: …</p>`;
-  else if (accion === 'evaluacion') cuerpo = `<h3>Evaluación: ${d.tema}</h3>${datos}
+  else if (accion === 'evaluacion') cuerpo = `<h3>Evaluación: ${tema}</h3>${datos}
     <p><b>Lo que se evalúa</b> (del programa oficial):</p>${contenidos}
     <h3>Preguntas (en voz alta o en la pizarra)</h3><ol><li>Recordar: …</li><li>Recordar: …</li><li>Aplicar a una situación concreta: …</li><li>Aplicar a una situación concreta: …</li><li>Explicar con sus palabras: …</li></ol>
     <h3>Clave para el docente</h3><ol><li>Respuesta esperada: … · Error que indica refuerzo: …</li><li>…</li><li>…</li><li>…</li><li>…</li></ol>`;
-  else cuerpo = `<h3>Repaso: ${d.tema}</h3>${datos}<p>El repaso con explicaciones necesita conexión. Mientras tanto, estos son los contenidos del programa oficial relacionados con su tema:</p>${contenidos}`;
-  const tipo = {plan:'Plan de clase', evaluacion:'Evaluación', repaso:'Repaso del contenido'}[accion];
-  salida.innerHTML = `<p class="revisado"><b>Sin conexión.</b> Le preparamos una guía con el programa oficial de su grado para que arme su ${accion === 'evaluacion' ? 'evaluación' : accion === 'repaso' ? 'repaso' : 'plan'}. Toque el texto para completar donde dice «…» y guárdelo. Con conexión, el asistente le propone un borrador completo.</p>
+  else cuerpo = `<h3>Repaso: ${tema}</h3>${datos}<p>El repaso con explicaciones necesita conexión. Mientras tanto, estos son los contenidos del programa oficial relacionados con su tema:</p>${contenidos}`;
+  salida.innerHTML = `<p class="revisado"><b>Sin conexión.</b> Le preparamos una guía con el programa oficial de su grado para que arme su ${accion === 'evaluacion' ? 'evaluación' : accion === 'repaso' ? 'repaso' : 'plan'}. Toque el texto para completar donde dice «…» y guárdelo. Con conexión, Tiza le propone un borrador completo.</p>
     <div class="resultado" contenteditable="true">${cuerpo}</div>${completo}
-    <div class="acciones"><button class="principal" style="margin-top:0">Guardar en este teléfono</button>
+    <div class="acciones"><button class="principal" data-guardar>Guardar en este teléfono</button>
       <button class="sec" data-compartir>Compartir por WhatsApp</button></div>`;
-  const titulo = `${tipo}: ${d.tema} (${d.multigrado ? 'multigrado' : d.grado}, ${d.area})`;
-  salida.querySelector('.acciones .principal').onclick = ev => guardar(tipo, d, salida.querySelector('.resultado').innerHTML, ev.target);
-  salida.querySelector('[data-compartir]').onclick = () => compartir(titulo, salida.querySelector('.resultado').innerText);
+  activarResultado(salida, TIPOS[accion], d);
 }
 
 // Compartir con un colega: en el teléfono abre el menú de compartir (WhatsApp incluido); si no, WhatsApp Web.
 async function compartir(titulo, texto) {
-  const mensaje = titulo + '\n\n' + texto.trim() + '\n\nPreparado con el Asistente docente (borrador revisado por el docente).';
+  const mensaje = titulo + '\n\n' + texto.trim() + '\n\nPreparado con Tiza, asistente de clases (borrador revisado por el docente).';
   if (navigator.share) { try { await navigator.share({title: titulo, text: mensaje}); return; } catch (e) { if (e.name === 'AbortError') return; } }
   window.open('https://wa.me/?text=' + encodeURIComponent(mensaje.slice(0, 6000)), '_blank');
 }
@@ -428,33 +620,32 @@ async function valorar(boton, borrador, d) {
 }
 
 // En la versión en línea todo se guarda en el navegador del teléfono; el servidor no guarda nada.
+// (Las claves conservan el prefijo «asistente.» para no perder lo que los docentes ya guardaron.)
 function leer(clave, vacio) {
   try { const v = localStorage.getItem('asistente.' + clave); return v === null ? vacio : JSON.parse(v); }
   catch (e) { return vacio; }
 }
 function escribir(clave, valor) {
-  try { localStorage.setItem('asistente.' + clave, JSON.stringify(valor)); }
-  catch (e) { alert('No se pudo guardar en este teléfono. Revise que el navegador no esté en modo privado.'); }
+  try { localStorage.setItem('asistente.' + clave, JSON.stringify(valor)); return true; }
+  catch (e) { alert('No se pudo guardar en este teléfono. Revise que el navegador no esté en modo privado.'); return false; }
 }
 
 // Guardados: quedan en este teléfono para usarlos sin internet, o imprimirlos después.
-async function guardar(tipo, d, html, boton) {
-  const titulo = `${tipo}: ${d.tema} (${d.multigrado ? 'multigrado' : d.grado}, ${d.area})`;
+function guardar(tipo, d, html, boton) {
   const docs = leer('guardados', []);
-  docs.unshift({id: Math.max(0, ...docs.map(x => x.id)) + 1, tipo, titulo, html, fecha:new Date().toISOString().slice(0,10)});
-  escribir('guardados', docs);
-  boton.textContent = 'Guardado ✓'; boton.disabled = true;
+  docs.unshift({id: Math.max(0, ...docs.map(x => x.id)) + 1, tipo, titulo: tituloDe(tipo, d), html, fecha:new Date().toISOString().slice(0,10)});
+  if (escribir('guardados', docs)) { boton.textContent = 'Guardado ✓'; boton.disabled = true; }
 }
-async function cargarGuardados() {
+function cargarGuardados() {
   const docs = leer('guardados', []);
   $('#lista-guardados').innerHTML = docs.length ? docs.map(x =>
-    `<details class="guardado"><summary><b>${x.titulo}</b><br><span class="nota">${x.fecha}</span></summary>
+    `<details class="guardado"><summary><b>${esc(x.titulo)}</b><br><span class="nota">${x.fecha}</span></summary>
       <div class="resultado">${x.html}</div>
       <div class="acciones"><button class="sec" data-wa="${x.id}">Compartir por WhatsApp</button>
       <button class="sec" data-descargar="${x.id}">Descargar archivo</button>
-      <button class="sec" data-borrar="${x.id}">Borrar</button></div></details>`).join('')
-    : '<p class="nota">Aún no ha guardado nada. Cuando prepare un plan, una evaluación o un repaso, pulse «Guardar en este teléfono» y aparecerá aquí, también sin internet.</p>';
-  $('#lista-guardados').querySelectorAll('[data-borrar]').forEach(b => b.onclick = async () => {
+      <button class="borde" data-borrar="${x.id}">Borrar</button></div></details>`).join('')
+    : '<div class="tarjeta"><p style="margin:0">Aún no ha guardado nada. Cuando prepare un plan, una evaluación o un repaso, pulse «Guardar en este teléfono» y aparecerá aquí, también sin internet.</p></div>';
+  $('#lista-guardados').querySelectorAll('[data-borrar]').forEach(b => b.onclick = () => {
     if (!confirm('¿Borrar este documento?')) return;
     escribir('guardados', leer('guardados', []).filter(x => x.id != b.dataset.borrar));
     cargarGuardados();
@@ -465,20 +656,12 @@ async function cargarGuardados() {
   });
   $('#lista-guardados').querySelectorAll('[data-descargar]').forEach(b => b.onclick = () => {
     const x = docs.find(y => y.id == b.dataset.descargar);
-    const pagina = `<!doctype html><meta charset="utf-8"><title>${x.titulo}</title><body style="font-family:sans-serif;max-width:700px;margin:auto"><h2>${x.titulo}</h2>${x.html}</body>`;
+    const pagina = `<!doctype html><meta charset="utf-8"><title>${esc(x.titulo)}</title><body style="font-family:sans-serif;max-width:700px;margin:auto"><h2>${esc(x.titulo)}</h2>${x.html}<p style="color:#666">Preparado con Tiza, asistente de clases.</p></body>`;
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([pagina], {type:'text/html'}));
     a.download = x.titulo.replace(/[^\wáéíóúñ ]+/gi, '').slice(0, 60) + '.html'; a.click();
   });
 }
-form.onsubmit = e => { e.preventDefault(); generar('plan', e.submitter || form.querySelector('button')); };
-$('#btn-eval').onclick = e => generar('evaluacion', e.target);
-$('#btn-repaso').onclick = e => generar('repaso', e.target);
-form.tipo_clase.onchange = () => {
-  $('#recuperar').style.display = form.tipo_clase.value === 'recuperar' ? 'block' : 'none';
-  if (form.tipo_clase.value === 'corta' && +form.minutos.value > 30) form.minutos.value = 25;
-  if (form.tipo_clase.value !== 'corta' && +form.minutos.value < 35) form.minutos.value = 45;
-};
 
 // Regla de aviso temprano: simple y visible, sin IA, para que el docente la entienda.
 const REGLA = {umbral:0.6, evaluaciones:2};
@@ -496,19 +679,16 @@ function calcularAvisos(reg) {
 }
 function leerRegistro() { return leer('registro', {estudiantes:[], evaluaciones:[]}); }
 
-let registro = {estudiantes:[]};
 const pct = e => Math.round(e.aciertos / e.total * 100);
-async function cargarRegistro() {
-  const reg = leerRegistro();
-  registro = {...reg, avisos:calcularAvisos(reg), regla:REGLA};
-  const g = registro.regla;
-  $('#regla').textContent = `Regla del aviso: menos de ${g.umbral*100} % de aciertos en las ${g.evaluaciones} últimas evaluaciones. Es una regla simple, no una decisión de la IA.`;
-  $('#avisos').innerHTML = registro.avisos.length
-    ? registro.avisos.map(a => `<div class="alerta"><b>${a.estudiante}</b> ${a.grado ? '(' + a.grado + ')' : ''}<br><span class="nota">${a.detalle}</span></div>`).join('')
+function cargarRegistro() {
+  const reg = leerRegistro(), avisos = calcularAvisos(reg);
+  $('#regla').textContent = `Regla del aviso: menos de ${REGLA.umbral*100} % de aciertos en las ${REGLA.evaluaciones} últimas evaluaciones. Es una regla simple, no una decisión de la IA.`;
+  $('#avisos').innerHTML = avisos.length
+    ? avisos.map(a => `<div class="alerta"><b>${esc(a.estudiante)}</b> ${a.grado ? '(' + esc(a.grado) + ')' : ''}<br><span class="nota">${esc(a.detalle)}</span></div>`).join('')
     : '<p class="nota">Nadie con aviso por ahora.</p>';
   $('#lista-est').innerHTML = reg.estudiantes.length
     ? '<div class="acciones" style="margin:0 0 6px">' + reg.estudiantes.map(e =>
-        `<span class="guardado" style="margin:0;display:inline-flex;gap:8px;align-items:center">${e.nombre}${e.grado ? ' <span class="nota">' + e.grado + '</span>' : ''}<button class="quitar" data-quitar="${e.id}" aria-label="Quitar a ${e.nombre}">×</button></span>`).join('') + '</div>'
+        `<span class="guardado" style="margin:0;display:inline-flex;gap:10px;align-items:center;font-weight:700">${esc(e.nombre)}${e.grado ? ' <span class="nota">' + esc(e.grado) + '</span>' : ''}<button class="quitar" data-quitar="${e.id}" aria-label="Quitar a ${esc(e.nombre)}">×</button></span>`).join('') + '</div>'
     : '<p class="nota">Todavía no ha agregado estudiantes.</p>';
   $('#lista-est').querySelectorAll('[data-quitar]').forEach(b => b.onclick = () => {
     if (!confirm('¿Quitar a este estudiante y sus resultados?')) return;
@@ -517,31 +697,32 @@ async function cargarRegistro() {
     escribir('registro', r); cargarRegistro();
   });
   $('#tabla-res tbody').innerHTML = reg.estudiantes.map(e =>
-    `<tr><td>${e.nombre} <span class="nota">${e.grado}</span></td><td><input type="number" min="0" data-id="${e.id}"></td></tr>`).join('')
+    `<tr><td>${esc(e.nombre)} <span class="nota">${esc(e.grado)}</span></td><td><input type="number" inputmode="numeric" min="0" data-id="${e.id}"></td></tr>`).join('')
     || '<tr><td colspan="2" class="nota">Primero agregue a sus estudiantes en el paso 1.</td></tr>';
   $('#historial').innerHTML = reg.estudiantes.some(e => reg.evaluaciones.some(v => v.estudiante === e.id))
     ? reg.estudiantes.map(e => {
         const ev = reg.evaluaciones.filter(v => v.estudiante === e.id).sort((a, b) => a.fecha.localeCompare(b.fecha));
         if (!ev.length) return '';
         const prom = Math.round(ev.reduce((s, v) => s + pct(v), 0) / ev.length);
-        return `<details class="guardado"><summary><b>${e.nombre}</b> <span class="nota">· ${ev.length} ${ev.length > 1 ? 'evaluaciones' : 'evaluación'} · promedio ${prom} %</span></summary>
+        return `<details class="guardado"><summary><b>${esc(e.nombre)}</b> <span class="nota">· ${ev.length} ${ev.length > 1 ? 'evaluaciones' : 'evaluación'} · promedio ${prom} %</span></summary>
           <table><thead><tr><th>Fecha</th><th>Tema</th><th>Aciertos</th></tr></thead><tbody>${ev.map(v =>
-            `<tr><td>${v.fecha}</td><td>${v.tema}</td><td>${v.aciertos}/${v.total} (${pct(v)} %)</td></tr>`).join('')}</tbody></table></details>`;
+            `<tr><td>${v.fecha}</td><td>${esc(v.tema)}</td><td>${v.aciertos}/${v.total} (${pct(v)} %)</td></tr>`).join('')}</tbody></table></details>`;
       }).join('')
     : '<p class="nota">Aún no hay resultados guardados.</p>';
 }
-$('#agregar-est').onclick = async () => {
+$('#agregar-est').onclick = () => {
   const nombre = $('#e-nombre').value.trim(); if (!nombre) { $('#e-nombre').focus(); return; }
   const reg = leerRegistro();
   reg.estudiantes.push({id: Math.max(0, ...reg.estudiantes.map(e => e.id)) + 1, nombre, grado:$('#e-grado').value.trim()});
   escribir('registro', reg);
   $('#e-nombre').value = ''; $('#e-nombre').focus(); cargarRegistro();
 };
-$('#guardar-res').onclick = async () => {
+$('#guardar-res').onclick = () => {
   const total = +$('#r-total').value, tema = $('#r-tema').value.trim(), fecha = $('#r-fecha').value;
   const resultados = [...document.querySelectorAll('#tabla-res input')].filter(i => i.value !== '')
     .map(i => ({estudiante:i.dataset.id, aciertos:Math.min(+i.value, total)}));
-  if (!tema || !fecha || !resultados.length) { alert('Complete el tema, la fecha y al menos un resultado.'); return; }
+  $('#res-error').textContent = '';
+  if (!tema || !fecha || !resultados.length) { $('#res-error').textContent = 'Complete el tema, la fecha y al menos un resultado.'; return; }
   const reg = leerRegistro();
   for (const r of resultados) reg.evaluaciones.push({estudiante:+r.estudiante, aciertos:r.aciertos, total, tema, fecha});
   escribir('registro', reg);
@@ -556,7 +737,7 @@ $('#descargar-reg').onclick = () => {
   if (!reg.evaluaciones.length) { alert('Aún no hay resultados guardados.'); return; }
   const filas = reg.evaluaciones.slice().sort((a, b) => a.fecha.localeCompare(b.fecha)).map(v => {
     const e = reg.estudiantes.find(x => x.id === v.estudiante) || {nombre:'?', grado:''};
-    return `<tr><td>${v.fecha}</td><td>${e.nombre}</td><td>${e.grado}</td><td>${v.tema}</td><td>${v.aciertos}/${v.total}</td><td>${pct(v)} %</td></tr>`;
+    return `<tr><td>${v.fecha}</td><td>${esc(e.nombre)}</td><td>${esc(e.grado)}</td><td>${esc(v.tema)}</td><td>${v.aciertos}/${v.total}</td><td>${pct(v)} %</td></tr>`;
   }).join('');
   const pagina = `<!doctype html><meta charset="utf-8"><title>Registro de resultados</title><body style="font-family:sans-serif;max-width:800px;margin:auto">
     <h2>Registro de resultados</h2><table border="1" cellpadding="6" style="border-collapse:collapse;width:100%">
@@ -567,7 +748,96 @@ $('#descargar-reg').onclick = () => {
 };
 $('#r-fecha').valueAsDate = new Date();
 
-// Contraseña: se pide cada vez que se abre el asistente (correo, WhatsApp o computador) y solo dura mientras
+// Perfil del docente: vive en este teléfono y llena los formularios. Solo se envía si marca «Compartir».
+const MUNICIPIOS = {"Amazonas":["Alto Orinoco","Atabapo","Atures","Autana","Manapiare","Maroa","Río Negro"],"Anzoátegui":["Anaco","Aragua","Bolívar","Bruzual","Cajigal","Carvajal","Diego Bautista Urbaneja","Freites","Guanipa","Guanta","Independencia","Libertad","McGregor","Miranda","Monagas","Peñalver","Píritu","San Juan de Capistrano","Santa Ana","Simón Rodríguez","Sotillo"],"Apure":["Achaguas","Biruaca","Muñoz","Pedro Camejo","Páez","Rómulo Gallegos","San Fernando"],"Aragua":["Bolívar","Camatagua","Francisco Linares Alcántara","Girardot","José Félix Ribas","José Rafael Revenga","José Ángel Lamas","Libertador","Mario Briceño Iragorry","Ocumare de la Costa de Oro","San Casimiro","San Sebastián","Santiago Mariño","Santos Michelena","Sucre","Tovar","Urdaneta","Zamora"],"Barinas":["Alberto Arvelo Torrealba","Andrés Eloy Blanco","Antonio José de Sucre","Arismendi","Barinas","Bolívar","Cruz Paredes","Ezequiel Zamora","Obispos","Pedraza","Rojas","Sosa"],"Bolívar":["Angostura","Caroní","Cedeño","El Callao","Gran Sabana","Heres","Padre Pedro Chien","Píar","Roscio","Sifontes","Sucre"],"Carabobo":["Bejuma","Carlos Arvelo","Diego Ibarra","Guacara","Libertador","Los Guayos","Miranda","Montalbán","Mora","Naguanagua","Puerto Cabello","San Diego","San Joaquín","Valencia"],"Cojedes":["Anzoátegui","Girardot","Lima Blanco","Pao de San Juan Bautista","Ricaurte","Rómulo Gallegos","San Carlos","Tinaco","Tinaquillo"],"Delta Amacuro":["Antonio Díaz","Casacoima","Pedernales","Tucupita"],"Distrito Capital":["Libertador"],"Falcón":["Acosta","Bolívar","Buchivacoa","Carirubana","Colina","Dabajuro","Democracia","Falcón","Federación","Jacura","Los Taques","Manaure","Mauroa","Miranda","Monseñor Iturriza","Palmasola","Petit","Píritu","San Francisco","Silva","Sucre","Tocópero","Unión","Urumaco","Zamora"],"Guárico":["Camaguán","Chaguaramas","El Socorro","Infante","Las Mercedes","Mellado","Miranda","Monagas","Ortiz","Ribas","Roscio","San Gerónimo de Guayabal","San José de Guaribe","Santa María de Ipire","Zaraza"],"La Guaira":["Vargas"],"Lara":["Andrés Eloy Blanco","Crespo","Iribarren","Jiménez","Morán","Palavecino","Simón Planas","Torres","Urdaneta"],"Miranda":["Acevedo","Andrés Bello","Baruta","Brión","Buroz","Carrizal","Chacao","Cristóbal Rojas","El Hatillo","Guaicaipuro","Independencia","Lander","Los Salias","Paz Castillo","Pedro Gual","Plaza","Páez","Simón Bolívar","Sucre","Urdaneta","Zamora"],"Monagas":["Acosta","Aguasay","Bolívar","Caripe","Cedeño","Ezequiel Zamora","Libertador","Maturín","Piar","Punceres","Santa Bárbara","Sotillo","Uracoa"],"Mérida":["Alberto Adriani","Andrés Bello","Antonio Pinto Salinas","Aricagua","Arzobispo Chacón","Campo Elías","Caracciolo Parra Olmedo","Cardenal Quintero","Guaraque","Julio César Salas","Justo Briceño","Libertador","Miranda","Obispo Ramos de Lora","Padre Noguera","Pueblo Llano","Rangel","Rivas Dávila","Santos Marquina","Sucre","Tovar","Tulio Febres Cordero","Zea"],"Nueva Esparta":["Antolín del Campo","Arismendi","Díaz","García","Gómez","Maneiro","Marcano","Mariño","Península de Macanao","Tubores","Villalba"],"Portuguesa":["Agua Blanca","Araure","Esteller","Guanare","Guanarito","Monseñor José Vicente de Unda","Ospino","Papelón","Páez","San Genaro de Boconoíto","San Rafael de Onoto","Santa Rosalía","Sucre","Turén"],"Sucre":["Andrés Eloy Blanco","Andrés Mata","Arismendi","Benítez","Bermúdez","Bolívar","Cajigal","Cruz Salmerón Acosta","Libertador","Mariño","Mejía","Montes","Ribero","Sucre","Valdez"],"Trujillo":["Andrés Bello","Boconó","Bolívar","Candelaria","Carache","Escuque","José Felipe Márquez Cañizalez","Juan Vicente Campos Elías","La Ceiba","Miranda","Monte Carmelo","Motatán","Pampanito","Pampán","Rafael Rangel","San Rafael de Carvajal","Sucre","Trujillo","Urdaneta","Valera"],"Táchira":["Andrés Bello","Antonio Rómulo Costa","Ayacucho","Bolívar","Cárdenas","Córdoba","Fernández Feo","Francisco de Miranda","García de Hevia","Guásimos","Independencia","José María Vargas","Junín","Jáuregui","Libertad","Libertador","Lobatera","Michelena","Panamericano","Pedro María Ureña","Rafael Urdaneta","Samuel Darío Maldonado","San Cristóbal","San Judas Tadeo","Seboruco","Simón Rodríguez","Sucre","Torbes","Uribante"],"Yaracuy":["Arístides Bastidas","Bolívar","Bruzual","Cocorote","Independencia","José Antonio Páez","La Trinidad","Manuel Monge","Nirgua","Peña","San Felipe","Sucre","Urachiche","Veroes"],"Zulia":["Almirante Padilla","Baralt","Cabimas","Catatumbo","Colón","Francisco Javier Pulgar","Jesús Enrique Lossada","Jesús María Semprún","La Cañada de Urdaneta","Lagunillas","Machiques de Perijá","Mara","Maracaibo","Miranda","Páez","Rosario de Perijá","San Francisco","Santa Rita","Simón Bolívar","Sucre","Valmore Rodríguez"]};
+const fp = $('#form-perfil');
+fp.estado.innerHTML += Object.keys(MUNICIPIOS).map(e => `<option>${e}</option>`).join('');
+function llenarMunicipios(valor) {
+  const lista = MUNICIPIOS[fp.estado.value] || [];
+  fp.municipio.innerHTML = '<option value="">' + (lista.length ? 'Elija' : 'Elija el estado') + '</option>' + lista.map(m => `<option>${m}</option>`).join('');
+  fp.municipio.disabled = !lista.length;
+  if (valor) fp.municipio.value = valor;
+}
+fp.estado.onchange = () => llenarMunicipios();
+function pintarGradosAreas(grados, areas) {
+  const niveles = [...fp.querySelectorAll('[name=niveles]:checked')].map(x => x.value);
+  const gs = niveles.flatMap(n => NIVELES[n].grados), as = [...new Set(niveles.flatMap(n => NIVELES[n].areas))];
+  const chip = (nombre, v, marcado) => `<label class="${marcado ? 'marcado' : ''}"><input type="checkbox" name="${nombre}" value="${v}"${marcado ? ' checked' : ''}> ${v}</label>`;
+  $('#p-grados').innerHTML = gs.length ? gs.map(g => chip('grados', g, grados.includes(g))).join('') : '<p class="nota" style="margin:0">Primero elija el nivel.</p>';
+  $('#p-areas').innerHTML = as.length ? as.map(a => chip('areas', a, areas.includes(a))).join('') : '<p class="nota" style="margin:0">Primero elija el nivel.</p>';
+}
+const marcados = n => [...fp.querySelectorAll(`[name=${n}]:checked`)].map(x => x.value);
+$('#p-niveles').addEventListener('change', () => pintarGradosAreas(marcados('grados'), marcados('areas')));
+function cargarPerfil() {
+  const p = leer('perfil', null) || {};
+  fp.nombre.value = p.nombre || ''; fp.escuela.value = p.escuela || '';
+  fp.estado.value = p.estado || ''; llenarMunicipios(p.municipio);
+  fp.querySelectorAll('[name=niveles]').forEach(x => x.checked = (p.niveles || []).includes(x.value));
+  marcarChips($('#p-niveles'));
+  pintarGradosAreas(p.grados || [], p.areas || []);
+  fp.multigrado.checked = !!p.multigrado; fp.compartir.checked = !!p.compartir;
+  if (p.condiciones) fp.condiciones.value = p.condiciones;
+  fp.minutos.value = p.minutos || 45;
+  $('#perfil-msg').style.display = 'none';
+}
+fp.onsubmit = async e => {
+  e.preventDefault();
+  const anterior = leer('perfil', null) || {};
+  const p = {id: anterior.id || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
+    nombre: fp.nombre.value.trim(), escuela: fp.escuela.value.trim(), estado: fp.estado.value, municipio: fp.municipio.value,
+    niveles: marcados('niveles'), grados: marcados('grados'), areas: marcados('areas'), multigrado: fp.multigrado.checked,
+    condiciones: fp.condiciones.value, minutos: +fp.minutos.value || 45, compartir: fp.compartir.checked};
+  if (!escribir('perfil', p)) return;
+  aplicarPerfil(); pintarAvatar();
+  const msg = $('#perfil-msg'); msg.style.display = 'block'; msg.textContent = '✓ Perfil guardado en este teléfono.';
+  if (p.compartir) {
+    try {
+      const r = await fetch('/api/perfil', {method:'POST', headers:{'Content-Type':'application/json', 'X-Codigo':codigo()},
+        body: JSON.stringify({...p, nivel: p.niveles.join(' y '), grados: p.grados.join(', ')})});
+      if (!(await r.json()).ok) throw new Error();
+      msg.textContent = '✓ Perfil guardado y compartido con el equipo de Tiza. ¡Gracias!';
+    } catch (e) { msg.textContent = '✓ Perfil guardado en este teléfono. No se pudo compartir ahora (sin conexión); vuelva a guardarlo cuando tenga señal.'; }
+  }
+  setTimeout(() => irA('inicio'), 1800);
+};
+$('#perfil-luego').onclick = () => { escribir('perfil-luego', true); irA('inicio'); };
+
+// Con el perfil, el formulario de «Preparar» ya viene lleno con su grado, su área y su aula.
+function aplicarPerfil() {
+  const p = leer('perfil', null); if (!p) return;
+  const g = (p.grados || [])[0];
+  const nivel = g ? (g.includes('año') ? 'Media General' : 'Primaria') : (p.niveles || [])[0];
+  if (nivel) { form.nivel.value = nivel; cambiarNivel(); }
+  if (g) form.grado.value = g;
+  const area = (p.areas || []).find(a => NIVELES[form.nivel.value].areas.includes(a));
+  if (area) { form.area.value = area; notaCurriculo(); }
+  form.multigrado.checked = !!p.multigrado; form.multigrado.onchange();
+  if (p.multigrado && p.grados?.length > 1) form.grados_multi.value = p.grados.filter(x => x.includes(nivel === 'Media General' ? 'año' : 'grado')).join(', ');
+  if (p.condiciones) form.condiciones.value = p.condiciones;
+  if (p.minutos) form.minutos.value = p.minutos;
+  $('#e-grado').placeholder = 'Ej.: ' + (g || '3er grado');
+}
+function pintarAvatar() {
+  const p = leer('perfil', null);
+  const ini = (p?.nombre || '').split(/\s+/).filter(Boolean).slice(0, 2).map(x => x[0].toUpperCase()).join('');
+  $('#btn-perfil').textContent = ini || '?';
+}
+function saludar() {
+  const p = leer('perfil', null), h = new Date().getHours();
+  const nombre = (p?.nombre || '').split(/\s+/)[0];
+  $('#saludo').textContent = (h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches') + (nombre ? ', ' + nombre : '');
+  $('#saludo-sub').textContent = p?.escuela ? p.escuela + ' · ¿Qué quiere hacer hoy?' : '¿Qué quiere hacer hoy?';
+  $('#aviso-perfil').style.display = p ? 'none' : 'block';
+}
+// La primera vez, después de entrar, Tiza pide el perfil (se puede dejar para más tarde).
+function primeraVez() {
+  if (leer('perfil', null) || leer('perfil-luego', false)) return irA('inicio');
+  $('#perfil-titulo').textContent = 'Bienvenida, bienvenido a Tiza';
+  $('#perfil-luego').style.display = '';
+  irA('perfil');
+}
+
+// Contraseña: se pide cada vez que se abre Tiza (correo, WhatsApp o computador) y solo dura mientras
 // la pestaña está abierta. Los estudiantes y resultados sí quedan guardados en el teléfono.
 async function huella(t) {
   const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('asistente-docente:' + t.toLowerCase()));
@@ -576,7 +846,8 @@ async function huella(t) {
 function codigo() { try { return sessionStorage.getItem('asistente.codigo') || ''; } catch (e) { return ''; } }
 function guardarCodigo(c) { try { sessionStorage.setItem('asistente.codigo', c); } catch (e) {} }
 try { localStorage.removeItem('asistente.codigo'); } catch (e) {}  // versiones anteriores la recordaban
-function mostrarBienvenida() { $('#bienvenida').style.display = 'block'; $('main').style.display = 'none'; $('nav').style.display = 'none'; $('#caja-opinion').style.display = 'none'; }
+const APP = ['header', 'main', 'nav'];
+function mostrarBienvenida() { $('#bienvenida').style.display = 'block'; APP.forEach(s => $(s).style.display = 'none'); }
 $('#entrar').onclick = async () => {
   const c = $('#codigo').value.trim(), err = $('#codigo-error'); err.textContent = '';
   if (!c) { err.textContent = 'Escriba la contraseña que está en el mensaje que le enviamos.'; return; }
@@ -591,25 +862,30 @@ $('#entrar').onclick = async () => {
     if (guardada !== await huella(c)) { err.textContent = 'La contraseña no es correcta. Revise el mensaje que le enviamos.'; return; }
   }
   guardarCodigo(c);
-  $('#bienvenida').style.display = 'none'; $('main').style.display = ''; $('nav').style.display = ''; $('#caja-opinion').style.display = '';
+  $('#bienvenida').style.display = 'none'; APP.forEach(s => $(s).style.display = '');
+  primeraVez();
 };
 if (location.search) history.replaceState(null, '', location.pathname);
+aplicarPerfil(); pintarAvatar(); saludar();
 if (!codigo()) mostrarBienvenida();
 
+const estadoConexion = () => { if (!navigator.onLine) $('#estado').textContent = 'Sin conexión · funciona igual'; };
 fetch('/api/estado').then(r => r.json()).then(j => {
-  $('#estado').textContent = j.simulado ? 'Modo de prueba' : j.ok ? 'Prueba en línea · listo' : 'No disponible';
-}).catch(() => $('#estado').textContent = 'Sin conexión');
+  $('#estado').textContent = j.simulado ? 'Modo de prueba' : j.ok ? 'Con conexión' : 'No disponible';
+}).catch(estadoConexion);
+addEventListener('offline', estadoConexion);
+addEventListener('online', () => $('#estado').textContent = 'Con conexión');
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 
-// Aviso para agregar el asistente a la pantalla de inicio (así abre sin internet como una aplicación).
+// Aviso para agregar Tiza a la pantalla de inicio (así abre sin internet como una aplicación).
 let pedidoInstalar = null;
 const instalado = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
 const esIphone = /iphone|ipad|ipod/i.test(navigator.userAgent);
 function mostrarInstalar() {
   if (instalado || leer('instalar-no', false)) return;
   $('#instalar-pasos').textContent = esIphone
-    ? 'En el iPhone: ábralo en Safari, toque el botón Compartir (el cuadrado con la flecha) y elija «Agregar a inicio».'
-    : 'En Android: ábralo en Chrome, toque el menú ⋮ y elija «Agregar a la pantalla principal» o «Instalar aplicación». Si lo abrió desde WhatsApp, primero toque ⋮ y «Abrir en Chrome».';
+    ? 'En el iPhone: ábrala en Safari, toque el botón Compartir (el cuadrado con la flecha) y elija «Agregar a inicio».'
+    : 'En Android: ábrala en Chrome, toque el menú ⋮ y elija «Agregar a la pantalla principal» o «Instalar aplicación». Si la abrió desde WhatsApp, primero toque ⋮ y «Abrir en Chrome».';
   $('#instalar').style.display = 'block';
 }
 addEventListener('beforeinstallprompt', e => { e.preventDefault(); pedidoInstalar = e; $('#instalar-si').style.display = ''; mostrarInstalar(); });
@@ -628,7 +904,7 @@ document.getElementById('enviar-opinion').onclick = async () => {
   try {
     const r = await fetch('/api/opinion', {method:'POST', headers:{'Content-Type':'application/json', 'X-Codigo':codigo()}, body:JSON.stringify(datos)});
     const j = await r.json(); if (!j.ok) throw new Error();
-    f.reset(); est.textContent = '¡Gracias! Su opinión fue enviada.';
+    f.reset(); f.querySelectorAll('.chips').forEach(marcarChips); est.textContent = '¡Gracias! Su opinión fue enviada.';
     setTimeout(() => document.getElementById('opinion').close(), 1500);
   } catch (e) { est.textContent = 'No se pudo enviar. Revise su conexión e intente de nuevo.'; }
 };

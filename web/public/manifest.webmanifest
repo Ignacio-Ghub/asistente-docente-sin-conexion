@@ -1,7 +1,7 @@
 {
-  "name": "Asistente docente",
-  "short_name": "Asistente docente",
-  "description": "Planes de clase, evaluaciones y seguimiento según el programa oficial. Funciona sin conexión.",
+  "name": "Tiza · asistente de clases",
+  "short_name": "Tiza",
+  "description": "Su asistente de clases, con o sin conexión: planes, evaluaciones y seguimiento según el programa oficial.",
   "lang": "es",
   "start_url": "/",
   "scope": "/",
@@ -9,7 +9,16 @@
   "background_color": "#F2F5FA",
   "theme_color": "#0F2747",
   "icons": [
-    {"src": "/icono-192.png", "sizes": "192x192", "type": "image/png"},
-    {"src": "/icono-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+    {
+      "src": "/icono-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icono-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }

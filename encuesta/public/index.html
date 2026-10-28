@@ -375,9 +375,9 @@ form.onsubmit = async e => {
     // Lo que sigue, según lo que respondió: siempre se le dice qué esperar.
     if (r.probar === 'Sí') {
       const caja = document.getElementById('revise'), partes = [];
-      if (r.correo) partes.push('<p style="margin:0 0 6px"><b>Revise su correo.</b> Le enviamos el enlace para probar el asistente, su contraseña y cómo usarlo. Si no lo ve en unos minutos, revise también la carpeta de correo no deseado (spam).</p>');
-      if (r.whatsapp) partes.push('<p style="margin:0 0 6px"><b>Revise su WhatsApp.</b> En breve le escribiremos con el enlace para probar el asistente y su contraseña.</p>');
-      if (!partes.length) partes.push('<p style="margin:0">Como no dejó su correo ni su WhatsApp, no podemos enviarle el enlace para probar el asistente. Si más adelante quiere probarlo, puede responder la encuesta de nuevo y dejar uno de los dos.</p>');
+      if (r.correo) partes.push('<p style="margin:0 0 6px"><b>Revise su correo.</b> Le enviamos el enlace para probar Tiza, el asistente para docentes, su contraseña y cómo usarla. Si no lo ve en unos minutos, revise también la carpeta de correo no deseado (spam).</p>');
+      if (r.whatsapp) partes.push('<p style="margin:0 0 6px"><b>Revise su WhatsApp.</b> En breve le escribiremos con el enlace para probar Tiza, el asistente para docentes, y su contraseña.</p>');
+      if (!partes.length) partes.push('<p style="margin:0">Como no dejó su correo ni su WhatsApp, no podemos enviarle el enlace para probar Tiza, el asistente para docentes. Si más adelante quiere probarlo, puede responder la encuesta de nuevo y dejar uno de los dos.</p>');
       caja.innerHTML = partes.join(''); caja.hidden = false;
     }
   } catch (ex) {
