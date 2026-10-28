@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Encuesta a docentes</title>
+<style>
+  :root { --marino:#132C4E; --azul:#378ADD; --fondo:#F4F7FB; --borde:#D5DEEA; --texto:#1B2433; --suave:#5B6B80; --alerta:#B4442B; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--fondo); color:var(--texto); font-size:17px; line-height:1.45; }
+  header { background:var(--marino); color:#fff; padding:18px 16px; }
+  header h1 { font-size:20px; margin:0 0 4px; font-weight:600; }
+  header p { margin:0; font-size:14px; opacity:.85; }
+  main { max-width:680px; margin:0 auto; padding:16px; }
+  .tarjeta { background:#fff; border:1px solid var(--borde); border-radius:16px; padding:16px; margin-bottom:14px; }
+  h2 { font-size:17px; color:var(--marino); margin:0 0 6px; }
+  .pregunta { margin:16px 0 0; }
+  .pregunta > label, .pregunta > p { display:block; font-weight:600; margin:0 0 6px; font-size:16px; }
+  .opc { display:flex; align-items:center; gap:10px; padding:7px 0; font-size:16px; }
+  .opc input { width:20px; height:20px; margin:0; }
+  input[type=text], input[type=number], textarea, select { width:100%; padding:11px 12px; border:1px solid var(--borde); border-radius:10px; font-size:16px; background:#fff; color:var(--texto); font-family:inherit; }
+  textarea { min-height:84px; }
+  .orden { display:grid; grid-template-columns:1fr 76px; gap:8px; align-items:center; margin:6px 0; font-size:15px; }
+  .nota { font-size:13px; color:var(--suave); font-weight:400; }
+  button { width:100%; padding:14px; border:0; border-radius:30px; background:var(--marino); color:#fff; font-size:17px; font-weight:600; }
+  button:disabled { opacity:.55; }
+  .error { color:var(--alerta); font-size:15px; margin-top:10px; }
+  .oculto { position:absolute; left:-9999px; }
+  .gracias { text-align:center; padding:32px 16px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Herramientas para escuelas con cortes de electricidad</h1>
+  <p>Encuesta a docentes · unos 10 minutos</p>
+</header>
+<main>
+<form id="encuesta" novalidate>
+  <div class="tarjeta">
+    <p style="margin:0">Estimada maestra, estimado maestro: estamos diseñando herramientas digitales para escuelas que trabajan con cortes de electricidad y sin internet. Queremos construir lo que de verdad les sirva, y para eso necesitamos su experiencia. Sus respuestas son confidenciales; si las citamos, será sin su nombre. Gracias por su tiempo.</p>
+  </div>
+
+  <div class="tarjeta">
+    <h2>1. Su escuela</h2>
+    <div class="pregunta"><label for="estado_municipio">1. Estado y municipio de la escuela</label><input type="text" id="estado_municipio" name="estado_municipio"></div>
+    <div class="pregunta"><p>2. ¿La escuela es rural o urbana?</p>
+      <label class="opc"><input type="radio" name="tipo_escuela" value="Rural"> Rural</label>
+      <label class="opc"><input type="radio" name="tipo_escuela" value="Urbana"> Urbana</label>
+      <label class="opc"><input type="radio" name="tipo_escuela" value="Mixta"> Mixta</label></div>
+    <div class="pregunta"><p>3. ¿Qué grado o grados atiende? <span class="nota">Puede marcar varios.</span></p>
+      <label class="opc"><input type="checkbox" name="grados" value="Inicial"> Inicial</label>
+      <label class="opc"><input type="checkbox" name="grados" value="1.º a 6.º grado"> Primaria (1.º a 6.º grado)</label>
+      <label class="opc"><input type="checkbox" name="grados" value="1.º a 5.º año"> Media General (1.º a 5.º año)</label></div>
+    <div class="pregunta"><p>4. ¿Atiende un aula multigrado?</p>
+      <label class="opc"><input type="radio" name="multigrado" value="Sí"> Sí</label>
+      <label class="opc"><input type="radio" name="multigrado" value="No"> No</label></div>
+    <div class="pregunta"><label for="estudiantes">5. ¿Cuántos estudiantes tiene en total?</label><input type="number" id="estudiantes" name="estudiantes" min="0" inputmode="numeric"></div>
+  </div>
+
+  <div class="tarjeta">
+    <h2>2. Electricidad, conexión y equipos</h2>
+    <div class="pregunta"><p>6. En una semana normal, ¿cuántos días se va la electricidad en la escuela?</p>
+      <label class="opc"><input type="radio" name="dias_sin_electricidad" value="Nunca"> Nunca</label>
+      <label class="opc"><input type="radio" name="dias_sin_electricidad" value="1-2 días"> 1 o 2 días</label>
+      <label class="opc"><input type="radio" name="dias_sin_electricidad" value="3-4 días"> 3 o 4 días</label>
+      <label class="opc"><input type="radio" name="dias_sin_electricidad" value="Todos los días"> Todos los días</label></div>
+    <div class="pregunta"><p>7. Cuando se va, ¿cuánto suele durar el corte?</p>
+      <label class="opc"><input type="radio" name="duracion_corte" value="Menos de 1 hora"> Menos de 1 hora</label>
+      <label class="opc"><input type="radio" name="duracion_corte" value="1-4 horas"> Entre 1 y 4 horas</label>
+      <label class="opc"><input type="radio" name="duracion_corte" value="Más de 4 horas"> Más de 4 horas</label>
+      <label class="opc"><input type="radio" name="duracion_corte" value="Varios días"> Varios días</label></div>
+    <div class="pregunta"><p>8. ¿Hay internet en la escuela?</p>
+      <label class="opc"><input type="radio" name="internet" value="No hay"> No hay</label>
+      <label class="opc"><input type="radio" name="internet" value="Hay pero falla mucho"> Hay, pero falla mucho</label>
+      <label class="opc"><input type="radio" name="internet" value="Funciona bien"> Funciona bien</label></div>
+    <div class="pregunta"><p>9. ¿Qué equipos tiene usted a mano? <span class="nota">Puede marcar varios.</span></p>
+      <label class="opc"><input type="checkbox" name="equipos" value="Teléfono Android"> Teléfono Android</label>
+      <label class="opc"><input type="checkbox" name="equipos" value="iPhone"> iPhone</label>
+      <label class="opc"><input type="checkbox" name="equipos" value="Laptop Canaima"> Laptop Canaima</label>
+      <label class="opc"><input type="checkbox" name="equipos" value="Otra laptop"> Otra laptop</label>
+      <label class="opc"><input type="checkbox" name="equipos" value="Computadora de la escuela"> Computadora de la escuela</label>
+      <label class="opc"><input type="checkbox" name="equipos" value="Ninguno"> Ninguno</label></div>
+    <div class="pregunta"><p>10. ¿La escuela tiene planta eléctrica, panel solar o batería de respaldo? <span class="nota">Puede marcar varios.</span></p>
+      <label class="opc"><input type="checkbox" name="respaldo" value="Planta eléctrica"> Planta eléctrica</label>
+      <label class="opc"><input type="checkbox" name="respaldo" value="Panel solar"> Panel solar</label>
+      <label class="opc"><input type="checkbox" name="respaldo" value="Batería"> Batería</label>
+      <label class="opc"><input type="checkbox" name="respaldo" value="Ninguno"> Ninguno</label>
+      <label class="opc"><input type="checkbox" name="respaldo" value="No sé"> No sé</label></div>
+  </div>
+
+  <div class="tarjeta">
+    <h2>3. Su trabajo diario</h2>
+    <div class="pregunta"><p>11. ¿Cuántas horas a la semana dedica a preparar sus clases?</p>
+      <label class="opc"><input type="radio" name="horas_planificacion" value="Menos de 2"> Menos de 2 horas</label>
+      <label class="opc"><input type="radio" name="horas_planificacion" value="2-5"> Entre 2 y 5 horas</label>
+      <label class="opc"><input type="radio" name="horas_planificacion" value="5-10"> Entre 5 y 10 horas</label>
+      <label class="opc"><input type="radio" name="horas_planificacion" value="Más de 10"> Más de 10 horas</label></div>
+    <div class="pregunta"><label for="documento">12. ¿Qué documento usa para planificar?</label><input type="text" id="documento" name="documento"></div>
+    <div class="pregunta"><p>13. ¿Dónde guarda las notas y los registros de sus estudiantes? <span class="nota">Puede marcar varios.</span></p>
+      <label class="opc"><input type="checkbox" name="registros" value="Cuaderno"> Cuaderno</label>
+      <label class="opc"><input type="checkbox" name="registros" value="Carpeta"> Carpeta</label>
+      <label class="opc"><input type="checkbox" name="registros" value="Teléfono"> Teléfono</label>
+      <label class="opc"><input type="checkbox" name="registros" value="Computadora"> Computadora</label>
+      <label class="opc"><input type="checkbox" name="registros" value="Otro"> Otro</label></div>
+    <div class="pregunta"><p>14. ¿Ha perdido alguna vez registros o trabajos por un corte de electricidad o una falla del equipo?</p>
+      <label class="opc"><input type="radio" name="perdio_registros" value="Sí"> Sí</label>
+      <label class="opc"><input type="radio" name="perdio_registros" value="No"> No</label></div>
+    <div class="pregunta"><label for="rezago">15. ¿Cómo sabe hoy qué estudiantes se están quedando atrás?</label><textarea id="rezago" name="rezago"></textarea></div>
+  </div>
+
+  <div class="tarjeta">
+    <h2>4. Sus necesidades</h2>
+    <div class="pregunta"><label for="mas_le_cuesta">16. ¿Qué es lo que más tiempo le quita o más le cuesta en su trabajo?</label><textarea id="mas_le_cuesta" name="mas_le_cuesta"></textarea></div>
+    <div class="pregunta"><p>17. Ordene estas herramientas, todas sin internet, del 1 (la más útil) al 5 (la menos útil). <span class="nota">Use cada número una sola vez.</span></p>
+      <div class="orden"><span>Preparar planes de clase</span><select name="p_planes"></select></div>
+      <div class="orden"><span>Crear evaluaciones cortas</span><select name="p_evaluaciones"></select></div>
+      <div class="orden"><span>Llevar registros de notas y avisos de quién va quedando atrás</span><select name="p_registros"></select></div>
+      <div class="orden"><span>Consultar material educativo (por ejemplo, Wikipedia sin internet)</span><select name="p_material"></select></div>
+      <div class="orden"><span>Guardar sus registros de forma segura, aunque se vaya la electricidad</span><select name="p_guardar"></select></div>
+      <p class="error" id="error-orden" hidden>Cada número del 1 al 5 debe usarse una sola vez.</p></div>
+    <div class="pregunta"><label for="otra_herramienta">18. ¿Qué otra herramienta le gustaría tener que no esté en la lista?</label><textarea id="otra_herramienta" name="otra_herramienta"></textarea></div>
+  </div>
+
+  <div class="tarjeta">
+    <h2>5. Sobre el asistente</h2>
+    <div class="pregunta"><p>19. Si una herramienta le propone un borrador de plan de clase y usted lo revisa y corrige, ¿lo usaría?</p>
+      <label class="opc"><input type="radio" name="usaria" value="Sí"> Sí</label>
+      <label class="opc"><input type="radio" name="usaria" value="Tal vez"> Tal vez</label>
+      <label class="opc"><input type="radio" name="usaria" value="No"> No</label>
+      <label for="por_que" class="nota" style="margin-top:8px">¿Por qué?</label><textarea id="por_que" name="por_que"></textarea></div>
+    <div class="pregunta"><label for="preocupaciones">20. ¿Le preocupa algo de usar inteligencia artificial en su trabajo?</label><textarea id="preocupaciones" name="preocupaciones"></textarea></div>
+    <div class="pregunta"><p>21. ¿Le gustaría probar el prototipo y darnos su opinión?</p>
+      <label class="opc"><input type="radio" name="probar" value="Sí"> Sí</label>
+      <label class="opc"><input type="radio" name="probar" value="No"> No</label>
+      <div id="bloque-contacto" hidden><label for="contacto" class="nota" style="margin-top:8px">Deje su WhatsApp o correo para coordinar la prueba (opcional).</label><input type="text" id="contacto" name="contacto"></div></div>
+    <div class="pregunta"><p>22. ¿Nos autoriza a citar sus respuestas, sin su nombre, en solicitudes de financiamiento?</p>
+      <label class="opc"><input type="radio" name="autoriza" value="Sí"> Sí</label>
+      <label class="opc"><input type="radio" name="autoriza" value="No"> No</label></div>
+  </div>
+
+  <input class="oculto" type="text" name="sitio_web" tabindex="-1" autocomplete="off" aria-hidden="true">
+  <button type="submit" id="enviar">Enviar respuestas</button>
+  <p class="error" id="error" hidden></p>
+</form>
+<div class="tarjeta gracias" id="gracias" hidden>
+  <h2>¡Muchas gracias!</h2>
+  <p>Sus respuestas nos ayudan a construir herramientas útiles para su escuela.</p>
+</div>
+</main>
+<script>
+const form = document.getElementById('encuesta');
+const ORDEN = ['p_planes', 'p_evaluaciones', 'p_registros', 'p_material', 'p_guardar'];
+for (const n of ORDEN) form[n].innerHTML = '<option value="">—</option>' + [1,2,3,4,5].map(i => `<option>${i}</option>`).join('');
+form.querySelectorAll('input[name=probar]').forEach(r => r.onchange = () =>
+  document.getElementById('bloque-contacto').hidden = form.probar.value !== 'Sí');
+
+function respuestas() {
+  const r = {};
+  for (const el of form.elements) {
+    if (!el.name || el.name === 'sitio_web') continue;
+    if (el.type === 'checkbox') { (r[el.name] ||= []); if (el.checked) r[el.name].push(el.value); }
+    else if (el.type === 'radio') { if (el.checked) r[el.name] = el.value; }
+    else r[el.name] = el.value.trim();
+  }
+  return r;
+}
+
+form.onsubmit = async e => {
+  e.preventDefault();
+  const err = document.getElementById('error'); err.hidden = true;
+  const r = respuestas();
+  const usados = ORDEN.map(n => r[n]).filter(Boolean);
+  const ordenMal = new Set(usados).size !== usados.length;
+  document.getElementById('error-orden').hidden = !ordenMal;
+  if (ordenMal) { form.p_planes.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+  const respondidas = Object.values(r).filter(v => Array.isArray(v) ? v.length : v).length;
+  if (respondidas < 3) { err.textContent = 'Responda al menos algunas preguntas antes de enviar.'; err.hidden = false; return; }
+  const boton = document.getElementById('enviar'); boton.disabled = true; boton.textContent = 'Enviando…';
+  try {
+    const res = await fetch('/api/enviar', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({r, sitio_web: form.sitio_web.value})});
+    const j = await res.json();
+    if (!res.ok || !j.ok) throw new Error(j.error || 'No se pudo enviar.');
+    form.hidden = true; document.getElementById('gracias').hidden = false; window.scrollTo(0, 0);
+  } catch (ex) {
+    err.textContent = ex.message + ' Revise su conexión e intente de nuevo; sus respuestas siguen en la pantalla.';
+    err.hidden = false; boton.disabled = false; boton.textContent = 'Enviar respuestas';
+  }
+};
+</script>
+</body>
+</html>

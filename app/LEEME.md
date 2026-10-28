@@ -6,7 +6,7 @@ Funciona sin internet. Una laptop hace de servidor y los teléfonos de los docen
 1. **Planificar:** propone un plan de clase según el nivel (Primaria de 1.º a 6.º grado o Media General de 1.º a 5.º año), el área, el tema, los materiales y las condiciones del aula. Admite aulas multigrado. Cada área tiene su propia estructura; Educación Física, por ejemplo, lleva calentamiento, parte principal, vuelta a la calma y medidas de seguridad.
 2. **Evaluar:** crea 5 preguntas con su clave de respuestas, y una revisión automática marca las respuestas dudosas. En Educación Física crea en cambio una lista de observación.
 3. **Seguimiento:** el docente anota los aciertos y aparece un aviso cuando un estudiante saca menos del 60 % en las dos últimas evaluaciones. El aviso sale de una regla simple, no de la IA.
-4. **Guardados:** los planes y evaluaciones se guardan en el equipo y se pueden consultar sin luz ni internet. «Descargar archivo» crea una copia para imprimirla cuando haya electricidad.
+4. **Guardados:** los planes y evaluaciones se guardan en el equipo y se pueden consultar sin electricidad ni internet. «Descargar archivo» crea una copia para imprimirla cuando haya electricidad.
 
 ## Currículo oficial cargado (carpeta `curriculo/`)
 | Nivel | Qué hay | Fuente |

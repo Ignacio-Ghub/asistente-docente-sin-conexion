@@ -124,7 +124,7 @@
 <section id="guardados">
   <div class="tarjeta">
     <h3 style="margin-top:0">Planes y evaluaciones guardados</h3>
-    <p class="nota">Se guardan en este equipo y se pueden consultar sin luz ni internet. «Descargar archivo» crea una copia para imprimirla cuando haya electricidad.</p>
+    <p class="nota">Se guardan en este equipo y se pueden consultar sin electricidad ni internet. «Descargar archivo» crea una copia para imprimirla cuando haya electricidad.</p>
     <div id="lista-guardados"></div>
   </div>
 </section>
@@ -235,7 +235,7 @@ async function generar(accion, boton) {
   boton.disabled = false; boton.textContent = txt;
 }
 
-// Guardados: quedan en este equipo para usarlos sin luz ni internet, o imprimirlos después.
+// Guardados: quedan en este equipo para usarlos sin electricidad ni internet, o imprimirlos después.
 async function guardar(tipo, d, html, boton) {
   const titulo = `${tipo}: ${d.tema} (${d.multigrado ? 'multigrado' : d.grado}, ${d.area})`;
   await fetch('/api/guardar', {method:'POST', headers:{'Content-Type':'application/json'},

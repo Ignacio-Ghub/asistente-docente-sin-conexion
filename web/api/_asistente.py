@@ -23,7 +23,7 @@ SISTEMA = (
     "contenidos del currículo oficial, básate en ellos y nómbralos; si no hay, no "
     "inventes normas ni contenidos oficiales. 3) Usa ejemplos de la vida local solo "
     "cuando ayuden de verdad al aprendizaje; no los fuerces. 4) Ten en cuenta las "
-    "condiciones del aula (sin luz, sin internet, sin fotocopias) y propone solo lo que "
+    "condiciones del aula (sin electricidad, sin internet, sin fotocopias) y propone solo lo que "
     "se puede hacer con ellas. 5) Instrucciones concretas que el docente pueda aplicar "
     "mañana: tiempos, organización del grupo, qué dice y qué hace. 6) No inventes datos "
     "ni cifras. Formato: texto simple con títulos y listas; sin emojis, sin saludos, sin "
