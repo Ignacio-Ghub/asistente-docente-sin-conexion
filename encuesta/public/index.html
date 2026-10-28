@@ -3,156 +3,297 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0F2747">
 <title>Encuesta a docentes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root { --marino:#132C4E; --azul:#378ADD; --fondo:#F4F7FB; --borde:#D5DEEA; --texto:#1B2433; --suave:#5B6B80; --alerta:#B4442B; }
+  :root {
+    --marino:#0F2747; --marino2:#1C3F6E; --azul:#2F7BD9; --amarillo:#FFC845; --amarillo-suave:#FFF4D6;
+    --fondo:#F2F5FA; --tarjeta:#FFFFFF; --borde:#DCE3EE; --texto:#16202E; --suave:#5A6A80; --alerta:#C2412D; --ok:#1E8A55;
+  }
   * { box-sizing:border-box; }
-  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--fondo); color:var(--texto); font-size:17px; line-height:1.45; }
-  header { background:var(--marino); color:#fff; padding:18px 16px; }
-  header h1 { font-size:20px; margin:0 0 4px; font-weight:600; }
-  header p { margin:0; font-size:14px; opacity:.85; }
-  main { max-width:680px; margin:0 auto; padding:16px; }
-  .tarjeta { background:#fff; border:1px solid var(--borde); border-radius:16px; padding:16px; margin-bottom:14px; }
-  h2 { font-size:17px; color:var(--marino); margin:0 0 6px; }
-  .pregunta { margin:16px 0 0; }
-  .pregunta > label, .pregunta > p { display:block; font-weight:600; margin:0 0 6px; font-size:16px; }
-  .opc { display:flex; align-items:center; gap:10px; padding:7px 0; font-size:16px; }
-  .opc input { width:20px; height:20px; margin:0; }
-  input[type=text], input[type=number], textarea, select { width:100%; padding:11px 12px; border:1px solid var(--borde); border-radius:10px; font-size:16px; background:#fff; color:var(--texto); font-family:inherit; }
-  textarea { min-height:84px; }
-  .orden { display:grid; grid-template-columns:1fr 76px; gap:8px; align-items:center; margin:6px 0; font-size:15px; }
-  .nota { font-size:13px; color:var(--suave); font-weight:400; }
-  button { width:100%; padding:14px; border:0; border-radius:30px; background:var(--marino); color:#fff; font-size:17px; font-weight:600; }
-  button:disabled { opacity:.55; }
-  .error { color:var(--alerta); font-size:15px; margin-top:10px; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; font-family:"Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; background:var(--fondo); color:var(--texto); font-size:17px; line-height:1.5; }
+
+  /* Portada */
+  .portada { position:relative; overflow:hidden; color:#fff; padding:34px 20px 72px;
+    background:radial-gradient(circle at 85% 15%, rgba(255,200,69,.28) 0, transparent 38%), linear-gradient(135deg, var(--marino) 0%, var(--marino2) 100%); }
+  .portada .contenido { max-width:680px; margin:0 auto; position:relative; z-index:1; }
+  .etiqueta { display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22);
+    padding:5px 12px; border-radius:30px; font-size:13px; font-weight:700; letter-spacing:.2px; }
+  .portada h1 { font-size:clamp(26px, 6.4vw, 36px); line-height:1.15; margin:16px 0 10px; font-weight:800; }
+  .portada h1 em { font-style:normal; color:var(--amarillo); }
+  .portada p { margin:0; font-size:16px; opacity:.9; max-width:520px; }
+  .dibujo { position:absolute; right:-24px; bottom:-10px; width:190px; opacity:.16; }
+
+  main { max-width:680px; margin:-44px auto 0; padding:0 14px 40px; position:relative; z-index:2; }
+
+  /* Barra de avance, fija arriba */
+  .progreso { position:fixed; top:0; left:0; right:0; height:6px; background:rgba(15,39,71,.15); z-index:10; }
+  .progreso i { display:block; height:100%; width:0; background:linear-gradient(90deg, var(--azul), var(--amarillo)); border-radius:0 6px 6px 0; transition:width .35s ease; }
+  .pct { position:fixed; bottom:14px; right:14px; z-index:10; background:var(--marino); color:#fff; font-size:12.5px; font-weight:800; padding:4px 10px; border-radius:20px;
+    box-shadow:0 4px 12px rgba(15,39,71,.25); opacity:0; transition:opacity .3s; }
+  .pct.visible { opacity:1; }
+
+  .tarjeta { background:var(--tarjeta); border:1px solid var(--borde); border-radius:20px; padding:20px 18px; margin-bottom:16px; box-shadow:0 6px 20px rgba(15,39,71,.06); }
+  .bienvenida { border-top:5px solid var(--amarillo); }
+  .bienvenida p { margin:0 0 10px; }
+  .confidencial { display:flex; gap:10px; align-items:flex-start; background:var(--amarillo-suave); border-radius:12px; padding:10px 12px; font-size:14px; color:#5B4511; }
+
+  .seccion-titulo { display:flex; align-items:center; gap:12px; margin:0 0 4px; }
+  .numero { flex:none; width:40px; height:40px; border-radius:12px; display:grid; place-items:center; background:var(--marino); color:var(--amarillo); }
+  .numero svg { width:22px; height:22px; }
+  .seccion-titulo h2 { font-size:19px; margin:0; color:var(--marino); font-weight:800; }
+  .seccion-titulo small { display:block; color:var(--suave); font-size:13px; font-weight:600; }
+
+  .pregunta { padding:18px 0 4px; border-top:1px solid #EEF2F7; margin-top:14px; }
+  .pregunta:first-of-type { border-top:0; }
+  .enunciado { display:block; font-weight:700; font-size:16.5px; margin:0 0 10px; color:var(--texto); }
+  .enunciado .n { color:var(--azul); margin-right:4px; }
+  .nota { font-size:13px; color:var(--suave); font-weight:600; }
+
+  /* Opciones en forma de botón */
+  .opciones { display:flex; flex-wrap:wrap; gap:8px; }
+  .opciones.lista { flex-direction:column; }
+  .chip { position:relative; }
+  .chip input { position:absolute; opacity:0; inset:0; margin:0; cursor:pointer; }
+  .chip span { display:flex; align-items:center; gap:10px; padding:11px 15px; border:1.5px solid var(--borde); border-radius:14px; background:#fff;
+    font-size:15.5px; font-weight:600; color:var(--texto); transition:all .15s ease; cursor:pointer; min-height:46px; }
+  .chip span::before { content:""; flex:none; width:18px; height:18px; border:2px solid #B6C2D3; border-radius:50%; transition:all .15s ease; }
+  .chip input[type=checkbox] + span::before { border-radius:6px; }
+  .chip input:checked + span { border-color:var(--marino); background:#EEF4FC; color:var(--marino); }
+  .chip input:checked + span::before { border-color:var(--marino); background:var(--marino); box-shadow:inset 0 0 0 3px #fff; }
+  .chip input:focus-visible + span { outline:3px solid var(--amarillo); outline-offset:2px; }
+
+  input[type=text], input[type=number], textarea { width:100%; padding:13px 14px; border:1.5px solid var(--borde); border-radius:14px; font-size:16px;
+    background:#FBFCFE; color:var(--texto); font-family:inherit; transition:border-color .15s, background .15s; }
+  input[type=text]:focus, input[type=number]:focus, textarea:focus { outline:none; border-color:var(--azul); background:#fff; box-shadow:0 0 0 4px rgba(47,123,217,.12); }
+  textarea { min-height:96px; resize:vertical; }
+
+  /* Ordenar del 1 al 5 */
+  .orden { display:flex; flex-direction:column; gap:10px; }
+  .item-orden { border:1.5px solid var(--borde); border-radius:14px; padding:12px; }
+  .item-orden p { margin:0 0 8px; font-weight:700; font-size:15px; }
+  .puestos { display:flex; gap:8px; }
+  .puesto { position:relative; flex:1; }
+  .puesto input { position:absolute; opacity:0; inset:0; margin:0; cursor:pointer; }
+  .puesto span { display:grid; place-items:center; height:40px; border-radius:12px; border:1.5px solid var(--borde); font-weight:800; color:var(--suave); background:#fff; transition:all .15s; }
+  .puesto input:checked + span { background:var(--amarillo); border-color:var(--amarillo); color:var(--marino); }
+  .puesto.usado span { opacity:.35; }
+  .puesto input:focus-visible + span { outline:3px solid var(--azul); outline-offset:2px; }
+
+  .error { color:var(--alerta); font-size:14.5px; font-weight:700; margin:10px 0 0; }
   .oculto { position:absolute; left:-9999px; }
-  .gracias { text-align:center; padding:32px 16px; }
+
+  .enviar { width:100%; display:flex; justify-content:center; align-items:center; gap:10px; padding:16px; border:0; border-radius:16px;
+    background:linear-gradient(135deg, var(--marino), var(--marino2)); color:#fff; font-size:18px; font-weight:800; font-family:inherit; cursor:pointer;
+    box-shadow:0 10px 24px rgba(15,39,71,.25); transition:transform .1s; }
+  .enviar:active { transform:scale(.99); }
+  .enviar:disabled { opacity:.6; }
+  .enviar svg { width:20px; height:20px; }
+
+  .gracias { text-align:center; padding:40px 22px; border-top:5px solid var(--ok); }
+  .gracias .check { width:76px; height:76px; border-radius:50%; background:#E6F5EC; display:grid; place-items:center; margin:0 auto 14px; animation:aparecer .5s ease; }
+  .gracias .check svg { width:40px; height:40px; color:var(--ok); }
+  .gracias h2 { color:var(--marino); font-size:24px; margin:0 0 8px; }
+  @keyframes aparecer { from { transform:scale(.6); opacity:0; } to { transform:scale(1); opacity:1; } }
+
+  footer { text-align:center; font-size:13px; color:var(--suave); padding:6px 16px 30px; }
 </style>
 </head>
 <body>
-<header>
-  <h1>Herramientas para escuelas con cortes de electricidad</h1>
-  <p>Encuesta a docentes · unos 10 minutos</p>
+<div class="progreso" aria-hidden="true"><i id="barra"></i></div>
+<div class="pct" id="porcentaje" aria-hidden="true">0 %</div>
+<header class="portada">
+  <div class="contenido">
+    <span class="etiqueta">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      Unos 10 minutos
+    </span>
+    <h1>Herramientas para escuelas con <em>cortes de electricidad</em></h1>
+    <p>Encuesta a docentes. Su experiencia nos ayuda a construir lo que de verdad sirve en el aula.</p>
+  </div>
+  <svg class="dibujo" viewBox="0 0 200 200" fill="none" stroke="#fff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+    <rect x="18" y="40" width="150" height="100" rx="10"/><path d="M50 160h86M93 140v20"/><path d="M98 62l-18 34h22l-14 30"/>
+  </svg>
 </header>
+
 <main>
 <form id="encuesta" novalidate>
-  <div class="tarjeta">
-    <p style="margin:0">Estimada maestra, estimado maestro: estamos diseñando herramientas digitales para escuelas que trabajan con cortes de electricidad y sin internet. Queremos construir lo que de verdad les sirva, y para eso necesitamos su experiencia. Sus respuestas son confidenciales; si las citamos, será sin su nombre. Gracias por su tiempo.</p>
+  <div class="tarjeta bienvenida">
+    <p>Estimada maestra, estimado maestro:</p>
+    <p>Estamos diseñando herramientas digitales para escuelas que trabajan con cortes de electricidad y sin internet. Queremos construir lo que de verdad les sirva, y para eso necesitamos su experiencia. Gracias por su tiempo.</p>
+    <div class="confidencial">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+      <span>Sus respuestas son confidenciales. Si las citamos, será sin su nombre.</span>
+    </div>
   </div>
 
-  <div class="tarjeta">
-    <h2>1. Su escuela</h2>
-    <div class="pregunta"><label for="estado_municipio">1. Estado y municipio de la escuela</label><input type="text" id="estado_municipio" name="estado_municipio"></div>
-    <div class="pregunta"><p>2. ¿La escuela es rural o urbana?</p>
-      <label class="opc"><input type="radio" name="tipo_escuela" value="Rural"> Rural</label>
-      <label class="opc"><input type="radio" name="tipo_escuela" value="Urbana"> Urbana</label>
-      <label class="opc"><input type="radio" name="tipo_escuela" value="Mixta"> Mixta</label></div>
-    <div class="pregunta"><p>3. ¿Qué grado o grados atiende? <span class="nota">Puede marcar varios.</span></p>
-      <label class="opc"><input type="checkbox" name="grados" value="Inicial"> Inicial</label>
-      <label class="opc"><input type="checkbox" name="grados" value="1.º a 6.º grado"> Primaria (1.º a 6.º grado)</label>
-      <label class="opc"><input type="checkbox" name="grados" value="1.º a 5.º año"> Media General (1.º a 5.º año)</label></div>
-    <div class="pregunta"><p>4. ¿Atiende un aula multigrado?</p>
-      <label class="opc"><input type="radio" name="multigrado" value="Sí"> Sí</label>
-      <label class="opc"><input type="radio" name="multigrado" value="No"> No</label></div>
-    <div class="pregunta"><label for="estudiantes">5. ¿Cuántos estudiantes tiene en total?</label><input type="number" id="estudiantes" name="estudiantes" min="0" inputmode="numeric"></div>
-  </div>
+  <section class="tarjeta">
+    <div class="seccion-titulo">
+      <div class="numero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg></div>
+      <div><h2>Su escuela</h2><small>Sección 1 de 5</small></div>
+    </div>
+    <div class="pregunta"><label class="enunciado" for="estado_municipio"><span class="n">1.</span>Estado y municipio de la escuela</label><input type="text" id="estado_municipio" name="estado_municipio" placeholder="Ej.: Mérida, municipio Rangel"></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">2.</span>¿La escuela es rural o urbana?</span>
+      <div class="opciones">
+        <label class="chip"><input type="radio" name="tipo_escuela" value="Rural"><span>Rural</span></label>
+        <label class="chip"><input type="radio" name="tipo_escuela" value="Urbana"><span>Urbana</span></label>
+        <label class="chip"><input type="radio" name="tipo_escuela" value="Mixta"><span>Mixta</span></label></div></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">3.</span>¿Qué grado o grados atiende? <span class="nota">Puede marcar varios.</span></span>
+      <div class="opciones lista">
+        <label class="chip"><input type="checkbox" name="grados" value="Inicial"><span>Inicial</span></label>
+        <label class="chip"><input type="checkbox" name="grados" value="1.º a 6.º grado"><span>Primaria (1.º a 6.º grado)</span></label>
+        <label class="chip"><input type="checkbox" name="grados" value="1.º a 5.º año"><span>Media General (1.º a 5.º año)</span></label></div></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">4.</span>¿Atiende un aula multigrado?</span>
+      <div class="opciones">
+        <label class="chip"><input type="radio" name="multigrado" value="Sí"><span>Sí</span></label>
+        <label class="chip"><input type="radio" name="multigrado" value="No"><span>No</span></label></div></div>
+    <div class="pregunta"><label class="enunciado" for="estudiantes"><span class="n">5.</span>¿Cuántos estudiantes tiene en total?</label><input type="number" id="estudiantes" name="estudiantes" min="0" inputmode="numeric" placeholder="Ej.: 18"></div>
+  </section>
 
-  <div class="tarjeta">
-    <h2>2. Electricidad, conexión y equipos</h2>
-    <div class="pregunta"><p>6. En una semana normal, ¿cuántos días se va la electricidad en la escuela?</p>
-      <label class="opc"><input type="radio" name="dias_sin_electricidad" value="Nunca"> Nunca</label>
-      <label class="opc"><input type="radio" name="dias_sin_electricidad" value="1-2 días"> 1 o 2 días</label>
-      <label class="opc"><input type="radio" name="dias_sin_electricidad" value="3-4 días"> 3 o 4 días</label>
-      <label class="opc"><input type="radio" name="dias_sin_electricidad" value="Todos los días"> Todos los días</label></div>
-    <div class="pregunta"><p>7. Cuando se va, ¿cuánto suele durar el corte?</p>
-      <label class="opc"><input type="radio" name="duracion_corte" value="Menos de 1 hora"> Menos de 1 hora</label>
-      <label class="opc"><input type="radio" name="duracion_corte" value="1-4 horas"> Entre 1 y 4 horas</label>
-      <label class="opc"><input type="radio" name="duracion_corte" value="Más de 4 horas"> Más de 4 horas</label>
-      <label class="opc"><input type="radio" name="duracion_corte" value="Varios días"> Varios días</label></div>
-    <div class="pregunta"><p>8. ¿Hay internet en la escuela?</p>
-      <label class="opc"><input type="radio" name="internet" value="No hay"> No hay</label>
-      <label class="opc"><input type="radio" name="internet" value="Hay pero falla mucho"> Hay, pero falla mucho</label>
-      <label class="opc"><input type="radio" name="internet" value="Funciona bien"> Funciona bien</label></div>
-    <div class="pregunta"><p>9. ¿Qué equipos tiene usted a mano? <span class="nota">Puede marcar varios.</span></p>
-      <label class="opc"><input type="checkbox" name="equipos" value="Teléfono Android"> Teléfono Android</label>
-      <label class="opc"><input type="checkbox" name="equipos" value="iPhone"> iPhone</label>
-      <label class="opc"><input type="checkbox" name="equipos" value="Laptop Canaima"> Laptop Canaima</label>
-      <label class="opc"><input type="checkbox" name="equipos" value="Otra laptop"> Otra laptop</label>
-      <label class="opc"><input type="checkbox" name="equipos" value="Computadora de la escuela"> Computadora de la escuela</label>
-      <label class="opc"><input type="checkbox" name="equipos" value="Ninguno"> Ninguno</label></div>
-    <div class="pregunta"><p>10. ¿La escuela tiene planta eléctrica, panel solar o batería de respaldo? <span class="nota">Puede marcar varios.</span></p>
-      <label class="opc"><input type="checkbox" name="respaldo" value="Planta eléctrica"> Planta eléctrica</label>
-      <label class="opc"><input type="checkbox" name="respaldo" value="Panel solar"> Panel solar</label>
-      <label class="opc"><input type="checkbox" name="respaldo" value="Batería"> Batería</label>
-      <label class="opc"><input type="checkbox" name="respaldo" value="Ninguno"> Ninguno</label>
-      <label class="opc"><input type="checkbox" name="respaldo" value="No sé"> No sé</label></div>
-  </div>
+  <section class="tarjeta">
+    <div class="seccion-titulo">
+      <div class="numero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></div>
+      <div><h2>Electricidad, conexión y equipos</h2><small>Sección 2 de 5</small></div>
+    </div>
+    <div class="pregunta"><span class="enunciado"><span class="n">6.</span>En una semana normal, ¿cuántos días se va la electricidad en la escuela?</span>
+      <div class="opciones">
+        <label class="chip"><input type="radio" name="dias_sin_electricidad" value="Nunca"><span>Nunca</span></label>
+        <label class="chip"><input type="radio" name="dias_sin_electricidad" value="1-2 días"><span>1 o 2 días</span></label>
+        <label class="chip"><input type="radio" name="dias_sin_electricidad" value="3-4 días"><span>3 o 4 días</span></label>
+        <label class="chip"><input type="radio" name="dias_sin_electricidad" value="Todos los días"><span>Todos los días</span></label></div></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">7.</span>Cuando se va, ¿cuánto suele durar el corte?</span>
+      <div class="opciones">
+        <label class="chip"><input type="radio" name="duracion_corte" value="Menos de 1 hora"><span>Menos de 1 hora</span></label>
+        <label class="chip"><input type="radio" name="duracion_corte" value="1-4 horas"><span>Entre 1 y 4 horas</span></label>
+        <label class="chip"><input type="radio" name="duracion_corte" value="Más de 4 horas"><span>Más de 4 horas</span></label>
+        <label class="chip"><input type="radio" name="duracion_corte" value="Varios días"><span>Varios días</span></label></div></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">8.</span>¿Hay internet en la escuela?</span>
+      <div class="opciones">
+        <label class="chip"><input type="radio" name="internet" value="No hay"><span>No hay</span></label>
+        <label class="chip"><input type="radio" name="internet" value="Hay pero falla mucho"><span>Hay, pero falla mucho</span></label>
+        <label class="chip"><input type="radio" name="internet" value="Funciona bien"><span>Funciona bien</span></label></div></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">9.</span>¿Qué equipos tiene usted a mano? <span class="nota">Puede marcar varios.</span></span>
+      <div class="opciones">
+        <label class="chip"><input type="checkbox" name="equipos" value="Teléfono Android"><span>Teléfono Android</span></label>
+        <label class="chip"><input type="checkbox" name="equipos" value="iPhone"><span>iPhone</span></label>
+        <label class="chip"><input type="checkbox" name="equipos" value="Laptop Canaima"><span>Laptop Canaima</span></label>
+        <label class="chip"><input type="checkbox" name="equipos" value="Otra laptop"><span>Otra laptop</span></label>
+        <label class="chip"><input type="checkbox" name="equipos" value="Computadora de la escuela"><span>Computadora de la escuela</span></label>
+        <label class="chip"><input type="checkbox" name="equipos" value="Ninguno"><span>Ninguno</span></label></div></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">10.</span>¿La escuela tiene planta eléctrica, panel solar o batería de respaldo? <span class="nota">Puede marcar varios.</span></span>
+      <div class="opciones">
+        <label class="chip"><input type="checkbox" name="respaldo" value="Planta eléctrica"><span>Planta eléctrica</span></label>
+        <label class="chip"><input type="checkbox" name="respaldo" value="Panel solar"><span>Panel solar</span></label>
+        <label class="chip"><input type="checkbox" name="respaldo" value="Batería"><span>Batería</span></label>
+        <label class="chip"><input type="checkbox" name="respaldo" value="Ninguno"><span>Ninguno</span></label>
+        <label class="chip"><input type="checkbox" name="respaldo" value="No sé"><span>No sé</span></label></div></div>
+  </section>
 
-  <div class="tarjeta">
-    <h2>3. Su trabajo diario</h2>
-    <div class="pregunta"><p>11. ¿Cuántas horas a la semana dedica a preparar sus clases?</p>
-      <label class="opc"><input type="radio" name="horas_planificacion" value="Menos de 2"> Menos de 2 horas</label>
-      <label class="opc"><input type="radio" name="horas_planificacion" value="2-5"> Entre 2 y 5 horas</label>
-      <label class="opc"><input type="radio" name="horas_planificacion" value="5-10"> Entre 5 y 10 horas</label>
-      <label class="opc"><input type="radio" name="horas_planificacion" value="Más de 10"> Más de 10 horas</label></div>
-    <div class="pregunta"><label for="documento">12. ¿Qué documento usa para planificar?</label><input type="text" id="documento" name="documento"></div>
-    <div class="pregunta"><p>13. ¿Dónde guarda las notas y los registros de sus estudiantes? <span class="nota">Puede marcar varios.</span></p>
-      <label class="opc"><input type="checkbox" name="registros" value="Cuaderno"> Cuaderno</label>
-      <label class="opc"><input type="checkbox" name="registros" value="Carpeta"> Carpeta</label>
-      <label class="opc"><input type="checkbox" name="registros" value="Teléfono"> Teléfono</label>
-      <label class="opc"><input type="checkbox" name="registros" value="Computadora"> Computadora</label>
-      <label class="opc"><input type="checkbox" name="registros" value="Otro"> Otro</label></div>
-    <div class="pregunta"><p>14. ¿Ha perdido alguna vez registros o trabajos por un corte de electricidad o una falla del equipo?</p>
-      <label class="opc"><input type="radio" name="perdio_registros" value="Sí"> Sí</label>
-      <label class="opc"><input type="radio" name="perdio_registros" value="No"> No</label></div>
-    <div class="pregunta"><label for="rezago">15. ¿Cómo sabe hoy qué estudiantes se están quedando atrás?</label><textarea id="rezago" name="rezago"></textarea></div>
-  </div>
+  <section class="tarjeta">
+    <div class="seccion-titulo">
+      <div class="numero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V5a2 2 0 0 1 2-2h12v15H6a2 2 0 0 0-2 1.5z"/><path d="M4 19.5A2 2 0 0 0 6 21h12"/><path d="M9 7h6M9 11h4"/></svg></div>
+      <div><h2>Su trabajo diario</h2><small>Sección 3 de 5</small></div>
+    </div>
+    <div class="pregunta"><span class="enunciado"><span class="n">11.</span>¿Cuántas horas a la semana dedica a preparar sus clases?</span>
+      <div class="opciones">
+        <label class="chip"><input type="radio" name="horas_planificacion" value="Menos de 2"><span>Menos de 2 horas</span></label>
+        <label class="chip"><input type="radio" name="horas_planificacion" value="2-5"><span>Entre 2 y 5</span></label>
+        <label class="chip"><input type="radio" name="horas_planificacion" value="5-10"><span>Entre 5 y 10</span></label>
+        <label class="chip"><input type="radio" name="horas_planificacion" value="Más de 10"><span>Más de 10</span></label></div></div>
+    <div class="pregunta"><label class="enunciado" for="documento"><span class="n">12.</span>¿Qué documento usa para planificar?</label><input type="text" id="documento" name="documento" placeholder="Ej.: el currículo de primaria, un libro de texto…"></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">13.</span>¿Dónde guarda las notas y los registros de sus estudiantes? <span class="nota">Puede marcar varios.</span></span>
+      <div class="opciones">
+        <label class="chip"><input type="checkbox" name="registros" value="Cuaderno"><span>Cuaderno</span></label>
+        <label class="chip"><input type="checkbox" name="registros" value="Carpeta"><span>Carpeta</span></label>
+        <label class="chip"><input type="checkbox" name="registros" value="Teléfono"><span>Teléfono</span></label>
+        <label class="chip"><input type="checkbox" name="registros" value="Computadora"><span>Computadora</span></label>
+        <label class="chip"><input type="checkbox" name="registros" value="Otro"><span>Otro</span></label></div></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">14.</span>¿Ha perdido alguna vez registros o trabajos por un corte de electricidad o una falla del equipo?</span>
+      <div class="opciones">
+        <label class="chip"><input type="radio" name="perdio_registros" value="Sí"><span>Sí</span></label>
+        <label class="chip"><input type="radio" name="perdio_registros" value="No"><span>No</span></label></div></div>
+    <div class="pregunta"><label class="enunciado" for="rezago"><span class="n">15.</span>¿Cómo sabe hoy qué estudiantes se están quedando atrás?</label><textarea id="rezago" name="rezago" placeholder="Cuéntenos con sus palabras"></textarea></div>
+  </section>
 
-  <div class="tarjeta">
-    <h2>4. Sus necesidades</h2>
-    <div class="pregunta"><label for="mas_le_cuesta">16. ¿Qué es lo que más tiempo le quita o más le cuesta en su trabajo?</label><textarea id="mas_le_cuesta" name="mas_le_cuesta"></textarea></div>
-    <div class="pregunta"><p>17. Ordene estas herramientas, todas sin internet, del 1 (la más útil) al 5 (la menos útil). <span class="nota">Use cada número una sola vez.</span></p>
-      <div class="orden"><span>Preparar planes de clase</span><select name="p_planes"></select></div>
-      <div class="orden"><span>Crear evaluaciones cortas</span><select name="p_evaluaciones"></select></div>
-      <div class="orden"><span>Llevar registros de notas y avisos de quién va quedando atrás</span><select name="p_registros"></select></div>
-      <div class="orden"><span>Consultar material educativo (por ejemplo, Wikipedia sin internet)</span><select name="p_material"></select></div>
-      <div class="orden"><span>Guardar sus registros de forma segura, aunque se vaya la electricidad</span><select name="p_guardar"></select></div>
+  <section class="tarjeta">
+    <div class="seccion-titulo">
+      <div class="numero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/></svg></div>
+      <div><h2>Sus necesidades</h2><small>Sección 4 de 5</small></div>
+    </div>
+    <div class="pregunta"><label class="enunciado" for="mas_le_cuesta"><span class="n">16.</span>¿Qué es lo que más tiempo le quita o más le cuesta en su trabajo?</label><textarea id="mas_le_cuesta" name="mas_le_cuesta" placeholder="Cuéntenos con sus palabras"></textarea></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">17.</span>Ordene estas herramientas, todas sin internet, del 1 (la más útil) al 5 (la menos útil). <span class="nota">Use cada número una sola vez.</span></span>
+      <div class="orden" id="orden"></div>
       <p class="error" id="error-orden" hidden>Cada número del 1 al 5 debe usarse una sola vez.</p></div>
-    <div class="pregunta"><label for="otra_herramienta">18. ¿Qué otra herramienta le gustaría tener que no esté en la lista?</label><textarea id="otra_herramienta" name="otra_herramienta"></textarea></div>
-  </div>
+    <div class="pregunta"><label class="enunciado" for="otra_herramienta"><span class="n">18.</span>¿Qué otra herramienta le gustaría tener que no esté en la lista?</label><textarea id="otra_herramienta" name="otra_herramienta" placeholder="Opcional"></textarea></div>
+  </section>
 
-  <div class="tarjeta">
-    <h2>5. Sobre el asistente</h2>
-    <div class="pregunta"><p>19. Si una herramienta le propone un borrador de plan de clase y usted lo revisa y corrige, ¿lo usaría?</p>
-      <label class="opc"><input type="radio" name="usaria" value="Sí"> Sí</label>
-      <label class="opc"><input type="radio" name="usaria" value="Tal vez"> Tal vez</label>
-      <label class="opc"><input type="radio" name="usaria" value="No"> No</label>
-      <label for="por_que" class="nota" style="margin-top:8px">¿Por qué?</label><textarea id="por_que" name="por_que"></textarea></div>
-    <div class="pregunta"><label for="preocupaciones">20. ¿Le preocupa algo de usar inteligencia artificial en su trabajo?</label><textarea id="preocupaciones" name="preocupaciones"></textarea></div>
-    <div class="pregunta"><p>21. ¿Le gustaría probar el prototipo y darnos su opinión?</p>
-      <label class="opc"><input type="radio" name="probar" value="Sí"> Sí</label>
-      <label class="opc"><input type="radio" name="probar" value="No"> No</label>
-      <div id="bloque-contacto" hidden><label for="contacto" class="nota" style="margin-top:8px">Deje su WhatsApp o correo para coordinar la prueba (opcional).</label><input type="text" id="contacto" name="contacto"></div></div>
-    <div class="pregunta"><p>22. ¿Nos autoriza a citar sus respuestas, sin su nombre, en solicitudes de financiamiento?</p>
-      <label class="opc"><input type="radio" name="autoriza" value="Sí"> Sí</label>
-      <label class="opc"><input type="radio" name="autoriza" value="No"> No</label></div>
-  </div>
+  <section class="tarjeta">
+    <div class="seccion-titulo">
+      <div class="numero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg></div>
+      <div><h2>Sobre el asistente</h2><small>Sección 5 de 5</small></div>
+    </div>
+    <div class="pregunta"><span class="enunciado"><span class="n">19.</span>Si una herramienta le propone un borrador de plan de clase y usted lo revisa y corrige, ¿lo usaría?</span>
+      <div class="opciones">
+        <label class="chip"><input type="radio" name="usaria" value="Sí"><span>Sí</span></label>
+        <label class="chip"><input type="radio" name="usaria" value="Tal vez"><span>Tal vez</span></label>
+        <label class="chip"><input type="radio" name="usaria" value="No"><span>No</span></label></div>
+      <label class="nota" for="por_que" style="display:block;margin:12px 0 6px">¿Por qué?</label><textarea id="por_que" name="por_que"></textarea></div>
+    <div class="pregunta"><label class="enunciado" for="preocupaciones"><span class="n">20.</span>¿Le preocupa algo de usar inteligencia artificial en su trabajo?</label><textarea id="preocupaciones" name="preocupaciones"></textarea></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">21.</span>¿Le gustaría probar el prototipo y darnos su opinión?</span>
+      <div class="opciones">
+        <label class="chip"><input type="radio" name="probar" value="Sí"><span>Sí, me gustaría</span></label>
+        <label class="chip"><input type="radio" name="probar" value="No"><span>No por ahora</span></label></div>
+      <div id="bloque-contacto" hidden><label class="nota" for="contacto" style="display:block;margin:12px 0 6px">Deje su WhatsApp o correo para coordinar la prueba (opcional).</label><input type="text" id="contacto" name="contacto" placeholder="Ej.: +58 414 000 0000"></div></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">22.</span>¿Nos autoriza a citar sus respuestas, sin su nombre, en solicitudes de financiamiento?</span>
+      <div class="opciones">
+        <label class="chip"><input type="radio" name="autoriza" value="Sí"><span>Sí</span></label>
+        <label class="chip"><input type="radio" name="autoriza" value="No"><span>No</span></label></div></div>
+  </section>
 
   <input class="oculto" type="text" name="sitio_web" tabindex="-1" autocomplete="off" aria-hidden="true">
-  <button type="submit" id="enviar">Enviar respuestas</button>
+  <button type="submit" class="enviar" id="enviar">Enviar respuestas
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
   <p class="error" id="error" hidden></p>
 </form>
+
 <div class="tarjeta gracias" id="gracias" hidden>
+  <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
   <h2>¡Muchas gracias!</h2>
   <p>Sus respuestas nos ayudan a construir herramientas útiles para su escuela.</p>
 </div>
 </main>
+<footer>Sus respuestas se guardan de forma confidencial.</footer>
+
 <script>
 const form = document.getElementById('encuesta');
-const ORDEN = ['p_planes', 'p_evaluaciones', 'p_registros', 'p_material', 'p_guardar'];
-for (const n of ORDEN) form[n].innerHTML = '<option value="">—</option>' + [1,2,3,4,5].map(i => `<option>${i}</option>`).join('');
-form.querySelectorAll('input[name=probar]').forEach(r => r.onchange = () =>
-  document.getElementById('bloque-contacto').hidden = form.probar.value !== 'Sí');
+
+// Pregunta 17: cada herramienta recibe un puesto del 1 al 5.
+const HERRAMIENTAS = [
+  ['p_planes', 'Preparar planes de clase'],
+  ['p_evaluaciones', 'Crear evaluaciones cortas'],
+  ['p_registros', 'Llevar registros de notas y avisos de quién va quedando atrás'],
+  ['p_material', 'Consultar material educativo (por ejemplo, Wikipedia sin internet)'],
+  ['p_guardar', 'Guardar sus registros de forma segura, aunque se vaya la electricidad'],
+];
+const ORDEN = HERRAMIENTAS.map(h => h[0]);
+document.getElementById('orden').innerHTML = HERRAMIENTAS.map(([n, t]) =>
+  `<div class="item-orden"><p>${t}</p><div class="puestos">${[1,2,3,4,5].map(i =>
+    `<label class="puesto"><input type="radio" name="${n}" value="${i}" aria-label="${t}: puesto ${i}"><span>${i}</span></label>`).join('')}</div></div>`).join('');
+
+function marcarUsados() {
+  const usados = ORDEN.map(n => form.querySelector(`[name=${n}]:checked`)?.value).filter(Boolean);
+  form.querySelectorAll('.puesto').forEach(p => {
+    const inp = p.querySelector('input');
+    p.classList.toggle('usado', !inp.checked && usados.includes(inp.value));
+  });
+}
+
+form.querySelectorAll('input[name=probar]').forEach(r => r.addEventListener('change', () =>
+  document.getElementById('bloque-contacto').hidden = form.probar.value !== 'Sí'));
 
 function respuestas() {
   const r = {};
@@ -165,6 +306,21 @@ function respuestas() {
   return r;
 }
 
+// Avance: preguntas con alguna respuesta sobre el total de preguntas (17 cuenta como una).
+const PREGUNTAS = ['estado_municipio','tipo_escuela','grados','multigrado','estudiantes','dias_sin_electricidad','duracion_corte','internet','equipos','respaldo',
+  'horas_planificacion','documento','registros','perdio_registros','rezago','mas_le_cuesta','orden','otra_herramienta','usaria','preocupaciones','probar','autoriza'];
+function actualizarAvance() {
+  const r = respuestas();
+  const hechas = PREGUNTAS.filter(p => p === 'orden' ? ORDEN.some(n => r[n]) : (Array.isArray(r[p]) ? r[p].length : r[p])).length;
+  const pct = Math.round(hechas / PREGUNTAS.length * 100);
+  document.getElementById('barra').style.width = pct + '%';
+  const etiqueta = document.getElementById('porcentaje');
+  etiqueta.textContent = pct + ' %';
+  etiqueta.classList.toggle('visible', pct > 0);
+}
+form.addEventListener('input', () => { marcarUsados(); actualizarAvance(); });
+form.addEventListener('change', () => { marcarUsados(); actualizarAvance(); });
+
 form.onsubmit = async e => {
   e.preventDefault();
   const err = document.getElementById('error'); err.hidden = true;
@@ -172,19 +328,20 @@ form.onsubmit = async e => {
   const usados = ORDEN.map(n => r[n]).filter(Boolean);
   const ordenMal = new Set(usados).size !== usados.length;
   document.getElementById('error-orden').hidden = !ordenMal;
-  if (ordenMal) { form.p_planes.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+  if (ordenMal) { document.getElementById('orden').scrollIntoView({block:'center'}); return; }
   const respondidas = Object.values(r).filter(v => Array.isArray(v) ? v.length : v).length;
   if (respondidas < 3) { err.textContent = 'Responda al menos algunas preguntas antes de enviar.'; err.hidden = false; return; }
-  const boton = document.getElementById('enviar'); boton.disabled = true; boton.textContent = 'Enviando…';
+  const boton = document.getElementById('enviar'); boton.disabled = true; boton.firstChild.textContent = 'Enviando… ';
   try {
     const res = await fetch('/api/enviar', {method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({r, sitio_web: form.sitio_web.value})});
     const j = await res.json();
     if (!res.ok || !j.ok) throw new Error(j.error || 'No se pudo enviar.');
     form.hidden = true; document.getElementById('gracias').hidden = false; window.scrollTo(0, 0);
+    document.querySelector('.progreso').hidden = true; document.getElementById('porcentaje').hidden = true;
   } catch (ex) {
     err.textContent = ex.message + ' Revise su conexión e intente de nuevo; sus respuestas siguen en la pantalla.';
-    err.hidden = false; boton.disabled = false; boton.textContent = 'Enviar respuestas';
+    err.hidden = false; boton.disabled = false; boton.firstChild.textContent = 'Enviar respuestas ';
   }
 };
 </script>
