@@ -13,6 +13,10 @@ from _asistente import CODIGO, responder
 # de Notion «Docentes registrados en Tiza» por el mismo flujo de n8n que las opiniones.
 N8N = "https://n8n.jibalab.com/webhook/jiba-opinion-asistente-v1"
 SECRETO = os.environ.get("OPINION_SECRETO", "")
+# Notion no admite comas en las opciones: las condiciones del aula van con su nombre corto.
+CONDICIONES = {"Sin electricidad ni internet, solo pizarra y cuadernos": "Sin electricidad ni internet",
+               "Electricidad a ratos, sin internet": "Electricidad a ratos sin internet",
+               "Electricidad estable, sin internet": "Electricidad estable sin internet"}
 
 
 class handler(BaseHTTPRequestHandler):
@@ -28,7 +32,8 @@ class handler(BaseHTTPRequestHandler):
                  "escuela": str(d.get("escuela", ""))[:200], "estado": str(d.get("estado", ""))[:40].replace(",", ""),
                  "municipio": str(d.get("municipio", ""))[:80], "nivel": str(d.get("nivel", ""))[:40].replace(",", ""),
                  "grados": str(d.get("grados", ""))[:200], "areas": [str(x).replace(",", "")[:60] for x in d.get("areas", [])][:10],
-                 "multigrado": "Sí" if d.get("multigrado") else "No"}
+                 "multigrado": "Sí" if d.get("multigrado") else "No",
+                 "condiciones": CONDICIONES.get(d.get("condiciones", ""), ""), "minutos": d.get("minutos") if isinstance(d.get("minutos"), int) else None}
         pedido = urllib.request.Request(N8N, data=json.dumps({"s": SECRETO, "r": datos}).encode(),
                                         headers={"Content-Type": "application/json", "User-Agent": "curl/8.7.1"}, method="POST")
         try:

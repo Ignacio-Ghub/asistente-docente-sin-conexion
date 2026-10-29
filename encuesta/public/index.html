@@ -88,6 +88,9 @@
   .puesto input:focus-visible + span { outline:3px solid var(--azul); outline-offset:2px; }
 
   .error { color:var(--alerta); font-size:14.5px; font-weight:700; margin:10px 0 0; }
+  /* Pregunta sin responder al intentar enviar */
+  .pregunta.falta { border-left:4px solid var(--alerta); padding-left:12px; }
+  .pregunta.falta .enunciado::after { content:'Falta responder esta pregunta.'; display:block; color:var(--alerta); font-size:14px; font-weight:700; margin-top:4px; }
   .oculto { position:absolute; left:-9999px; }
 
   .enviar { width:100%; display:flex; justify-content:center; align-items:center; gap:10px; padding:16px; border:0; border-radius:16px;
@@ -258,7 +261,7 @@
         <label class="chip"><input type="checkbox" name="comparte" value="No comparto"><span>No comparto</span></label></div></div>
     <div class="pregunta"><span class="enunciado"><span class="n">22.</span>¿Qué tan útil le sería cada una de estas herramientas, todas sin internet?</span>
       <div class="orden" id="orden"></div></div>
-    <div class="pregunta"><label class="enunciado" for="otra_herramienta"><span class="n">23.</span>¿Qué otra herramienta o función le sería útil? Cuéntenos lo que de verdad necesita.</label><textarea id="otra_herramienta" name="otra_herramienta" placeholder="Opcional"></textarea></div>
+    <div class="pregunta"><label class="enunciado" for="otra_herramienta"><span class="n">23.</span>¿Qué otra herramienta o función le sería útil? Cuéntenos lo que de verdad necesita.</label><textarea id="otra_herramienta" name="otra_herramienta" placeholder="Cuéntenos con sus palabras"></textarea></div>
   </section>
 
   <section class="tarjeta">
@@ -282,7 +285,7 @@
         <label class="enunciado" for="correo" style="margin:14px 0 6px;font-size:15px">Correo electrónico</label>
         <input type="email" id="correo" name="correo" inputmode="email" autocomplete="email" placeholder="Ej.: maestra@gmail.com">
         <label class="enunciado" for="whatsapp" style="margin:12px 0 6px;font-size:15px">WhatsApp</label>
-        <input type="tel" id="whatsapp" name="whatsapp" inputmode="tel" autocomplete="tel" placeholder="Ej.: 0414 123 4567">
+        <input type="tel" id="whatsapp" name="whatsapp" inputmode="tel" autocomplete="tel" placeholder="Ej.: 0414 123 4567 o +58 414 123 4567">
         <p class="error" id="error-contacto" hidden>Para enviarle el enlace, escriba su correo o su WhatsApp. Si prefiere no dejarlo, marque «No por ahora».</p>
       </div></div>
   </section>
@@ -347,8 +350,12 @@ function respuestas() {
 // Avance: preguntas con alguna respuesta sobre el total de preguntas (la utilidad de las herramientas cuenta como una).
 const PREGUNTAS = ['estado','municipio','nombre_escuela','tipo_escuela','grados','multigrado','estudiantes','dias_sin_electricidad','duracion_corte','clases_perdidas','internet','equipos','respaldo',
   'horas_planificacion','documento','otra_especialidad','registros','perdio_registros','rezago','mas_le_cuesta','comparte','orden','otra_herramienta','usaria','preocupaciones','probar'];
+// Todas las preguntas numeradas son obligatorias (el «¿Por qué?» de la pregunta 24 es opcional).
+const respondida = (p, r) => p === 'orden' ? ORDEN.every(n => r[n]) : (Array.isArray(r[p]) ? r[p].length > 0 : !!r[p]);
+const preguntaDe = p => (p === 'orden' ? document.getElementById('orden') : form.querySelector(`[name="${p}"]`)).closest('.pregunta');
 function actualizarAvance() {
   const r = respuestas();
+  PREGUNTAS.forEach(p => { if (respondida(p, r)) preguntaDe(p).classList.remove('falta'); });
   const hechas = PREGUNTAS.filter(p => p === 'orden' ? ORDEN.some(n => r[n]) : (Array.isArray(r[p]) ? r[p].length : r[p])).length;
   const pct = Math.round(hechas / PREGUNTAS.length * 100);
   document.getElementById('barra').style.width = pct + '%';
@@ -363,12 +370,23 @@ form.onsubmit = async e => {
   e.preventDefault();
   const err = document.getElementById('error'); err.hidden = true;
   const r = respuestas();
-  // Quien quiere probar Tiza necesita dejar un contacto: el enlace solo llega por correo o WhatsApp.
-  const sinContacto = r.probar === 'Sí' && !r.correo && !r.whatsapp;
-  document.getElementById('error-contacto').hidden = !sinContacto;
-  if (sinContacto) { document.getElementById('correo').scrollIntoView({block:'center'}); document.getElementById('correo').focus(); return; }
-  const respondidas = Object.values(r).filter(v => Array.isArray(v) ? v.length : v).length;
-  if (respondidas < 3) { err.textContent = 'Responda al menos algunas preguntas antes de enviar.'; err.hidden = false; return; }
+  const faltan = PREGUNTAS.filter(p => !respondida(p, r));
+  faltan.forEach(p => preguntaDe(p).classList.add('falta'));
+  if (faltan.length) {
+    err.textContent = faltan.length === 1 ? 'Falta responder 1 pregunta. Está marcada en rojo.' : `Faltan ${faltan.length} preguntas por responder. Están marcadas en rojo.`;
+    err.hidden = false; preguntaDe(faltan[0]).scrollIntoView({block:'center'}); return;
+  }
+  // Quien quiere probar Tiza necesita dejar un contacto válido: el enlace solo llega por correo o WhatsApp.
+  const correoOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r.correo || ''), telOk = (r.whatsapp || '').replace(/\D/g, '').length >= 10;
+  const avisoContacto = document.getElementById('error-contacto');
+  const sinContacto = r.probar === 'Sí' && !correoOk && !telOk;
+  avisoContacto.hidden = !sinContacto;
+  if (sinContacto) {
+    avisoContacto.textContent = (r.correo || r.whatsapp) ? 'Revise su correo o su número de WhatsApp: parece incompleto.'
+      : 'Para enviarle el enlace, escriba su correo o su WhatsApp. Si prefiere no dejarlo, marque «No por ahora».';
+    document.getElementById('correo').scrollIntoView({block:'center'}); document.getElementById('correo').focus(); return;
+  }
+  if (r.probar === 'Sí') { if (!correoOk) r.correo = ''; if (!telOk) r.whatsapp = ''; }
   const boton = document.getElementById('enviar'); boton.disabled = true; boton.firstChild.textContent = 'Enviando… ';
   try {
     const res = await fetch('/api/enviar', {method:'POST', headers:{'Content-Type':'application/json'},
@@ -382,7 +400,6 @@ form.onsubmit = async e => {
       const caja = document.getElementById('revise'), partes = [];
       if (r.correo) partes.push('<p style="margin:0 0 6px"><b>Revise su correo.</b> Le enviamos el enlace para probar Tiza, el asistente para docentes, su contraseña y cómo usarla. Si no lo ve en unos minutos, revise también la carpeta de correo no deseado (spam).</p>');
       if (r.whatsapp) partes.push('<p style="margin:0 0 6px"><b>Revise su WhatsApp.</b> En breve le escribiremos con el enlace para probar Tiza, el asistente para docentes, y su contraseña.</p>');
-      if (!partes.length) partes.push('<p style="margin:0">Como no dejó su correo ni su WhatsApp, no podemos enviarle el enlace para probar Tiza, el asistente para docentes. Si más adelante quiere probarlo, puede responder la encuesta de nuevo y dejar uno de los dos.</p>');
       caja.innerHTML = partes.join(''); caja.hidden = false;
     }
   } catch (ex) {
