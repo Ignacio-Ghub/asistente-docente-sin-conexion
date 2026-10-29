@@ -228,7 +228,15 @@
         <label class="chip"><input type="radio" name="horas_planificacion" value="2-5"><span>Entre 2 y 5</span></label>
         <label class="chip"><input type="radio" name="horas_planificacion" value="5-10"><span>Entre 5 y 10</span></label>
         <label class="chip"><input type="radio" name="horas_planificacion" value="Más de 10"><span>Más de 10</span></label></div></div>
-    <div class="pregunta"><label class="enunciado" for="documento"><span class="n">15.</span>¿Qué documento usa para planificar?</label><input type="text" id="documento" name="documento" placeholder="Ej.: el currículo de primaria, un libro de texto…"></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">15.</span>¿Qué usa para planificar? <span class="nota">Puede marcar varios.</span></span>
+      <div class="opciones">
+        <label class="chip"><input type="checkbox" name="documento" value="Contenidos oficiales del Ministerio de Educación"><span>Los contenidos oficiales del Ministerio de Educación (documentos del año escolar)</span></label>
+        <label class="chip"><input type="checkbox" name="documento" value="Libros de la Colección Bicentenario"><span>Los libros de la Colección Bicentenario</span></label>
+        <label class="chip"><input type="checkbox" name="documento" value="Formatos o lineamientos de la coordinación o el circuito"><span>Formatos o lineamientos de la coordinación o el circuito escolar</span></label>
+        <label class="chip"><input type="checkbox" name="documento" value="Planificaciones de años anteriores"><span>Planificaciones de años anteriores, propias o de colegas</span></label>
+        <label class="chip"><input type="checkbox" name="documento" value="Material de internet"><span>Material de internet</span></label>
+        <label class="chip"><input type="checkbox" name="documento" value="Otro"><span>Otro</span></label></div>
+      <input type="text" id="documento_otro" name="documento_otro" placeholder="Escriba cuál" style="margin-top:10px" hidden></div>
     <div class="pregunta"><span class="enunciado"><span class="n">16.</span>¿Da clases de alguna área que no es su especialidad?</span>
       <div class="opciones">
         <label class="chip"><input type="radio" name="otra_especialidad" value="Sí"><span>Sí</span></label>
@@ -252,7 +260,16 @@
       <div class="numero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/></svg></div>
       <div><h2>Sus necesidades</h2><small>Sección 4 de 5</small></div>
     </div>
-    <div class="pregunta"><label class="enunciado" for="mas_le_cuesta"><span class="n">20.</span>¿Qué es lo que más tiempo le quita o más le cuesta en su trabajo?</label><textarea id="mas_le_cuesta" name="mas_le_cuesta" placeholder="Cuéntenos con sus palabras"></textarea></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">20.</span>¿Qué es lo que más tiempo le quita o más le cuesta en su trabajo? <span class="nota">Marque hasta dos.</span></span>
+      <div class="opciones">
+        <label class="chip"><input type="checkbox" name="mas_le_cuesta" value="Planificar las clases"><span>Planificar las clases</span></label>
+        <label class="chip"><input type="checkbox" name="mas_le_cuesta" value="Corregir y calificar"><span>Corregir y calificar</span></label>
+        <label class="chip"><input type="checkbox" name="mas_le_cuesta" value="Llenar registros boletas y otros documentos"><span>Llenar registros, boletas y otros documentos</span></label>
+        <label class="chip"><input type="checkbox" name="mas_le_cuesta" value="Preparar material sin fotocopias ni electricidad"><span>Preparar material sin fotocopias ni electricidad</span></label>
+        <label class="chip"><input type="checkbox" name="mas_le_cuesta" value="Recuperar clases perdidas por los cortes"><span>Recuperar clases perdidas por los cortes</span></label>
+        <label class="chip"><input type="checkbox" name="mas_le_cuesta" value="Atender un aula multigrado o un grupo grande"><span>Atender un aula multigrado o un grupo grande</span></label>
+        <label class="chip"><input type="checkbox" name="mas_le_cuesta" value="Otro"><span>Otro</span></label></div>
+      <textarea id="mas_le_cuesta_detalle" name="mas_le_cuesta_detalle" placeholder="Cuéntenos más (opcional). Si marcó «Otro», escriba cuál." style="margin-top:10px"></textarea></div>
     <div class="pregunta"><span class="enunciado"><span class="n">21.</span>¿Cómo comparte hoy materiales con otros docentes? <span class="nota">Puede marcar varios.</span></span>
       <div class="opciones">
         <label class="chip"><input type="checkbox" name="comparte" value="WhatsApp"><span>WhatsApp</span></label>
@@ -274,7 +291,7 @@
         <label class="chip"><input type="radio" name="usaria" value="Sí"><span>Sí</span></label>
         <label class="chip"><input type="radio" name="usaria" value="Tal vez"><span>Tal vez</span></label>
         <label class="chip"><input type="radio" name="usaria" value="No"><span>No</span></label></div>
-      <label class="nota" for="por_que" style="display:block;margin:12px 0 6px">¿Por qué?</label><textarea id="por_que" name="por_que"></textarea></div>
+      <label class="nota" for="por_que" style="display:block;margin:12px 0 6px">¿Por qué?</label><textarea id="por_que" name="por_que" placeholder="Cuéntenos con sus palabras"></textarea></div>
     <div class="pregunta"><label class="enunciado" for="preocupaciones"><span class="n">25.</span>¿Le preocupa algo de usar inteligencia artificial en su trabajo?</label><textarea id="preocupaciones" name="preocupaciones" placeholder="Cuéntenos con sus palabras. Si no tiene ninguna preocupación, escriba «ninguna»."></textarea></div>
     <div class="pregunta"><span class="enunciado"><span class="n">26.</span>¿Le gustaría probar el prototipo y darnos su opinión?</span>
       <div class="opciones">
@@ -333,6 +350,15 @@ document.getElementById('orden').innerHTML = HERRAMIENTAS.map(([n, t]) =>
   `<div class="item-orden"><p>${t}</p><div class="puestos">${NIVELES_UTILIDAD.map(v =>
     `<label class="puesto"><input type="radio" name="${n}" value="${v}" aria-label="${t}: ${v}"><span>${v}</span></label>`).join('')}</div></div>`).join('');
 
+form.querySelectorAll('input[name=documento]').forEach(c => c.addEventListener('change', () =>
+  document.getElementById('documento_otro').hidden = !form.querySelector('input[name=documento][value=Otro]').checked));
+form.querySelectorAll('input[name=mas_le_cuesta]').forEach(c => c.addEventListener('change', () => {
+  if (form.querySelectorAll('input[name=mas_le_cuesta]:checked').length > 2) c.checked = false;  // hasta dos
+}));
+// «¿Por qué?»: opcional si usaría el borrador; si duda o no lo usaría, se pide, porque eso dice qué le hace falta.
+form.querySelectorAll('input[name=usaria]').forEach(r => r.addEventListener('change', () =>
+  document.getElementById('por_que').placeholder = form.usaria.value === 'Sí' ? 'Cuéntenos con sus palabras (opcional)'
+    : 'Cuéntenos qué le haría falta para usarlo; nos ayuda mucho a mejorarlo.'));
 form.querySelectorAll('input[name=probar]').forEach(r => r.addEventListener('change', () =>
   document.getElementById('bloque-contacto').hidden = form.probar.value !== 'Sí'));
 
@@ -350,8 +376,16 @@ function respuestas() {
 // Avance: preguntas con alguna respuesta sobre el total de preguntas (la utilidad de las herramientas cuenta como una).
 const PREGUNTAS = ['estado','municipio','nombre_escuela','tipo_escuela','grados','multigrado','estudiantes','dias_sin_electricidad','duracion_corte','clases_perdidas','internet','equipos','respaldo',
   'horas_planificacion','documento','otra_especialidad','registros','perdio_registros','rezago','mas_le_cuesta','comparte','orden','otra_herramienta','usaria','preocupaciones','probar'];
-// Todas las preguntas numeradas son obligatorias (el «¿Por qué?» de la pregunta 24 es opcional).
-const respondida = (p, r) => p === 'orden' ? ORDEN.every(n => r[n]) : (Array.isArray(r[p]) ? r[p].length > 0 : !!r[p]);
+// Todas las preguntas numeradas son obligatorias. «Otro» pide escribir cuál, y el «¿Por qué?» de la pregunta 24
+// se pide cuando responde «Tal vez» o «No».
+const marcoOtro = (r, p) => Array.isArray(r[p]) && r[p].includes('Otro');
+const respondida = (p, r) => {
+  if (p === 'orden') return ORDEN.every(n => r[n]);
+  if (p === 'documento' && marcoOtro(r, p) && !r.documento_otro) return false;
+  if (p === 'mas_le_cuesta' && marcoOtro(r, p) && !r.mas_le_cuesta_detalle) return false;
+  if (p === 'usaria' && r.usaria && r.usaria !== 'Sí' && !r.por_que) return false;
+  return Array.isArray(r[p]) ? r[p].length > 0 : !!r[p];
+};
 const preguntaDe = p => (p === 'orden' ? document.getElementById('orden') : form.querySelector(`[name="${p}"]`)).closest('.pregunta');
 function actualizarAvance() {
   const r = respuestas();
