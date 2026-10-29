@@ -140,7 +140,7 @@
     <p>Estamos diseñando herramientas digitales para escuelas que trabajan con cortes de electricidad y sin internet. Queremos construir lo que de verdad les sirva, y para eso necesitamos su experiencia. Gracias por su tiempo.</p>
     <div class="confidencial">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-      <span>Sus respuestas son confidenciales. Si las citamos, será sin su nombre.</span>
+      <span>Sus respuestas son anónimas: no le pedimos su nombre. Las usaremos, siempre sin nombres, para mejorar estas herramientas.</span>
     </div>
   </div>
 
@@ -186,12 +186,19 @@
         <label class="chip"><input type="radio" name="duracion_corte" value="1-4 horas"><span>Entre 1 y 4 horas</span></label>
         <label class="chip"><input type="radio" name="duracion_corte" value="Más de 4 horas"><span>Más de 4 horas</span></label>
         <label class="chip"><input type="radio" name="duracion_corte" value="Varios días"><span>Varios días</span></label></div></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">10.</span>¿Hay internet en la escuela?</span>
+    <div class="pregunta"><span class="enunciado"><span class="n">10.</span>En el último mes, ¿cuántas clases perdió por cortes de electricidad u otras causas?</span>
+      <div class="opciones">
+        <label class="chip"><input type="radio" name="clases_perdidas" value="Ninguna"><span>Ninguna</span></label>
+        <label class="chip"><input type="radio" name="clases_perdidas" value="1 a 3"><span>1 a 3</span></label>
+        <label class="chip"><input type="radio" name="clases_perdidas" value="4 a 8"><span>4 a 8</span></label>
+        <label class="chip"><input type="radio" name="clases_perdidas" value="Más de 8"><span>Más de 8</span></label></div></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">11.</span>¿Hay internet en la escuela?</span>
       <div class="opciones">
         <label class="chip"><input type="radio" name="internet" value="No hay"><span>No hay</span></label>
+        <label class="chip"><input type="radio" name="internet" value="Solo con datos del teléfono"><span>Solo con los datos de mi teléfono</span></label>
         <label class="chip"><input type="radio" name="internet" value="Hay pero falla mucho"><span>Hay, pero falla mucho</span></label>
         <label class="chip"><input type="radio" name="internet" value="Funciona bien"><span>Funciona bien</span></label></div></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">11.</span>¿Qué equipos tiene usted a mano? <span class="nota">Puede marcar varios.</span></span>
+    <div class="pregunta"><span class="enunciado"><span class="n">12.</span>¿Qué equipos tiene usted a mano? <span class="nota">Puede marcar varios.</span></span>
       <div class="opciones">
         <label class="chip"><input type="checkbox" name="equipos" value="Teléfono Android"><span>Teléfono Android</span></label>
         <label class="chip"><input type="checkbox" name="equipos" value="iPhone"><span>iPhone</span></label>
@@ -199,7 +206,7 @@
         <label class="chip"><input type="checkbox" name="equipos" value="Otra laptop"><span>Otra laptop</span></label>
         <label class="chip"><input type="checkbox" name="equipos" value="Computadora de la escuela"><span>Computadora de la escuela</span></label>
         <label class="chip"><input type="checkbox" name="equipos" value="Ninguno"><span>Ninguno</span></label></div></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">12.</span>¿La escuela tiene planta eléctrica, panel solar o batería de respaldo? <span class="nota">Puede marcar varios.</span></span>
+    <div class="pregunta"><span class="enunciado"><span class="n">13.</span>¿La escuela tiene planta eléctrica, panel solar o batería de respaldo? <span class="nota">Puede marcar varios.</span></span>
       <div class="opciones">
         <label class="chip"><input type="checkbox" name="respaldo" value="Planta eléctrica"><span>Planta eléctrica</span></label>
         <label class="chip"><input type="checkbox" name="respaldo" value="Panel solar"><span>Panel solar</span></label>
@@ -213,25 +220,29 @@
       <div class="numero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V5a2 2 0 0 1 2-2h12v15H6a2 2 0 0 0-2 1.5z"/><path d="M4 19.5A2 2 0 0 0 6 21h12"/><path d="M9 7h6M9 11h4"/></svg></div>
       <div><h2>Su trabajo diario</h2><small>Sección 3 de 5</small></div>
     </div>
-    <div class="pregunta"><span class="enunciado"><span class="n">13.</span>¿Cuántas horas a la semana dedica a preparar sus clases?</span>
+    <div class="pregunta"><span class="enunciado"><span class="n">14.</span>¿Cuántas horas a la semana dedica a preparar sus clases?</span>
       <div class="opciones">
         <label class="chip"><input type="radio" name="horas_planificacion" value="Menos de 2"><span>Menos de 2 horas</span></label>
         <label class="chip"><input type="radio" name="horas_planificacion" value="2-5"><span>Entre 2 y 5</span></label>
         <label class="chip"><input type="radio" name="horas_planificacion" value="5-10"><span>Entre 5 y 10</span></label>
         <label class="chip"><input type="radio" name="horas_planificacion" value="Más de 10"><span>Más de 10</span></label></div></div>
-    <div class="pregunta"><label class="enunciado" for="documento"><span class="n">14.</span>¿Qué documento usa para planificar?</label><input type="text" id="documento" name="documento" placeholder="Ej.: el currículo de primaria, un libro de texto…"></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">15.</span>¿Dónde guarda las notas y los registros de sus estudiantes? <span class="nota">Puede marcar varios.</span></span>
+    <div class="pregunta"><label class="enunciado" for="documento"><span class="n">15.</span>¿Qué documento usa para planificar?</label><input type="text" id="documento" name="documento" placeholder="Ej.: el currículo de primaria, un libro de texto…"></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">16.</span>¿Da clases de alguna área que no es su especialidad?</span>
+      <div class="opciones">
+        <label class="chip"><input type="radio" name="otra_especialidad" value="Sí"><span>Sí</span></label>
+        <label class="chip"><input type="radio" name="otra_especialidad" value="No"><span>No</span></label></div></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">17.</span>¿Dónde guarda las notas y los registros de sus estudiantes? <span class="nota">Puede marcar varios.</span></span>
       <div class="opciones">
         <label class="chip"><input type="checkbox" name="registros" value="Cuaderno"><span>Cuaderno</span></label>
         <label class="chip"><input type="checkbox" name="registros" value="Carpeta"><span>Carpeta</span></label>
         <label class="chip"><input type="checkbox" name="registros" value="Teléfono"><span>Teléfono</span></label>
         <label class="chip"><input type="checkbox" name="registros" value="Computadora"><span>Computadora</span></label>
         <label class="chip"><input type="checkbox" name="registros" value="Otro"><span>Otro</span></label></div></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">16.</span>¿Ha perdido alguna vez registros o trabajos por un corte de electricidad o una falla del equipo?</span>
+    <div class="pregunta"><span class="enunciado"><span class="n">18.</span>¿Ha perdido alguna vez registros o trabajos por un corte de electricidad o una falla del equipo?</span>
       <div class="opciones">
         <label class="chip"><input type="radio" name="perdio_registros" value="Sí"><span>Sí</span></label>
         <label class="chip"><input type="radio" name="perdio_registros" value="No"><span>No</span></label></div></div>
-    <div class="pregunta"><label class="enunciado" for="rezago"><span class="n">17.</span>¿Cómo sabe hoy qué estudiantes se están quedando atrás?</label><textarea id="rezago" name="rezago" placeholder="Cuéntenos con sus palabras"></textarea></div>
+    <div class="pregunta"><label class="enunciado" for="rezago"><span class="n">19.</span>¿Cómo sabe hoy qué estudiantes se están quedando atrás?</label><textarea id="rezago" name="rezago" placeholder="Cuéntenos con sus palabras"></textarea></div>
   </section>
 
   <section class="tarjeta">
@@ -239,11 +250,17 @@
       <div class="numero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/></svg></div>
       <div><h2>Sus necesidades</h2><small>Sección 4 de 5</small></div>
     </div>
-    <div class="pregunta"><label class="enunciado" for="mas_le_cuesta"><span class="n">18.</span>¿Qué es lo que más tiempo le quita o más le cuesta en su trabajo?</label><textarea id="mas_le_cuesta" name="mas_le_cuesta" placeholder="Cuéntenos con sus palabras"></textarea></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">19.</span>Ordene estas herramientas, todas sin internet, del 1 (la más útil) al 5 (la menos útil). <span class="nota">Use cada número una sola vez.</span></span>
+    <div class="pregunta"><label class="enunciado" for="mas_le_cuesta"><span class="n">20.</span>¿Qué es lo que más tiempo le quita o más le cuesta en su trabajo?</label><textarea id="mas_le_cuesta" name="mas_le_cuesta" placeholder="Cuéntenos con sus palabras"></textarea></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">21.</span>¿Cómo comparte hoy materiales con otros docentes? <span class="nota">Puede marcar varios.</span></span>
+      <div class="opciones">
+        <label class="chip"><input type="checkbox" name="comparte" value="WhatsApp"><span>WhatsApp</span></label>
+        <label class="chip"><input type="checkbox" name="comparte" value="En persona"><span>En persona</span></label>
+        <label class="chip"><input type="checkbox" name="comparte" value="Impresos"><span>Impresos</span></label>
+        <label class="chip"><input type="checkbox" name="comparte" value="No comparto"><span>No comparto</span></label></div></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">22.</span>Ordene estas herramientas, todas sin internet, del 1 (la más útil) al 5 (la menos útil). <span class="nota">Use cada número una sola vez.</span></span>
       <div class="orden" id="orden"></div>
       <p class="error" id="error-orden" hidden>Cada número del 1 al 5 debe usarse una sola vez.</p></div>
-    <div class="pregunta"><label class="enunciado" for="otra_herramienta"><span class="n">20.</span>¿Qué otra herramienta le gustaría tener que no esté en la lista?</label><textarea id="otra_herramienta" name="otra_herramienta" placeholder="Opcional"></textarea></div>
+    <div class="pregunta"><label class="enunciado" for="otra_herramienta"><span class="n">23.</span>¿Qué otra herramienta le gustaría tener que no esté en la lista?</label><textarea id="otra_herramienta" name="otra_herramienta" placeholder="Opcional"></textarea></div>
   </section>
 
   <section class="tarjeta">
@@ -251,28 +268,24 @@
       <div class="numero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg></div>
       <div><h2>Sobre el asistente</h2><small>Sección 5 de 5</small></div>
     </div>
-    <div class="pregunta"><span class="enunciado"><span class="n">21.</span>Si una herramienta le propone un borrador de plan de clase y usted lo revisa y corrige, ¿lo usaría?</span>
+    <div class="pregunta"><span class="enunciado"><span class="n">24.</span>Si una herramienta le propone un borrador de plan de clase y usted lo revisa y corrige, ¿lo usaría?</span>
       <div class="opciones">
         <label class="chip"><input type="radio" name="usaria" value="Sí"><span>Sí</span></label>
         <label class="chip"><input type="radio" name="usaria" value="Tal vez"><span>Tal vez</span></label>
         <label class="chip"><input type="radio" name="usaria" value="No"><span>No</span></label></div>
       <label class="nota" for="por_que" style="display:block;margin:12px 0 6px">¿Por qué?</label><textarea id="por_que" name="por_que"></textarea></div>
-    <div class="pregunta"><label class="enunciado" for="preocupaciones"><span class="n">22.</span>¿Le preocupa algo de usar inteligencia artificial en su trabajo?</label><textarea id="preocupaciones" name="preocupaciones"></textarea></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">23.</span>¿Le gustaría probar el prototipo y darnos su opinión?</span>
+    <div class="pregunta"><label class="enunciado" for="preocupaciones"><span class="n">25.</span>¿Le preocupa algo de usar inteligencia artificial en su trabajo?</label><textarea id="preocupaciones" name="preocupaciones"></textarea></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">26.</span>¿Le gustaría probar el prototipo y darnos su opinión?</span>
       <div class="opciones">
         <label class="chip"><input type="radio" name="probar" value="Sí"><span>Sí, me gustaría</span></label>
         <label class="chip"><input type="radio" name="probar" value="No"><span>No por ahora</span></label></div>
       <div id="bloque-contacto" hidden>
-        <div class="confidencial" style="margin-top:14px"><span>Solo usamos su correo o su teléfono para enviarle el enlace de prueba y avisarle si organizamos una demostración en línea. No se publica ni se comparte.</span></div>
+        <div class="confidencial" style="margin-top:14px"><span>Sus datos están protegidos: solo usamos su correo o su teléfono para enviarle el enlace de prueba y avisarle si organizamos una demostración en línea. No se publican ni se comparten.</span></div>
         <label class="enunciado" for="correo" style="margin:14px 0 6px;font-size:15px">Correo electrónico</label>
         <input type="email" id="correo" name="correo" inputmode="email" autocomplete="email" placeholder="Ej.: maestra@gmail.com">
         <label class="enunciado" for="whatsapp" style="margin:12px 0 6px;font-size:15px">WhatsApp</label>
         <input type="tel" id="whatsapp" name="whatsapp" inputmode="tel" autocomplete="tel" placeholder="Ej.: 0414 123 4567">
       </div></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">24.</span>¿Nos autoriza a citar sus respuestas de forma anónima, sin su nombre ni el de su escuela, en solicitudes de financiamiento?</span>
-      <div class="opciones">
-        <label class="chip"><input type="radio" name="autoriza" value="Sí"><span>Sí</span></label>
-        <label class="chip"><input type="radio" name="autoriza" value="No"><span>No</span></label></div></div>
   </section>
 
   <input class="oculto" type="text" name="sitio_web" tabindex="-1" autocomplete="off" aria-hidden="true">
@@ -290,7 +303,7 @@
 </main>
 <footer>Una iniciativa de Jesús Ignacio Briceño Alarcón · JIBA<br>Consultor en cooperación al desarrollo e IA ética<br>
   <a href="https://ignaciobriceno.com" target="_blank" rel="noopener" style="color:var(--azul);font-weight:700;text-decoration:none">ignaciobriceno.com</a><br>
-  Sus respuestas se guardan de forma confidencial.</footer>
+  Sus respuestas son anónimas y sus datos están protegidos.</footer>
 
 <script>
 const form = document.getElementById('encuesta');
@@ -304,7 +317,7 @@ selEstado.addEventListener('change', () => {
   selMunicipio.disabled = !lista.length;
 });
 
-// Pregunta 17: cada herramienta recibe un puesto del 1 al 5.
+// Orden de herramientas: cada una recibe un puesto del 1 al 5.
 const HERRAMIENTAS = [
   ['p_planes', 'Preparar planes de clase'],
   ['p_evaluaciones', 'Crear evaluaciones cortas'],
@@ -339,9 +352,9 @@ function respuestas() {
   return r;
 }
 
-// Avance: preguntas con alguna respuesta sobre el total de preguntas (17 cuenta como una).
-const PREGUNTAS = ['estado','municipio','nombre_escuela','tipo_escuela','grados','multigrado','estudiantes','dias_sin_electricidad','duracion_corte','internet','equipos','respaldo',
-  'horas_planificacion','documento','registros','perdio_registros','rezago','mas_le_cuesta','orden','otra_herramienta','usaria','preocupaciones','probar','autoriza'];
+// Avance: preguntas con alguna respuesta sobre el total de preguntas (el orden de herramientas cuenta como una).
+const PREGUNTAS = ['estado','municipio','nombre_escuela','tipo_escuela','grados','multigrado','estudiantes','dias_sin_electricidad','duracion_corte','clases_perdidas','internet','equipos','respaldo',
+  'horas_planificacion','documento','otra_especialidad','registros','perdio_registros','rezago','mas_le_cuesta','comparte','orden','otra_herramienta','usaria','preocupaciones','probar'];
 function actualizarAvance() {
   const r = respuestas();
   const hechas = PREGUNTAS.filter(p => p === 'orden' ? ORDEN.some(n => r[n]) : (Array.isArray(r[p]) ? r[p].length : r[p])).length;
