@@ -1,14 +1,17 @@
-# Prototipo: asistente docente sin conexión
+# Tiza sin conexión
 
-Funciona sin internet. Una laptop hace de servidor y los teléfonos de los docentes se conectan a ella por la red Wi-Fi local. No usa librerías externas, solo Python 3.
+Funciona sin internet. Una laptop hace de servidor y los teléfonos de los docentes se conectan a ella por la red Wi-Fi local. Es la misma aplicación Tiza de la versión web (carpeta `web/`), con la misma lógica; solo cambia dónde corre el modelo: aquí, en la laptop, con Ollama. No usa librerías externas, solo Python 3.
+
+Los estudiantes, guardados y calificaciones quedan en el teléfono de cada docente. Las opiniones y los perfiles se guardan en `app/datos/` de la laptop; nada sale del equipo.
 
 ## Funciones
 1. **Planificar:** propone un plan de clase según el nivel (Primaria de 1.º a 6.º grado o Media General de 1.º a 5.º año), el área, el tema, los materiales y las condiciones del aula. Admite aulas multigrado. Cada área tiene su propia estructura; Educación Física, por ejemplo, lleva calentamiento, parte principal, vuelta a la calma y medidas de seguridad.
 2. **Evaluar:** crea 5 preguntas con su clave de respuestas, y una revisión automática marca las respuestas dudosas. En Educación Física crea en cambio una lista de observación.
-3. **Seguimiento:** el docente anota los aciertos y aparece un aviso cuando un estudiante saca menos del 60 % en las dos últimas evaluaciones. El aviso sale de una regla simple, no de la IA.
-4. **Guardados:** los planes y evaluaciones se guardan en el equipo y se pueden consultar sin electricidad ni internet. «Descargar archivo» crea una copia para imprimirla cuando haya electricidad.
+3. **Mis estudiantes:** el docente anota las calificaciones con la escala oficial (art. 108 del Reglamento de la LOE: literales A a E en Primaria, 1 a 20 en Media General, mínimo 10). Tiza avisa cuando un estudiante necesita apoyo (D o E, o menos de 10). El aviso sale de una regla simple, no de la IA.
+4. **Repasar:** explica un tema en lenguaje sencillo para preparar la clase.
+5. **Guardados:** los planes y evaluaciones se guardan en el equipo y se pueden consultar sin electricidad ni internet. «Descargar archivo» crea una copia para imprimirla cuando haya electricidad.
 
-## Contenidos oficiales cargados (carpeta `curriculo/`)
+## Contenidos oficiales cargados (carpeta `web/api/curriculo/`)
 Fuente: documentos del Ministerio del Poder Popular para la Educación para el año escolar vigente, publicados en https://www.mppe.gob.ve/periodo-escolar-2025-2026/ («Propuestas de contenidos para la enseñanza y aprendizajes esperados»). Revisado el 28/10/2026.
 
 | Área | Documento | Niveles |
@@ -32,7 +35,7 @@ ollama pull gemma4:e4b-it-qat
 ```bash
 python3 app/server.py
 ```
-La pantalla muestra una dirección, por ejemplo `http://192.168.1.20:8080`. Los teléfonos conectados al mismo Wi-Fi la abren en el navegador.
+La pantalla muestra una dirección, por ejemplo `http://192.168.1.20:8080`, y la contraseña (por defecto `aula2026`; se cambia con `CODIGO_ACCESO=...`). Los teléfonos conectados al mismo Wi-Fi la abren en el navegador. Arriba, Tiza muestra «Sin internet · en la escuela».
 
 - **Revisar solo la pantalla, sin modelo:** `SIMULAR=1 python3 app/server.py`.
 

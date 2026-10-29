@@ -15,6 +15,10 @@ CURRICULO = Path(__file__).resolve().parent / "curriculo"
 MODELO = "claude-haiku-5-5"
 CODIGO = os.environ.get("CODIGO_ACCESO", "")
 SIMULAR = os.environ.get("SIMULAR") == "1"  # solo para revisar la pantalla sin modelo
+# Versión sin conexión (app/server.py): el modelo corre en la laptop de la escuela con Ollama.
+LOCAL = os.environ.get("MOTOR") == "local"
+OLLAMA = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434")
+MODELO_LOCAL = os.environ.get("MODELO", "gemma4:e4b-it-qat")
 
 SISTEMA = (
     "Eres un asistente para docentes de escuelas rurales de Venezuela (estado Mérida). "
@@ -97,7 +101,7 @@ def curriculo_de(nivel, grado, area):
     texto = datos["areas"].get(area)
     if not texto:
         return None
-    return "Fuente: {}\n{}".format(datos["fuentes"][area], texto[:30000])
+    return "Fuente: {}\n{}".format(datos["fuentes"][area], texto[:14000 if LOCAL else 30000])  # el modelo local tiene menos contexto
 
 
 class Rechazo(Exception):
@@ -124,6 +128,8 @@ def preguntar_modelo(prompt, sistema=SISTEMA, esquema=None, esfuerzo=None):
         if esquema:
             return json.dumps(ejemplo_de(esquema))
         return "Modo de prueba de pantalla: este texto no lo escribió ningún modelo."
+    if LOCAL:
+        return preguntar_local(prompt, sistema, esquema, pensar=(esfuerzo or ("low" if esquema is None else "medium")) != "low")
     import anthropic  # solo hace falta cuando hay modelo
     pedido = {
         "model": MODELO,
@@ -138,6 +144,23 @@ def preguntar_modelo(prompt, sistema=SISTEMA, esquema=None, esfuerzo=None):
     if r.stop_reason == "refusal":
         raise Rechazo()
     return next(b.text for b in r.content if b.type == "text")
+
+
+def preguntar_local(prompt, sistema, esquema, pensar):
+    import urllib.request
+    pedido = {
+        "model": MODELO_LOCAL,
+        "messages": [{"role": "system", "content": sistema}, {"role": "user", "content": prompt}],
+        "stream": False,
+        "think": pensar,  # sin razonamiento extra al redactar: respuestas más rápidas en equipos modestos
+        "options": {"temperature": 0.2 if esquema else 0.4, "num_ctx": 8192},
+    }
+    if esquema:
+        pedido["format"] = esquema
+    req = urllib.request.Request(OLLAMA + "/api/chat", data=json.dumps(pedido).encode(),
+                                 headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=600) as r:
+        return json.loads(r.read())["message"]["content"]
 
 
 def contexto_clase(d):

@@ -984,11 +984,11 @@ if (!codigo()) mostrarBienvenida(); else registrarPerfil();
 
 const estadoConexion = () => { if (!navigator.onLine) $('#estado').textContent = 'Sin conexión · funciona igual'; };
 fetch('/api/estado', {headers:{'X-Codigo': codigo()}}).then(r => r.json()).then(j => {
-  $('#estado').textContent = j.simulado ? 'Modo de prueba' : j.ok ? 'Con conexión' : 'No disponible';
+  $('#estado').textContent = j.simulado ? 'Modo de prueba' : j.local ? 'Sin internet · en la escuela' : j.ok ? 'Con conexión' : 'No disponible';
   if (codigo() && j.acceso === false) { guardarCodigo(''); mostrarBienvenida(); }  // la contraseña de la prueba cambió
 }).catch(estadoConexion);
 addEventListener('offline', estadoConexion);
-addEventListener('online', () => { $('#estado').textContent = 'Con conexión'; registrarPerfil(); });
+addEventListener('online', () => { if (!/escuela/.test($('#estado').textContent)) $('#estado').textContent = 'Con conexión'; registrarPerfil(); });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 
 // Aviso para agregar Tiza a la pantalla de inicio (así abre sin internet como una aplicación).
