@@ -113,6 +113,10 @@
   table { width:100%; border-collapse:collapse; font-size:1.05rem; }
   td, th { padding:10px 4px; border-bottom:1px solid var(--borde); text-align:left; }
   td input { width:5.5rem; }
+  /* En el iPhone el campo de fecha trae su propio ancho y se sale del recuadro */
+  input[type=date] { -webkit-appearance:none; appearance:none; display:block; min-width:0; max-width:100%; text-align:left; }
+  input[type=date]::-webkit-date-and-time-value { text-align:left; }
+  .historial summary .nota { display:block; }
   .historial table { table-layout:fixed; } .historial td, .historial th { overflow-wrap:anywhere; }
   .alerta { border-left:5px solid var(--alerta); background:#FFF5F2; padding:12px 14px; border-radius:12px; margin:8px 0; }
   .revisado { font-size:1.05rem; color:var(--verde); background:#EFF8F2; border-radius:12px; padding:12px 14px; }
@@ -316,7 +320,7 @@
 <!-- GUARDADOS -->
 <section id="guardados">
   <h2>Guardados</h2>
-  <p class="sub">Sus planes, evaluaciones y repasos. Se abren sin internet. Puede imprimirlos o descargar una copia para imprimirla cuando haya electricidad.</p>
+  <p class="sub">Sus planes, evaluaciones y repasos. Se abren sin internet. «Descargar archivo» guarda una copia en su teléfono para imprimirla o enviarla cuando lo necesite.</p>
   <div id="lista-guardados"></div>
 </section>
 
@@ -341,12 +345,12 @@
     <p style="margin:0"><b>Android:</b> abra Tiza en Chrome, toque el menú ⋮ y elija «Agregar a la pantalla principal» o «Instalar aplicación». Si la abrió desde WhatsApp, primero toque ⋮ y «Abrir en Chrome».</p>
   </div>
   <div class="tarjeta">
-    <h3>Imprimir o guardar un archivo</h3>
-    <p style="margin:0">Debajo de cada borrador y en Guardados está el botón «Imprimir». «Descargar archivo» guarda una copia con el mismo formato, para imprimirla después, por ejemplo cuando haya electricidad.</p>
+    <h3>Guardar e imprimir</h3>
+    <p style="margin:0">«Guardar en este teléfono» deja el borrador dentro de Tiza, en Guardados, y se abre sin internet. Para imprimirlo, en Guardados toque «Descargar archivo»: se guarda una copia en su teléfono que puede imprimir o enviar cuando lo necesite.</p>
   </div>
   <div class="tarjeta">
     <h3>La contraseña</h3>
-    <p style="margin:0">Se escribe una sola vez: después Tiza abre directo en este teléfono. Si la prueba cambia de contraseña, se la pediremos de nuevo.</p>
+    <p style="margin:0">Se escribe una sola vez y queda guardada en este teléfono.</p>
   </div>
   <div class="opinion-caja noimprimir"><p>¿Ya la probó? Nos encantaría conocer su opinión.</p><button class="sec" onclick="abrirOpinion()">Dar mi opinión</button></div>
 </section>
@@ -409,6 +413,12 @@
     <button class="borde" type="button" style="width:100%;margin-top:10px" onclick="document.getElementById('opinion').close()">Cerrar</button>
     <p class="nota" id="opinion-estado" style="text-align:center;margin:10px 0 0"></p>
   </form>
+  <div id="opinion-gracias" style="display:none;text-align:center;padding:10px 4px">
+    <span class="logo" style="display:inline-grid;width:4rem;height:4rem;border-radius:20px;background:var(--marino);place-items:center"><svg style="width:2.8rem;height:2.8rem"><use href="#tiza"/></svg></span>
+    <h3 style="margin:14px 0 6px">¡Gracias por su opinión!</h3>
+    <p style="margin:0 0 18px">Sus valoraciones nos ayudan mucho a mejorar Tiza para las escuelas.</p>
+    <button class="principal" type="button" onclick="document.getElementById('opinion').close()">Continuar</button>
+  </div>
 </dialog>
 
 <script>
@@ -566,10 +576,9 @@ function activarResultado(salida, tipo, d, texto) {
   const actual = () => texto || res.innerText;
   salida.querySelector('[data-guardar]').onclick = ev => guardar(tipo, d, res.innerHTML, actual(), ev.currentTarget);
   salida.querySelector('[data-compartir]').onclick = () => compartir(tituloDe(tipo, d), actual());
-  salida.querySelector('[data-imprimir]').onclick = () => imprimir(tituloDe(tipo, d), res.innerHTML);
 }
 
-// Imprimir y descargar: un documento limpio, con su propio formato (la clave de la evaluación va en una tabla).
+// «Descargar archivo»: un documento limpio para imprimir, con su propio formato (la clave de la evaluación va en una tabla).
 const ESTILO_DOC = `.doc{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#16202E;font-size:15px;line-height:1.5;max-width:720px;margin:0 auto}
 .doc h1{font-size:20px;color:#0F2747;margin:0 0 4px}.doc h2{font-size:18px;color:#0F2747;margin:10px 0 6px}.doc h3{font-size:16px;color:#0F2747;margin:16px 0 6px}
 .doc p{margin:4px 0}.doc ul,.doc ol{margin:4px 0;padding-left:22px}.doc li{margin:2px 0}
@@ -592,16 +601,6 @@ function documentoHTML(titulo, html) {
   });
   return `<div class="doc"><h1>${esc(titulo)}</h1>${caja.innerHTML}<p class="pie-doc">Preparado con Tiza, asistente de clases. Borrador revisado por el docente.</p></div>`;
 }
-document.head.insertAdjacentHTML('beforeend', `<style>${ESTILO_DOC}
-#impresion{display:none} @media print { html.imprimiendo body > *:not(#impresion){display:none !important} html.imprimiendo #impresion{display:block} html.imprimiendo body{background:#fff} }</style>`);
-function imprimir(titulo, html) {
-  let caja = $('#impresion');
-  if (!caja) { caja = document.createElement('div'); caja.id = 'impresion'; document.body.appendChild(caja); }
-  caja.innerHTML = documentoHTML(titulo, html);
-  document.documentElement.classList.add('imprimiendo');
-  addEventListener('afterprint', () => document.documentElement.classList.remove('imprimiendo'), {once:true});
-  print();
-}
 
 async function generar(accion) {
   const salida = $('#salida'), d = datosClase(), tipo = TIPOS[accion];
@@ -617,7 +616,7 @@ async function generar(accion) {
     salida.innerHTML = revisionHTML(j.revision) + `<div class="resultado" contenteditable="true">${partesHTML(accion, j.partes, j.revision)}</div>
       <p class="aviso-ia">Borrador hecho con IA. Toque el texto para corregirlo. Usted decide qué usar.</p>
       <div class="acciones"><button class="principal" data-guardar>Guardar en este teléfono</button>
-        <button class="sec" data-compartir>Compartir por WhatsApp</button><button class="borde" data-imprimir>Imprimir</button></div>`;
+        <button class="sec" data-compartir>Compartir por WhatsApp</button></div>`;
     activarResultado(salida, tipo, d, j.texto);
   } catch (e) {
     if (!navigator.onLine || e instanceof TypeError) await mostrarSinConexion(accion, d, salida);
@@ -691,7 +690,7 @@ async function mostrarSinConexion(accion, d, salida) {
   salida.innerHTML = `<p class="revisado"><b>Sin conexión.</b> Le preparamos una guía con el programa oficial de su grado para que arme su ${accion === 'evaluacion' ? 'evaluación' : accion === 'repaso' ? 'repaso' : 'plan'}. Toque el texto para completar donde dice «…» y guárdelo. Con conexión, Tiza le propone un borrador completo.</p>
     <div class="resultado" contenteditable="true">${cuerpo}</div>${completo}
     <div class="acciones"><button class="principal" data-guardar>Guardar en este teléfono</button>
-      <button class="sec" data-compartir>Compartir por WhatsApp</button><button class="borde" data-imprimir>Imprimir</button></div>`;
+      <button class="sec" data-compartir>Compartir por WhatsApp</button></div>`;
   activarResultado(salida, TIPOS[accion], d);
 }
 
@@ -727,7 +726,6 @@ function cargarGuardados() {
     `<details class="guardado"><summary><b>${esc(x.titulo)}</b><br><span class="nota">${x.fecha}</span></summary>
       <div class="resultado">${x.html}</div>
       <div class="acciones"><button class="sec" data-wa="${x.id}">Compartir por WhatsApp</button>
-      <button class="sec" data-imprimir="${x.id}">Imprimir</button>
       <button class="sec" data-descargar="${x.id}">Descargar archivo</button>
       <button class="borde" data-borrar="${x.id}">Borrar</button></div></details>`).join('')
     : '<div class="tarjeta"><p style="margin:0">Aún no ha guardado nada. Cuando prepare un plan, una evaluación o un repaso, pulse «Guardar en este teléfono» y aparecerá aquí, también sin internet.</p></div>';
@@ -740,16 +738,17 @@ function cargarGuardados() {
     const x = docs.find(y => y.id == b.dataset.wa);
     compartir(x.titulo, x.texto || b.closest('details').querySelector('.resultado').innerText);
   });
-  $('#lista-guardados').querySelectorAll('[data-imprimir]').forEach(b => b.onclick = () => {
-    const x = docs.find(y => y.id == b.dataset.imprimir);
-    imprimir(x.titulo, x.html);
-  });
-  $('#lista-guardados').querySelectorAll('[data-descargar]').forEach(b => b.onclick = () => {
+  $('#lista-guardados').querySelectorAll('[data-descargar]').forEach(b => b.onclick = async () => {
     const x = docs.find(y => y.id == b.dataset.descargar);
     const pagina = `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(x.titulo)}</title><style>${ESTILO_DOC} body{margin:20px 14px}</style><body>${documentoHTML(x.titulo, x.html)}</body>`;
+    const nombre = x.titulo.replace(/[^\wáéíóúñ ]+/gi, '').slice(0, 60) + '.html';
+    // En el teléfono se abre el menú del sistema (Guardar en Archivos, Imprimir, WhatsApp…); si no se puede, se descarga.
+    const archivo = new File([pagina], nombre, {type:'text/html'});
+    if (navigator.canShare && navigator.canShare({files:[archivo]})) {
+      try { await navigator.share({files:[archivo], title:x.titulo}); return; } catch (e) { if (e.name === 'AbortError') return; }
+    }
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([pagina], {type:'text/html'}));
-    a.download = x.titulo.replace(/[^\wáéíóúñ ]+/gi, '').slice(0, 60) + '.html'; a.click();
+    a.href = URL.createObjectURL(archivo); a.download = nombre; a.click();
   });
 }
 
@@ -808,7 +807,7 @@ function cargarRegistro() {
     ? reg.estudiantes.map(e => {
         const ev = reg.evaluaciones.filter(v => v.estudiante === e.id).sort((a, b) => a.fecha.localeCompare(b.fecha));
         if (!ev.length) return '';
-        return `<details class="guardado"><summary><b>${esc(e.nombre)}</b> <span class="nota">· ${ev.length} ${ev.length > 1 ? 'evaluaciones' : 'evaluación'} · última: ${esc(resultadoDe(ev[ev.length - 1]))}</span></summary>
+        return `<details class="guardado"><summary><b>${esc(e.nombre)}</b> <span class="nota">${ev.length} ${ev.length > 1 ? 'evaluaciones' : 'evaluación'} · última: ${esc(resultadoDe(ev[ev.length - 1]))}</span></summary>
           <table><colgroup><col style="width:24%"><col><col style="width:30%"></colgroup><thead><tr><th>Fecha</th><th>Tema</th><th>Resultado</th></tr></thead><tbody>${ev.map(v =>
             `<tr><td>${fechaCorta(v.fecha)}</td><td>${esc(v.tema)}</td><td>${esc(resultadoDe(v))}</td></tr>`).join('')}</tbody></table></details>`;
       }).join('')
@@ -1003,7 +1002,11 @@ $('#instalar-no').onclick = () => { escribir('instalar-no', true); $('#instalar'
 mostrarInstalar();
 
 // Opinión anónima: se envía sin nombre ni datos personales.
-function abrirOpinion() { document.getElementById('opinion-estado').textContent = ''; document.getElementById('opinion').showModal(); }
+function abrirOpinion() {
+  document.getElementById('opinion-estado').textContent = '';
+  document.getElementById('form-opinion').style.display = ''; document.getElementById('opinion-gracias').style.display = 'none';
+  document.getElementById('opinion').showModal();
+}
 document.getElementById('enviar-opinion').onclick = async () => {
   const f = document.getElementById('form-opinion'), est = document.getElementById('opinion-estado');
   const datos = { probo: [...f.querySelectorAll('[name=probo]:checked')].map(x => x.value),
@@ -1013,8 +1016,8 @@ document.getElementById('enviar-opinion').onclick = async () => {
   try {
     const r = await fetch('/api/opinion', {method:'POST', headers:{'Content-Type':'application/json', 'X-Codigo':codigo()}, body:JSON.stringify(datos)});
     const j = await r.json(); if (!j.ok) throw new Error();
-    f.reset(); f.querySelectorAll('.chips').forEach(marcarChips); est.textContent = '¡Gracias! Su opinión fue enviada.';
-    setTimeout(() => document.getElementById('opinion').close(), 1500);
+    f.reset(); f.querySelectorAll('.chips').forEach(marcarChips); est.textContent = '';
+    f.style.display = 'none'; document.getElementById('opinion-gracias').style.display = '';
   } catch (e) { est.textContent = 'No se pudo enviar. Revise su conexión e intente de nuevo.'; }
 };
 </script>
