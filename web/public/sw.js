@@ -1,6 +1,6 @@
 // Permite abrir Tiza sin conexión: guarda la página y la usa cuando no hay internet.
 // Las respuestas de /api nunca se guardan (las genera el modelo y necesitan conexión).
-const CACHE = 'tiza-v1';
+const CACHE = 'tiza-v2';
 const BASE = ['/', '/logo-jiba-azul.png', '/manifest.webmanifest', '/icono-192.png', '/icono-512.png', '/apple-touch-icon.png',
   // Programa oficial del MPPE: permite armar planes y evaluaciones sin conexión.
   '/curriculo/media-1er.json', '/curriculo/media-2do.json', '/curriculo/media-3er.json', '/curriculo/media-4to.json', '/curriculo/media-5to.json', '/curriculo/primaria-1er.json', '/curriculo/primaria-2do.json', '/curriculo/primaria-3er.json', '/curriculo/primaria-4to.json', '/curriculo/primaria-5to.json', '/curriculo/primaria-6to.json'];

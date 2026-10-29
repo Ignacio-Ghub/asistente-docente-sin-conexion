@@ -31,12 +31,13 @@
   #estado { display:block; font-size:.9rem; font-weight:700; opacity:.85; }
   #btn-perfil { flex:none; width:3rem; height:3rem; border-radius:50%; border:2px solid rgba(255,255,255,.5); background:var(--amarillo); color:var(--marino); font-size:1.1rem; font-weight:800; cursor:pointer; }
 
-  /* Menú inferior, al alcance del pulgar */
+  /* Menú inferior, al alcance del pulgar. Su letra no crece con el tamaño de letra del teléfono
+     (como en las aplicaciones del sistema): así los cuatro botones caben siempre en el ancho de la pantalla. */
   nav { position:fixed; left:0; right:0; bottom:0; z-index:5; background:#fff; border-top:1px solid var(--borde); box-shadow:0 -6px 18px rgba(15,39,71,.08);
     display:flex; justify-content:center; padding:6px 6px calc(6px + env(safe-area-inset-bottom)); }
-  nav button { flex:1; max-width:190px; min-height:3.75rem; border:0; background:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
-    font-size:.95rem; font-weight:800; color:var(--suave); border-radius:16px; cursor:pointer; padding:4px 2px; }
-  nav button svg { width:1.6rem; height:1.6rem; }
+  nav button { flex:1 1 0; min-width:0; max-width:190px; min-height:58px; border:0; background:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    font-size:min(.95rem, 3.6vw, 15px); font-weight:800; color:var(--suave); border-radius:16px; cursor:pointer; padding:4px 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  nav button svg { width:26px; height:26px; flex:none; }
   nav button.activo { color:var(--marino); background:#E8EFFA; }
 
   main { max-width:760px; margin:0 auto; padding:18px 16px calc(110px + env(safe-area-inset-bottom)); }
@@ -47,7 +48,8 @@
   .tarjeta { background:#fff; border:1px solid var(--borde); border-radius:22px; padding:20px; margin-bottom:16px; box-shadow:0 6px 20px rgba(15,39,71,.06); }
 
   /* Inicio: tarjetas grandes, sin tener que saber escribir instrucciones a la IA */
-  .accesos { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+  /* Dos columnas con letra normal; una sola si el docente usa letra grande en su teléfono. */
+  .accesos { display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr)); gap:12px; margin-bottom:16px; }
   .acceso { display:flex; flex-direction:column; align-items:flex-start; gap:8px; text-align:left; min-height:9.5rem; padding:16px; border-radius:22px; border:1px solid var(--borde);
     background:#fff; color:var(--texto); box-shadow:0 6px 20px rgba(15,39,71,.07); cursor:pointer; font-size:1rem; }
   .acceso .ic { width:3rem; height:3rem; border-radius:16px; display:grid; place-items:center; background:var(--marino); color:#fff; }
@@ -55,7 +57,6 @@
   .acceso:nth-child(2) .ic { background:var(--azul); } .acceso:nth-child(3) .ic { background:#E7A90E; } .acceso:nth-child(4) .ic { background:var(--verde); }
   .acceso b { font-size:1.15rem; line-height:1.25; color:var(--marino); }
   .acceso span { color:var(--suave); font-weight:600; line-height:1.35; }
-  @media (max-width:360px) { .accesos { grid-template-columns:1fr; } .acceso { min-height:0; } }
 
   /* Formularios */
   label { display:block; font-size:1.05rem; font-weight:800; color:var(--texto); margin:16px 0 6px; }
@@ -80,9 +81,7 @@
   .acciones > button { flex:1 1 auto; }
 
   /* Pasos de «Preparar» */
-  .modos { display:flex; gap:8px; margin-bottom:14px; overflow-x:auto; }
-  .modos button { flex:1; min-height:3rem; padding:8px 10px; border:2px solid var(--borde); border-radius:30px; background:#fff; color:var(--marino); font-size:1rem; font-weight:800; cursor:pointer; white-space:nowrap; }
-  .modos button.activo { background:var(--marino); border-color:var(--marino); color:#fff; }
+  .volver { border:0; background:none; color:var(--azul); font-size:1.05rem; font-weight:800; padding:6px 0; min-height:2.75rem; cursor:pointer; }
   .progreso { display:flex; align-items:center; gap:12px; font-weight:800; color:var(--suave); font-size:1rem; }
   .progreso .barra-p { flex:1; height:8px; background:var(--borde); border-radius:8px; overflow:hidden; }
   .progreso .barra-p i { display:block; height:100%; background:var(--amarillo); border-radius:8px; transition:width .25s; }
@@ -99,9 +98,17 @@
   .giro { width:3rem; height:3rem; margin:0 auto 14px; border-radius:50%; border:5px solid var(--borde); border-top-color:var(--amarillo); animation:giro 1s linear infinite; }
   @keyframes giro { to { transform:rotate(360deg); } }
   .aviso-ia { font-size:1rem; color:var(--suave); border-top:1px dashed var(--borde); margin-top:14px; padding-top:10px; }
-  .valorar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:14px; font-size:1.05rem; font-weight:800; color:var(--marino); }
-  .valorar span { width:100%; }
-  .valorar button { flex:1; min-height:3rem; border:2px solid var(--marino); border-radius:30px; background:#fff; color:var(--marino); font-size:1rem; font-weight:800; cursor:pointer; }
+  /* Resultado por partes: cada momento, pregunta o idea en su propio bloque, fácil de revisar de un vistazo */
+  .resultado h2 { font-size:1.35rem; margin:0 0 8px; }
+  .nota-programa { background:#FFF8E5; border-left:5px solid var(--amarillo); border-radius:12px; padding:10px 14px; margin:8px 0; }
+  .bloque { border:1px solid var(--borde); border-radius:16px; padding:12px 14px; margin:10px 0; background:#FBFCFE; }
+  .bloque-cab { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:4px 8px; font-weight:800; color:var(--marino); font-size:1.1rem; margin-bottom:4px; }
+  .min { flex:none; background:var(--amarillo); color:var(--marino); border-radius:20px; padding:2px 10px; font-size:.95rem; font-weight:800; }
+  .tipo { flex:none; background:#E8EFFA; color:var(--marino); border-radius:20px; padding:2px 10px; font-size:.95rem; font-weight:800; }
+  .linea { margin:6px 0 0; }
+  .etq { display:block; font-weight:800; font-size:.95rem; }
+  .etq.bien { color:var(--verde); } .etq.mal { color:var(--alerta); } .etq.medio { color:#9A6B00; }
+  .bloque.dudosa { border:2px solid var(--alerta); }
   table { width:100%; border-collapse:collapse; font-size:1.05rem; }
   td, th { padding:10px 4px; border-bottom:1px solid var(--borde); text-align:left; }
   td input { width:5.5rem; }
@@ -143,6 +150,7 @@
   <symbol id="i-repaso" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></symbol>
   <symbol id="i-est" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M2 20c0-3.6 3-6 7-6s7 2.4 7 6M16.5 5a3 3 0 0 1 0 6M18 14c2.4.5 4 2.6 4 5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
   <symbol id="i-guard" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-ayuda" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M9.3 9.3a2.8 2.8 0 1 1 3.9 2.6c-.8.4-1.2 1-1.2 1.8v.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17.2" r="1.3" fill="currentColor"/></symbol>
 </svg>
 
 <div id="bienvenida">
@@ -156,7 +164,7 @@
       <input id="codigo" autocomplete="off" placeholder="Está en su mensaje" onkeydown="if(event.key==='Enter')$('#entrar').click()">
       <p class="error" id="codigo-error"></p>
       <button class="principal" id="entrar" style="margin-top:14px">Entrar</button>
-      <p class="nota" style="margin:12px 0 0">Versión de prueba. Lo que guarde queda solo en este teléfono. Use nombres inventados para los estudiantes.</p>
+      <p class="nota" style="margin:12px 0 0">Versión de prueba: puede usar nombres y datos inventados. Lo que anote de sus estudiantes queda solo en este teléfono.</p>
     </div>
   </div>
 </div>
@@ -198,12 +206,10 @@
   </div>
 </section>
 
-<!-- PREPARAR: plan, evaluación o repaso, en tres pasos cortos -->
+<!-- PREPARAR: plan, evaluación o repaso, en pasos cortos. Se entra solo desde las tarjetas de Inicio. -->
 <section id="preparar">
+  <button class="volver noimprimir" onclick="irA('inicio')">‹ Inicio</button>
   <h2 id="titulo-preparar">Preparar una clase</h2>
-  <div class="modos noimprimir" role="tablist">
-    <button data-modo="plan" class="activo">Plan de clase</button><button data-modo="evaluacion">Evaluación</button><button data-modo="repaso">Repaso</button>
-  </div>
   <form class="tarjeta" id="form-clase" novalidate>
     <div class="progreso"><span id="paso-texto">Paso 1 de 3</span><span class="barra-p"><i id="paso-barra" style="width:33%"></i></span></div>
 
@@ -256,14 +262,9 @@
     </div>
   </form>
   <div class="tarjeta" id="salida" style="display:none"></div>
-  <div class="tarjeta noimprimir" id="despues" style="display:none">
-    <h3>Con los mismos datos</h3>
-    <div class="acciones" style="margin-top:0">
-      <button class="sec" data-otro="evaluacion">Crear la evaluación</button>
-      <button class="sec" data-otro="repaso">Repasar el tema</button>
-      <button class="sec" data-otro="plan">Preparar el plan</button>
-      <button class="borde" id="cambiar-datos">Cambiar los datos</button>
-    </div>
+  <div class="acciones noimprimir" id="despues" style="display:none">
+    <button class="sec" id="crear-evaluacion">Crear la evaluación de esta clase</button>
+    <button class="borde" id="modificar">Modificar los datos</button>
   </div>
 </section>
 
@@ -274,20 +275,26 @@
   <div class="tarjeta">
     <h3>1. Sus estudiantes</h3>
     <div id="lista-est"></div>
-    <div class="fila">
-      <div><label for="e-nombre">Nombre</label><input id="e-nombre" placeholder="Ej.: Ana"></div>
-      <div><label for="e-grado">Grado</label><input id="e-grado" placeholder="Ej.: 3er grado"></div>
-    </div>
+    <label for="e-nombre">Nombre</label><input id="e-nombre" placeholder="Ej.: Ana">
+    <label for="e-grado">Grado o año</label><select id="e-grado"></select>
     <div class="acciones"><button class="sec" id="agregar-est">Agregar estudiante</button></div>
   </div>
   <div class="tarjeta">
     <h3>2. Anotar resultados de una evaluación</h3>
-    <div class="fila">
-      <div><label for="r-tema">Tema evaluado</label><input id="r-tema" placeholder="Ej.: fracciones"></div>
-      <div style="flex:0 0 7rem"><label for="r-total">Preguntas</label><input id="r-total" type="number" inputmode="numeric" value="5" min="1"></div>
-    </div>
+    <label for="r-tema">Tema evaluado</label><input id="r-tema" placeholder="Ej.: fracciones">
     <label for="r-fecha">Fecha</label><input id="r-fecha" type="date">
-    <table id="tabla-res" style="margin-top:12px"><thead><tr><th>Estudiante</th><th>Aciertos</th></tr></thead><tbody></tbody></table>
+    <table id="tabla-res" style="margin-top:12px"><thead><tr><th>Estudiante</th><th>Resultado</th></tr></thead><tbody></tbody></table>
+    <details class="guardado" style="margin-top:12px"><summary><b>¿Qué significa cada literal?</b></summary>
+      <p class="nota" style="margin:6px 0">Primaria (artículo 108 del Reglamento General de la Ley Orgánica de Educación):</p>
+      <ul style="margin:0;padding-left:22px">
+        <li><b>A:</b> alcanzó todas las competencias y en algunos casos superó las expectativas para el grado.</li>
+        <li><b>B:</b> alcanzó todas las competencias previstas para el grado.</li>
+        <li><b>C:</b> alcanzó la mayoría de las competencias previstas para el grado.</li>
+        <li><b>D:</b> alcanzó algunas de las competencias previstas, pero requiere un proceso de nivelación.</li>
+        <li><b>E:</b> no logró las competencias mínimas requeridas para ser promovido.</li>
+      </ul>
+      <p class="nota" style="margin:6px 0 0">Media General: nota del 1 al 20; la mínima aprobatoria es 10.</p>
+    </details>
     <p class="error" id="res-error"></p>
     <button class="principal" id="guardar-res" style="margin-top:14px">Guardar resultados</button>
     <p class="revisado" id="msg-res" style="display:none;margin-top:10px"></p>
@@ -311,10 +318,28 @@
   <div id="lista-guardados"></div>
 </section>
 
-<!-- MI PERFIL: queda en el teléfono; solo se comparte si el docente lo marca -->
+<!-- AYUDA: cómo se usa Tiza -->
+<section id="ayuda">
+  <h2>Cómo se usa Tiza</h2>
+  <p class="sub">Tiza le propone borradores; usted los revisa y decide qué usar.</p>
+  <div class="tarjeta">
+    <ol style="margin:0;padding-left:24px">
+      <li><b>Complete su perfil una vez</b> (el círculo de arriba a la derecha). Con su grado, sus áreas y su aula, Tiza llena los formularios por usted.</li>
+      <li style="margin-top:10px"><b>En Inicio, elija qué necesita:</b> preparar una clase, crear una evaluación o repasar un tema (para usted, antes de dar la clase).</li>
+      <li style="margin-top:10px"><b>Responda los pasos cortos</b> y toque el botón final. En un minuto aparece el borrador, ordenado por partes.</li>
+      <li style="margin-top:10px"><b>Revíselo.</b> Puede tocar el texto para corregirlo. Luego guárdelo (queda en Guardados y se abre sin internet) o compártalo por WhatsApp.</li>
+      <li style="margin-top:10px"><b>Después de un plan,</b> «Crear la evaluación de esta clase» usa los mismos datos. «Modificar los datos» vuelve al formulario.</li>
+      <li style="margin-top:10px"><b>Mis estudiantes:</b> anote a sus estudiantes y, después de cada evaluación, su resultado (literal en Primaria, nota del 1 al 20 en Media General). Tiza le muestra quién necesita refuerzo.</li>
+      <li style="margin-top:10px"><b>Sin internet:</b> si agregó Tiza a la pantalla de inicio, abre igual y le arma una guía con el programa oficial de su grado para completarla.</li>
+    </ol>
+  </div>
+  <div class="opinion-caja noimprimir"><p>¿Ya la probó? Nos encantaría conocer su opinión.</p><button class="sec" onclick="abrirOpinion()">Dar mi opinión</button></div>
+</section>
+
+<!-- MI PERFIL: llena los formularios; se registra para conocer el uso de la prueba (nunca datos de estudiantes) -->
 <section id="perfil">
   <h2 id="perfil-titulo">Mi perfil</h2>
-  <p class="sub" id="perfil-sub">Con su perfil, Tiza lo saluda por su nombre y llena los formularios por usted. Se guarda solo en este teléfono.</p>
+  <p class="sub" id="perfil-sub">Con su perfil, Tiza lo saluda por su nombre y llena los formularios por usted. En esta prueba puede usar datos inventados.</p>
   <form class="tarjeta" id="form-perfil" novalidate>
     <label for="p-nombre" style="margin-top:0">Su nombre</label><input id="p-nombre" name="nombre" autocomplete="name" placeholder="Ej.: María Rondón">
     <label for="p-escuela">Escuela</label><input id="p-escuela" name="escuela" placeholder="Ej.: Escuela Básica Los Nevados">
@@ -336,7 +361,6 @@
       <option value="Electricidad estable, sin internet">Electricidad estable</option>
     </select>
     <label for="p-min">Minutos que suele durar su clase</label><input id="p-min" name="minutos" type="number" inputmode="numeric" value="45">
-    <label class="check" style="align-items:flex-start"><input type="checkbox" name="compartir" style="margin-top:2px"> <span>Compartir mi nombre, escuela, municipio, grados y áreas con el equipo de Tiza, para saber dónde se usa y mejorarla. Nunca se comparte nada de sus estudiantes.</span></label>
     <button class="principal" type="submit" style="margin-top:20px">Guardar mi perfil</button>
     <button class="borde" type="button" id="perfil-luego" style="width:100%;margin-top:10px;display:none">Más tarde</button>
     <p class="revisado" id="perfil-msg" style="display:none;margin:12px 0 0"></p>
@@ -347,9 +371,9 @@
 
 <nav class="noimprimir">
   <button data-tab="inicio" class="activo"><svg><use href="#i-inicio"/></svg>Inicio</button>
-  <button data-tab="preparar"><svg><use href="#i-clase"/></svg>Preparar</button>
   <button data-tab="estudiantes"><svg><use href="#i-est"/></svg>Estudiantes</button>
   <button data-tab="guardados"><svg><use href="#i-guard"/></svg>Guardados</button>
+  <button data-tab="ayuda"><svg><use href="#i-ayuda"/></svg>Ayuda</button>
 </nav>
 
 <dialog id="opinion">
@@ -358,6 +382,8 @@
     <p class="nota" style="margin:0 0 6px">Gracias por tomarse un momento. Su opinión es anónima: no pedimos su nombre ni sus datos.</p>
     <label>¿Qué probó?</label>
     <div class="chips"><label><input type="checkbox" name="probo" value="Planificar"> Planes</label><label><input type="checkbox" name="probo" value="Evaluar"> Evaluaciones</label><label><input type="checkbox" name="probo" value="Repasar el contenido"> Repaso</label><label><input type="checkbox" name="probo" value="Seguimiento"> Estudiantes</label></div>
+    <label>¿Le sirvieron los borradores que preparó Tiza?</label>
+    <div class="chips"><label><input type="radio" name="borradores" value="Sí"> Sí</label><label><input type="radio" name="borradores" value="Más o menos"> Más o menos</label><label><input type="radio" name="borradores" value="No"> No</label></div>
     <label>¿Le resultó útil?</label>
     <div class="chips"><label><input type="radio" name="util" value="Muy útil"> Muy útil</label><label><input type="radio" name="util" value="Algo útil"> Algo útil</label><label><input type="radio" name="util" value="Poco útil"> Poco útil</label></div>
     <label>¿La usaría en sus clases?</label>
@@ -377,7 +403,8 @@ const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 
 // Navegación: menú inferior y tarjetas de inicio.
 function irA(tab) {
-  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('activo', x.dataset.tab === tab));
+  const enMenu = tab === 'preparar' ? 'inicio' : tab;  // «Preparar» se abre desde las tarjetas de Inicio
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('activo', x.dataset.tab === enMenu));
   document.querySelectorAll('main section').forEach(x => x.classList.toggle('activo', x.id === tab));
   if (tab === 'inicio') saludar();
   if (tab === 'estudiantes') cargarRegistro();
@@ -439,7 +466,6 @@ const totalPasos = () => modo === 'repaso' ? 2 : 3;
 function elegirModo(m) {
   modo = m;
   $('#titulo-preparar').textContent = MODOS[m].titulo;
-  document.querySelectorAll('.modos button').forEach(b => b.classList.toggle('activo', b.dataset.modo === m));
   document.querySelector('.solo-clase').style.display = m === 'repaso' ? 'none' : '';
   irPaso(Math.min(paso, totalPasos()));
 }
@@ -456,7 +482,6 @@ function abrirPreparar(m) {
   form.style.display = ''; $('#salida').style.display = 'none'; $('#despues').style.display = 'none';
   paso = 1; elegirModo(m || modo);
 }
-document.querySelectorAll('.modos button').forEach(b => b.onclick = () => abrirPreparar(b.dataset.modo));
 $('#paso-atras').onclick = () => { irPaso(paso - 1); scrollTo(0, 0); };
 form.onsubmit = e => {
   e.preventDefault();
@@ -465,24 +490,44 @@ form.onsubmit = e => {
   if (paso < totalPasos()) { irPaso(paso + 1); scrollTo(0, 0); return; }
   generar(modo);
 };
-document.querySelectorAll('[data-otro]').forEach(b => b.onclick = () => { elegirModo(b.dataset.otro); generar(b.dataset.otro); });
-$('#cambiar-datos').onclick = () => abrirPreparar(modo);
+// Después de un plan, el paso natural es su evaluación, con los mismos datos.
+$('#crear-evaluacion').onclick = () => { elegirModo('evaluacion'); generar('evaluacion'); };
+$('#modificar').onclick = () => { form.style.display = ''; $('#salida').style.display = 'none'; $('#despues').style.display = 'none'; irPaso(1); scrollTo(0, 0); };
 
-// Convierte el texto del modelo (markdown simple) en HTML seguro.
-function formatear(t) {
-  const neg = s => s.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
-  let html = '', lista = null;
-  const cerrar = () => { if (lista) { html += `</${lista}>`; lista = null; } };
-  for (let l of esc(t).split('\n')) {
-    l = l.trim();
-    if (!l) { cerrar(); continue; }
-    let m;
-    if ((m = l.match(/^#{1,4}\s+(.*)/))) { cerrar(); html += `<h3>${neg(m[1])}</h3>`; }
-    else if ((m = l.match(/^[-*•]\s+(.*)/))) { if (lista !== 'ul') { cerrar(); html += '<ul>'; lista = 'ul'; } html += `<li>${neg(m[1])}</li>`; }
-    else if ((m = l.match(/^\d+[.)]\s+(.*)/))) { if (lista !== 'ol') { cerrar(); html += '<ol>'; lista = 'ol'; } html += `<li>${neg(m[1])}</li>`; }
-    else { cerrar(); html += `<p>${neg(l)}</p>`; }
+// El borrador llega ordenado por partes y se muestra en bloques: cada momento, pregunta o idea en el suyo.
+const lista = (xs, tag = 'ul') => xs?.length ? `<${tag}>${xs.map(x => `<li>${esc(x)}</li>`).join('')}</${tag}>` : '';
+const notaPrograma = p => p.nota_programa ? `<p class="nota-programa">${esc(p.nota_programa)}</p>` : '';
+function partesHTML(accion, p, rev) {
+  const dudosas = new Map((Array.isArray(rev) ? rev : []).map(x => [+x.pregunta, x.motivo]));
+  let h = `<h2>${esc(p.titulo)}</h2>` + notaPrograma(p);
+  if (accion === 'plan') {
+    h += `<div class="bloque"><span class="etq bien">Propósito</span>${esc(p.proposito)}</div>`;
+    if (p.contenidos?.length) h += `<h3>Contenidos del programa</h3>${lista(p.contenidos)}`;
+    if (p.materiales?.length) h += `<p class="linea"><b>Materiales:</b> ${esc(p.materiales.join(', '))}</p>`;
+    h += (p.momentos || []).map(m => `<div class="bloque"><div class="bloque-cab"><span>${esc(m.nombre)}</span><span class="min">${esc(m.minutos)} min</span></div>${lista(m.pasos, 'ol')}</div>`).join('');
+    h += (p.otras || []).map(o => `<h3>${esc(o.titulo)}</h3>${lista(o.puntos)}`).join('');
+  } else if (accion === 'evaluacion' && p.criterios) {
+    h += `<p class="linea">${esc(p.como_aplicarla)}</p>`;
+    h += p.criterios.map((c, i) => `<div class="bloque"><div class="bloque-cab"><span>${i + 1}. ${esc(c.criterio)}</span></div>
+      <p class="linea"><span class="etq bien">Logrado</span>${esc(c.logrado)}</p>
+      <p class="linea"><span class="etq medio">En proceso</span>${esc(c.en_proceso)}</p>
+      <p class="linea"><span class="etq mal">Necesita apoyo</span>${esc(c.necesita_apoyo)}</p></div>`).join('');
+    h += `<h3>Preguntas para la reflexión final</h3>${lista(p.preguntas_orales)}`;
+  } else if (accion === 'evaluacion') {
+    h += `<p class="linea">${esc(p.como_aplicarla)}</p><h3>Preguntas para los estudiantes</h3>`;
+    h += `<ol>${(p.preguntas || []).map(q => `<li>${esc(q.pregunta)}</li>`).join('')}</ol>`;
+    h += `<h3>Clave para el docente</h3>`;
+    h += (p.preguntas || []).map(q => `<div class="bloque${dudosas.has(+q.numero) ? ' dudosa' : ''}"><div class="bloque-cab"><span>Pregunta ${esc(q.numero)}</span><span class="tipo">${esc(q.tipo)}</span></div>
+      <p class="linea"><span class="etq bien">Respuesta esperada</span>${esc(q.respuesta_esperada)}</p>
+      <p class="linea"><span class="etq mal">Si responde mal, reforzar</span>${esc(q.si_falla)}</p>
+      ${dudosas.has(+q.numero) ? `<p class="linea"><span class="etq mal">Revise esta respuesta</span>${esc(dudosas.get(+q.numero))}</p>` : ''}</div>`).join('');
+  } else {
+    h += `<h3>Lo esencial</h3>${lista(p.ideas_clave)}`;
+    h += `<div class="bloque"><span class="etq bien">Ejemplo</span>${esc(p.ejemplo?.enunciado)}${lista(p.ejemplo?.pasos, 'ol')}</div>`;
+    h += `<h3>Errores frecuentes</h3>` + (p.errores || []).map(e => `<div class="bloque"><p class="linea" style="margin:0"><span class="etq mal">Error</span>${esc(e.error)}</p><p class="linea"><span class="etq bien">Cómo ayudar</span>${esc(e.como_ayudar)}</p></div>`).join('');
+    h += `<h3>Preguntas que suelen hacer</h3>` + (p.preguntas || []).map(q => `<p class="linea"><b>${esc(q.pregunta)}</b><br>${esc(q.respuesta)}</p>`).join('');
   }
-  cerrar(); return html;
+  return h;
 }
 
 // Resultado de la segunda revisión de la clave (solo existe en la evaluación).
@@ -490,19 +535,22 @@ function revisionHTML(rev) {
   if (rev === undefined || rev === 'no_aplica') return '';
   if (rev === null) return '<p class="alerta">No se pudo hacer la revisión automática. Revise la clave con más cuidado.</p>';
   if (!rev.length) return '<p class="revisado">Revisión automática: no encontró errores en la clave. Igual conviene que la revise.</p>';
-  return `<div class="alerta"><b>Revise estas respuestas de la clave:</b><ul>${
-    rev.map(x => `<li>Pregunta ${esc(x.pregunta)}: ${esc(x.motivo)}</li>`).join('')}</ul></div>`;
+  return '<p class="alerta"><b>Revise las respuestas marcadas en rojo en la clave.</b></p>';
 }
 
 const TIPOS = {plan:'Plan de clase', evaluacion:'Evaluación', repaso:'Repaso del contenido'};
 const tituloDe = (tipo, d) => `${tipo}: ${d.tema} (${d.multigrado ? 'multigrado' : d.grado}, ${d.area})`;
 function mostrarDespues(accion) {
-  document.querySelectorAll('[data-otro]').forEach(b => b.style.display = b.dataset.otro === accion ? 'none' : '');
-  $('#despues').style.display = 'block';
+  $('#crear-evaluacion').style.display = accion === 'plan' ? '' : 'none';
+  $('#despues').style.display = 'flex';
 }
-function activarResultado(salida, tipo, d) {
-  salida.querySelector('[data-guardar]').onclick = ev => guardar(tipo, d, salida.querySelector('.resultado').innerHTML, ev.currentTarget);
-  salida.querySelector('[data-compartir]').onclick = () => compartir(tituloDe(tipo, d), salida.querySelector('.resultado').innerText);
+// Para compartir y guardar se usa el texto limpio; si el docente corrigió el borrador, el texto corregido.
+function activarResultado(salida, tipo, d, texto) {
+  const res = salida.querySelector('.resultado');
+  res.addEventListener('input', () => texto = null, {once:true});
+  const actual = () => texto || res.innerText;
+  salida.querySelector('[data-guardar]').onclick = ev => guardar(tipo, d, res.innerHTML, actual(), ev.currentTarget);
+  salida.querySelector('[data-compartir]').onclick = () => compartir(tituloDe(tipo, d), actual());
 }
 
 async function generar(accion) {
@@ -516,16 +564,14 @@ async function generar(accion) {
     const j = await r.json();
     if (j.codigo) { guardarCodigo(''); mostrarBienvenida(); }
     if (j.error) throw new Error(j.error);
-    salida.innerHTML = revisionHTML(j.revision) + `<div class="resultado" contenteditable="true">${formatear(j.texto)}</div>
+    salida.innerHTML = revisionHTML(j.revision) + `<div class="resultado" contenteditable="true">${partesHTML(accion, j.partes, j.revision)}</div>
       <p class="aviso-ia">Borrador hecho con IA. Toque el texto para corregirlo. Usted decide qué usar.</p>
       <div class="acciones"><button class="principal" data-guardar>Guardar en este teléfono</button>
-        <button class="sec" data-compartir>Compartir por WhatsApp</button></div>
-      <div class="valorar noimprimir"><span>${accion === 'repaso' ? '¿Le sirvió este repaso?' : '¿Le sirvió este borrador?'}</span><button>Sí</button><button>Más o menos</button><button>No</button></div>`;
-    activarResultado(salida, tipo, d);
-    salida.querySelectorAll('.valorar button').forEach(b => b.onclick = () => valorar(b, tipo, d));
+        <button class="sec" data-compartir>Compartir por WhatsApp</button></div>`;
+    activarResultado(salida, tipo, d, j.texto);
   } catch (e) {
     if (!navigator.onLine || e instanceof TypeError) await mostrarSinConexion(accion, d, salida);
-    else salida.innerHTML = `<p class="alerta">${esc(e.message)}</p>`;
+    else { salida.innerHTML = `<p class="alerta">${esc(e.message)}</p>`; mostrarDespues(''); return; }
   }
   mostrarDespues(accion);
 }
@@ -606,19 +652,6 @@ async function compartir(titulo, texto) {
   window.open('https://wa.me/?text=' + encodeURIComponent(mensaje.slice(0, 6000)), '_blank');
 }
 
-// Valoración de un toque: anónima, va a la misma base de opiniones.
-async function valorar(boton, borrador, d) {
-  const caja = boton.parentElement;
-  caja.querySelectorAll('button').forEach(b => b.disabled = true);
-  try {
-    const r = await fetch('/api/opinion', {method:'POST', headers:{'Content-Type':'application/json', 'X-Codigo':codigo()},
-      body: JSON.stringify({tipo:'Valoración rápida', valoracion:boton.textContent, borrador,
-        grado: d.multigrado ? 'Multigrado: ' + (d.grados_multi || '') : d.grado, area:d.area, tema:d.tema})});
-    if (!(await r.json()).ok) throw new Error();
-    caja.innerHTML = '¡Gracias por su valoración!';
-  } catch (e) { caja.innerHTML = 'Sin conexión: no se pudo enviar la valoración, pero su borrador está aquí.'; }
-}
-
 // En la versión en línea todo se guarda en el navegador del teléfono; el servidor no guarda nada.
 // (Las claves conservan el prefijo «asistente.» para no perder lo que los docentes ya guardaron.)
 function leer(clave, vacio) {
@@ -631,9 +664,9 @@ function escribir(clave, valor) {
 }
 
 // Guardados: quedan en este teléfono para usarlos sin internet, o imprimirlos después.
-function guardar(tipo, d, html, boton) {
+function guardar(tipo, d, html, texto, boton) {
   const docs = leer('guardados', []);
-  docs.unshift({id: Math.max(0, ...docs.map(x => x.id)) + 1, tipo, titulo: tituloDe(tipo, d), html, fecha:new Date().toISOString().slice(0,10)});
+  docs.unshift({id: Math.max(0, ...docs.map(x => x.id)) + 1, tipo, titulo: tituloDe(tipo, d), html, texto, fecha:new Date().toISOString().slice(0,10)});
   if (escribir('guardados', docs)) { boton.textContent = 'Guardado ✓'; boton.disabled = true; }
 }
 function cargarGuardados() {
@@ -652,7 +685,7 @@ function cargarGuardados() {
   });
   $('#lista-guardados').querySelectorAll('[data-wa]').forEach(b => b.onclick = () => {
     const x = docs.find(y => y.id == b.dataset.wa);
-    compartir(x.titulo, b.closest('details').querySelector('.resultado').innerText);
+    compartir(x.titulo, x.texto || b.closest('details').querySelector('.resultado').innerText);
   });
   $('#lista-guardados').querySelectorAll('[data-descargar]').forEach(b => b.onclick = () => {
     const x = docs.find(y => y.id == b.dataset.descargar);
@@ -663,26 +696,40 @@ function cargarGuardados() {
   });
 }
 
-// Regla de aviso temprano: simple y visible, sin IA, para que el docente la entienda.
-const REGLA = {umbral:0.6, evaluaciones:2};
+// Calificación según el artículo 108 del Reglamento General de la Ley Orgánica de Educación
+// (Decreto 313, Gaceta Oficial 36.787): en Primaria, expresión cualitativa en literales; en Media General,
+// nota del 1 al 20 con 10 como mínima aprobatoria. El docente anota el resultado; Tiza no calcula notas.
+const LITERALES = ['A','B','C','D','E'];
+const esMedia = grado => /año/i.test(grado || '');
+// Aviso de refuerzo: la última evaluación del estudiante quedó en D o E (requiere nivelación o no logró las
+// competencias mínimas) o, en Media General, por debajo de 10. Es una regla visible, no una decisión de la IA.
+const necesitaApoyo = v => v.nota !== undefined ? (esMedia(v.grado) ? +v.nota < 10 : ['D','E'].includes(v.nota)) : false;
+const resultadoDe = v => v.nota !== undefined ? String(v.nota) : `${v.aciertos}/${v.total} aciertos`;  // los de antes eran aciertos
 function calcularAvisos(reg) {
   const avisos = [];
   for (const est of reg.estudiantes) {
-    const ultimas = reg.evaluaciones.filter(e => e.estudiante === est.id)
-      .sort((a, b) => a.fecha.localeCompare(b.fecha)).slice(-REGLA.evaluaciones);
-    if (ultimas.length < REGLA.evaluaciones) continue;
-    if (ultimas.every(e => e.aciertos / e.total < REGLA.umbral))
-      avisos.push({estudiante:est.nombre, grado:est.grado || '',
-        detalle:ultimas.map(e => `${e.tema} ${e.aciertos}/${e.total}`).join(', ')});
+    const ultima = reg.evaluaciones.filter(e => e.estudiante === est.id).sort((a, b) => a.fecha.localeCompare(b.fecha)).pop();
+    if (ultima && necesitaApoyo({...ultima, grado: est.grado}))
+      avisos.push({estudiante:est.nombre, grado:est.grado || '', detalle:`${ultima.tema}: ${resultadoDe(ultima)} (${ultima.fecha})`});
   }
   return avisos;
 }
 function leerRegistro() { return leer('registro', {estudiantes:[], evaluaciones:[]}); }
 
-const pct = e => Math.round(e.aciertos / e.total * 100);
+function opcionesGrado() {
+  const p = leer('perfil', null), niveles = p?.niveles?.length ? p.niveles : Object.keys(NIVELES);
+  const gs = niveles.flatMap(n => NIVELES[n].grados), elegido = (p?.grados || [])[0];
+  $('#e-grado').innerHTML = gs.map(g => `<option${g === elegido ? ' selected' : ''}>${g}</option>`).join('');
+}
+function campoResultado(e) {
+  return esMedia(e.grado)
+    ? `<input type="number" inputmode="numeric" min="1" max="20" placeholder="1 a 20" data-id="${e.id}">`
+    : `<select data-id="${e.id}"><option value="">—</option>${LITERALES.map(l => `<option>${l}</option>`).join('')}</select>`;
+}
 function cargarRegistro() {
   const reg = leerRegistro(), avisos = calcularAvisos(reg);
-  $('#regla').textContent = `Regla del aviso: menos de ${REGLA.umbral*100} % de aciertos en las ${REGLA.evaluaciones} últimas evaluaciones. Es una regla simple, no una decisión de la IA.`;
+  opcionesGrado();
+  $('#regla').textContent = 'Aparece aquí quien en su última evaluación tuvo literal D o E (Primaria) o una nota menor de 10 (Media General), según el artículo 108 del Reglamento General de la Ley Orgánica de Educación. Es una regla simple, no una decisión de la IA.';
   $('#avisos').innerHTML = avisos.length
     ? avisos.map(a => `<div class="alerta"><b>${esc(a.estudiante)}</b> ${a.grado ? '(' + esc(a.grado) + ')' : ''}<br><span class="nota">${esc(a.detalle)}</span></div>`).join('')
     : '<p class="nota">Nadie con aviso por ahora.</p>';
@@ -697,39 +744,40 @@ function cargarRegistro() {
     escribir('registro', r); cargarRegistro();
   });
   $('#tabla-res tbody').innerHTML = reg.estudiantes.map(e =>
-    `<tr><td>${esc(e.nombre)} <span class="nota">${esc(e.grado)}</span></td><td><input type="number" inputmode="numeric" min="0" data-id="${e.id}"></td></tr>`).join('')
+    `<tr><td>${esc(e.nombre)} <span class="nota">${esc(e.grado)}</span></td><td style="width:7.5rem">${campoResultado(e)}</td></tr>`).join('')
     || '<tr><td colspan="2" class="nota">Primero agregue a sus estudiantes en el paso 1.</td></tr>';
   $('#historial').innerHTML = reg.estudiantes.some(e => reg.evaluaciones.some(v => v.estudiante === e.id))
     ? reg.estudiantes.map(e => {
         const ev = reg.evaluaciones.filter(v => v.estudiante === e.id).sort((a, b) => a.fecha.localeCompare(b.fecha));
         if (!ev.length) return '';
-        const prom = Math.round(ev.reduce((s, v) => s + pct(v), 0) / ev.length);
-        return `<details class="guardado"><summary><b>${esc(e.nombre)}</b> <span class="nota">· ${ev.length} ${ev.length > 1 ? 'evaluaciones' : 'evaluación'} · promedio ${prom} %</span></summary>
-          <table><thead><tr><th>Fecha</th><th>Tema</th><th>Aciertos</th></tr></thead><tbody>${ev.map(v =>
-            `<tr><td>${v.fecha}</td><td>${esc(v.tema)}</td><td>${v.aciertos}/${v.total} (${pct(v)} %)</td></tr>`).join('')}</tbody></table></details>`;
+        return `<details class="guardado"><summary><b>${esc(e.nombre)}</b> <span class="nota">· ${ev.length} ${ev.length > 1 ? 'evaluaciones' : 'evaluación'} · última: ${esc(resultadoDe(ev[ev.length - 1]))}</span></summary>
+          <table><thead><tr><th>Fecha</th><th>Tema</th><th>Resultado</th></tr></thead><tbody>${ev.map(v =>
+            `<tr><td>${v.fecha}</td><td>${esc(v.tema)}</td><td>${esc(resultadoDe(v))}</td></tr>`).join('')}</tbody></table></details>`;
       }).join('')
     : '<p class="nota">Aún no hay resultados guardados.</p>';
 }
 $('#agregar-est').onclick = () => {
   const nombre = $('#e-nombre').value.trim(); if (!nombre) { $('#e-nombre').focus(); return; }
   const reg = leerRegistro();
-  reg.estudiantes.push({id: Math.max(0, ...reg.estudiantes.map(e => e.id)) + 1, nombre, grado:$('#e-grado').value.trim()});
+  reg.estudiantes.push({id: Math.max(0, ...reg.estudiantes.map(e => e.id)) + 1, nombre, grado:$('#e-grado').value});
   escribir('registro', reg);
   $('#e-nombre').value = ''; $('#e-nombre').focus(); cargarRegistro();
 };
 $('#guardar-res').onclick = () => {
-  const total = +$('#r-total').value, tema = $('#r-tema').value.trim(), fecha = $('#r-fecha').value;
-  const resultados = [...document.querySelectorAll('#tabla-res input')].filter(i => i.value !== '')
-    .map(i => ({estudiante:i.dataset.id, aciertos:Math.min(+i.value, total)}));
+  const tema = $('#r-tema').value.trim(), fecha = $('#r-fecha').value;
+  const campos = [...document.querySelectorAll('#tabla-res [data-id]')].filter(i => i.value !== '');
   $('#res-error').textContent = '';
-  if (!tema || !fecha || !resultados.length) { $('#res-error').textContent = 'Complete el tema, la fecha y al menos un resultado.'; return; }
+  if (campos.some(i => i.tagName === 'INPUT' && !(+i.value >= 1 && +i.value <= 20 && Number.isInteger(+i.value)))) {
+    $('#res-error').textContent = 'En Media General la nota es un número entero del 1 al 20.'; return;
+  }
+  if (!tema || !fecha || !campos.length) { $('#res-error').textContent = 'Complete el tema, la fecha y al menos un resultado.'; return; }
   const reg = leerRegistro();
-  for (const r of resultados) reg.evaluaciones.push({estudiante:+r.estudiante, aciertos:r.aciertos, total, tema, fecha});
+  for (const i of campos) reg.evaluaciones.push({estudiante:+i.dataset.id, nota: i.tagName === 'INPUT' ? +i.value : i.value, tema, fecha});
   escribir('registro', reg);
   $('#r-tema').value = '';
   cargarRegistro();
   const m = $('#msg-res'); m.style.display = 'block';
-  m.textContent = `✓ Resultados guardados: ${resultados.length} estudiante${resultados.length > 1 ? 's' : ''}. Puede verlos en el historial, más abajo.`;
+  m.textContent = `✓ Resultados guardados: ${campos.length} estudiante${campos.length > 1 ? 's' : ''}. Puede verlos en el historial, más abajo.`;
   setTimeout(() => m.style.display = 'none', 6000);
 };
 $('#descargar-reg').onclick = () => {
@@ -737,18 +785,19 @@ $('#descargar-reg').onclick = () => {
   if (!reg.evaluaciones.length) { alert('Aún no hay resultados guardados.'); return; }
   const filas = reg.evaluaciones.slice().sort((a, b) => a.fecha.localeCompare(b.fecha)).map(v => {
     const e = reg.estudiantes.find(x => x.id === v.estudiante) || {nombre:'?', grado:''};
-    return `<tr><td>${v.fecha}</td><td>${esc(e.nombre)}</td><td>${esc(e.grado)}</td><td>${esc(v.tema)}</td><td>${v.aciertos}/${v.total}</td><td>${pct(v)} %</td></tr>`;
+    return `<tr><td>${v.fecha}</td><td>${esc(e.nombre)}</td><td>${esc(e.grado)}</td><td>${esc(v.tema)}</td><td>${esc(resultadoDe(v))}</td></tr>`;
   }).join('');
   const pagina = `<!doctype html><meta charset="utf-8"><title>Registro de resultados</title><body style="font-family:sans-serif;max-width:800px;margin:auto">
     <h2>Registro de resultados</h2><table border="1" cellpadding="6" style="border-collapse:collapse;width:100%">
-    <tr><th>Fecha</th><th>Estudiante</th><th>Grado</th><th>Tema</th><th>Aciertos</th><th>%</th></tr>${filas}</table></body>`;
+    <tr><th>Fecha</th><th>Estudiante</th><th>Grado</th><th>Tema</th><th>Resultado</th></tr>${filas}</table>
+    <p style="color:#666">Primaria: literales A a E. Media General: nota del 1 al 20 (mínima aprobatoria 10). Artículo 108 del Reglamento General de la Ley Orgánica de Educación.</p></body>`;
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([pagina], {type:'text/html'}));
   a.download = 'registro-de-resultados.html'; a.click();
 };
 $('#r-fecha').valueAsDate = new Date();
 
-// Perfil del docente: vive en este teléfono y llena los formularios. Solo se envía si marca «Compartir».
+// Perfil del docente: llena los formularios y se registra para conocer el uso de la prueba.
 const MUNICIPIOS = {"Amazonas":["Alto Orinoco","Atabapo","Atures","Autana","Manapiare","Maroa","Río Negro"],"Anzoátegui":["Anaco","Aragua","Bolívar","Bruzual","Cajigal","Carvajal","Diego Bautista Urbaneja","Freites","Guanipa","Guanta","Independencia","Libertad","McGregor","Miranda","Monagas","Peñalver","Píritu","San Juan de Capistrano","Santa Ana","Simón Rodríguez","Sotillo"],"Apure":["Achaguas","Biruaca","Muñoz","Pedro Camejo","Páez","Rómulo Gallegos","San Fernando"],"Aragua":["Bolívar","Camatagua","Francisco Linares Alcántara","Girardot","José Félix Ribas","José Rafael Revenga","José Ángel Lamas","Libertador","Mario Briceño Iragorry","Ocumare de la Costa de Oro","San Casimiro","San Sebastián","Santiago Mariño","Santos Michelena","Sucre","Tovar","Urdaneta","Zamora"],"Barinas":["Alberto Arvelo Torrealba","Andrés Eloy Blanco","Antonio José de Sucre","Arismendi","Barinas","Bolívar","Cruz Paredes","Ezequiel Zamora","Obispos","Pedraza","Rojas","Sosa"],"Bolívar":["Angostura","Caroní","Cedeño","El Callao","Gran Sabana","Heres","Padre Pedro Chien","Píar","Roscio","Sifontes","Sucre"],"Carabobo":["Bejuma","Carlos Arvelo","Diego Ibarra","Guacara","Libertador","Los Guayos","Miranda","Montalbán","Mora","Naguanagua","Puerto Cabello","San Diego","San Joaquín","Valencia"],"Cojedes":["Anzoátegui","Girardot","Lima Blanco","Pao de San Juan Bautista","Ricaurte","Rómulo Gallegos","San Carlos","Tinaco","Tinaquillo"],"Delta Amacuro":["Antonio Díaz","Casacoima","Pedernales","Tucupita"],"Distrito Capital":["Libertador"],"Falcón":["Acosta","Bolívar","Buchivacoa","Carirubana","Colina","Dabajuro","Democracia","Falcón","Federación","Jacura","Los Taques","Manaure","Mauroa","Miranda","Monseñor Iturriza","Palmasola","Petit","Píritu","San Francisco","Silva","Sucre","Tocópero","Unión","Urumaco","Zamora"],"Guárico":["Camaguán","Chaguaramas","El Socorro","Infante","Las Mercedes","Mellado","Miranda","Monagas","Ortiz","Ribas","Roscio","San Gerónimo de Guayabal","San José de Guaribe","Santa María de Ipire","Zaraza"],"La Guaira":["Vargas"],"Lara":["Andrés Eloy Blanco","Crespo","Iribarren","Jiménez","Morán","Palavecino","Simón Planas","Torres","Urdaneta"],"Miranda":["Acevedo","Andrés Bello","Baruta","Brión","Buroz","Carrizal","Chacao","Cristóbal Rojas","El Hatillo","Guaicaipuro","Independencia","Lander","Los Salias","Paz Castillo","Pedro Gual","Plaza","Páez","Simón Bolívar","Sucre","Urdaneta","Zamora"],"Monagas":["Acosta","Aguasay","Bolívar","Caripe","Cedeño","Ezequiel Zamora","Libertador","Maturín","Piar","Punceres","Santa Bárbara","Sotillo","Uracoa"],"Mérida":["Alberto Adriani","Andrés Bello","Antonio Pinto Salinas","Aricagua","Arzobispo Chacón","Campo Elías","Caracciolo Parra Olmedo","Cardenal Quintero","Guaraque","Julio César Salas","Justo Briceño","Libertador","Miranda","Obispo Ramos de Lora","Padre Noguera","Pueblo Llano","Rangel","Rivas Dávila","Santos Marquina","Sucre","Tovar","Tulio Febres Cordero","Zea"],"Nueva Esparta":["Antolín del Campo","Arismendi","Díaz","García","Gómez","Maneiro","Marcano","Mariño","Península de Macanao","Tubores","Villalba"],"Portuguesa":["Agua Blanca","Araure","Esteller","Guanare","Guanarito","Monseñor José Vicente de Unda","Ospino","Papelón","Páez","San Genaro de Boconoíto","San Rafael de Onoto","Santa Rosalía","Sucre","Turén"],"Sucre":["Andrés Eloy Blanco","Andrés Mata","Arismendi","Benítez","Bermúdez","Bolívar","Cajigal","Cruz Salmerón Acosta","Libertador","Mariño","Mejía","Montes","Ribero","Sucre","Valdez"],"Trujillo":["Andrés Bello","Boconó","Bolívar","Candelaria","Carache","Escuque","José Felipe Márquez Cañizalez","Juan Vicente Campos Elías","La Ceiba","Miranda","Monte Carmelo","Motatán","Pampanito","Pampán","Rafael Rangel","San Rafael de Carvajal","Sucre","Trujillo","Urdaneta","Valera"],"Táchira":["Andrés Bello","Antonio Rómulo Costa","Ayacucho","Bolívar","Cárdenas","Córdoba","Fernández Feo","Francisco de Miranda","García de Hevia","Guásimos","Independencia","José María Vargas","Junín","Jáuregui","Libertad","Libertador","Lobatera","Michelena","Panamericano","Pedro María Ureña","Rafael Urdaneta","Samuel Darío Maldonado","San Cristóbal","San Judas Tadeo","Seboruco","Simón Rodríguez","Sucre","Torbes","Uribante"],"Yaracuy":["Arístides Bastidas","Bolívar","Bruzual","Cocorote","Independencia","José Antonio Páez","La Trinidad","Manuel Monge","Nirgua","Peña","San Felipe","Sucre","Urachiche","Veroes"],"Zulia":["Almirante Padilla","Baralt","Cabimas","Catatumbo","Colón","Francisco Javier Pulgar","Jesús Enrique Lossada","Jesús María Semprún","La Cañada de Urdaneta","Lagunillas","Machiques de Perijá","Mara","Maracaibo","Miranda","Páez","Rosario de Perijá","San Francisco","Santa Rita","Simón Bolívar","Sucre","Valmore Rodríguez"]};
 const fp = $('#form-perfil');
 fp.estado.innerHTML += Object.keys(MUNICIPIOS).map(e => `<option>${e}</option>`).join('');
@@ -775,31 +824,33 @@ function cargarPerfil() {
   fp.querySelectorAll('[name=niveles]').forEach(x => x.checked = (p.niveles || []).includes(x.value));
   marcarChips($('#p-niveles'));
   pintarGradosAreas(p.grados || [], p.areas || []);
-  fp.multigrado.checked = !!p.multigrado; fp.compartir.checked = !!p.compartir;
+  fp.multigrado.checked = !!p.multigrado;
   if (p.condiciones) fp.condiciones.value = p.condiciones;
   fp.minutos.value = p.minutos || 45;
   $('#perfil-msg').style.display = 'none';
 }
-fp.onsubmit = async e => {
+fp.onsubmit = e => {
   e.preventDefault();
   const anterior = leer('perfil', null) || {};
   const p = {id: anterior.id || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
     nombre: fp.nombre.value.trim(), escuela: fp.escuela.value.trim(), estado: fp.estado.value, municipio: fp.municipio.value,
     niveles: marcados('niveles'), grados: marcados('grados'), areas: marcados('areas'), multigrado: fp.multigrado.checked,
-    condiciones: fp.condiciones.value, minutos: +fp.minutos.value || 45, compartir: fp.compartir.checked};
+    condiciones: fp.condiciones.value, minutos: +fp.minutos.value || 45};
   if (!escribir('perfil', p)) return;
-  aplicarPerfil(); pintarAvatar();
-  const msg = $('#perfil-msg'); msg.style.display = 'block'; msg.textContent = '✓ Perfil guardado en este teléfono.';
-  if (p.compartir) {
-    try {
-      const r = await fetch('/api/perfil', {method:'POST', headers:{'Content-Type':'application/json', 'X-Codigo':codigo()},
-        body: JSON.stringify({...p, nivel: p.niveles.join(' y '), grados: p.grados.join(', ')})});
-      if (!(await r.json()).ok) throw new Error();
-      msg.textContent = '✓ Perfil guardado y compartido con el equipo de Tiza. ¡Gracias!';
-    } catch (e) { msg.textContent = '✓ Perfil guardado en este teléfono. No se pudo compartir ahora (sin conexión); vuelva a guardarlo cuando tenga señal.'; }
-  }
-  setTimeout(() => irA('inicio'), 1800);
+  aplicarPerfil(); pintarAvatar(); registrarPerfil();
+  const msg = $('#perfil-msg'); msg.style.display = 'block'; msg.textContent = '✓ Perfil guardado.';
+  setTimeout(() => irA('inicio'), 1500);
 };
+// Registro de la prueba: el perfil se envía al guardarlo; si no hay señal, se reintenta al abrir Tiza con conexión.
+async function registrarPerfil() {
+  const p = leer('perfil', null), firma = JSON.stringify(p);
+  if (!p || !codigo() || leer('perfil-registrado', '') === firma) return;
+  try {
+    const r = await fetch('/api/perfil', {method:'POST', headers:{'Content-Type':'application/json', 'X-Codigo':codigo()},
+      body: JSON.stringify({...p, nivel: (p.niveles || []).join(' y '), grados: (p.grados || []).join(', ')})});
+    if ((await r.json()).ok) escribir('perfil-registrado', firma);
+  } catch (e) {}
+}
 $('#perfil-luego').onclick = () => { escribir('perfil-luego', true); irA('inicio'); };
 
 // Con el perfil, el formulario de «Preparar» ya viene lleno con su grado, su área y su aula.
@@ -863,18 +914,18 @@ $('#entrar').onclick = async () => {
   }
   guardarCodigo(c);
   $('#bienvenida').style.display = 'none'; APP.forEach(s => $(s).style.display = '');
-  primeraVez();
+  primeraVez(); registrarPerfil();
 };
 if (location.search) history.replaceState(null, '', location.pathname);
 aplicarPerfil(); pintarAvatar(); saludar();
-if (!codigo()) mostrarBienvenida();
+if (!codigo()) mostrarBienvenida(); else registrarPerfil();
 
 const estadoConexion = () => { if (!navigator.onLine) $('#estado').textContent = 'Sin conexión · funciona igual'; };
 fetch('/api/estado').then(r => r.json()).then(j => {
   $('#estado').textContent = j.simulado ? 'Modo de prueba' : j.ok ? 'Con conexión' : 'No disponible';
 }).catch(estadoConexion);
 addEventListener('offline', estadoConexion);
-addEventListener('online', () => $('#estado').textContent = 'Con conexión');
+addEventListener('online', () => { $('#estado').textContent = 'Con conexión'; registrarPerfil(); });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 
 // Aviso para agregar Tiza a la pantalla de inicio (así abre sin internet como una aplicación).
@@ -898,8 +949,8 @@ function abrirOpinion() { document.getElementById('opinion-estado').textContent 
 document.getElementById('enviar-opinion').onclick = async () => {
   const f = document.getElementById('form-opinion'), est = document.getElementById('opinion-estado');
   const datos = { probo: [...f.querySelectorAll('[name=probo]:checked')].map(x => x.value),
-    util: f.util.value, usaria: f.usaria.value, mejoras: f.mejoras.value.trim() };
-  if (!datos.probo.length && !datos.util && !datos.usaria && !datos.mejoras) { est.textContent = 'Responda al menos una pregunta.'; return; }
+    borradores: f.borradores.value, util: f.util.value, usaria: f.usaria.value, mejoras: f.mejoras.value.trim() };
+  if (!datos.probo.length && !datos.borradores && !datos.util && !datos.usaria && !datos.mejoras) { est.textContent = 'Responda al menos una pregunta.'; return; }
   est.textContent = 'Enviando…';
   try {
     const r = await fetch('/api/opinion', {method:'POST', headers:{'Content-Type':'application/json', 'X-Codigo':codigo()}, body:JSON.stringify(datos)});

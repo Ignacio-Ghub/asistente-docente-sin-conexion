@@ -9,8 +9,8 @@ from http.server import BaseHTTPRequestHandler
 
 from _asistente import CODIGO, responder
 
-# Solo llega aquí el perfil de un docente que marcó «Compartir mi perfil con el proyecto».
-# Va a la base de Notion «Docentes registrados en Tiza» por el mismo flujo de n8n que las opiniones.
+# Registro de la prueba: el perfil que guarda el docente (nunca datos de sus estudiantes) va a la base
+# de Notion «Docentes registrados en Tiza» por el mismo flujo de n8n que las opiniones.
 N8N = "https://n8n.jibalab.com/webhook/jiba-opinion-asistente-v1"
 SECRETO = os.environ.get("OPINION_SECRETO", "")
 

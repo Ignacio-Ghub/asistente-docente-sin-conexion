@@ -31,8 +31,8 @@ SISTEMA = (
     "copias, documentos adjuntos o textos cortados; si un contenido no aparece en los oficiales, dilo en una "
     "frase sencilla, por ejemplo «Este tema no aparece tal cual en el programa oficial de su grado; estos son "
     "los contenidos más cercanos». 8) Los minutos de inicio, desarrollo y cierre suman exactamente la duración "
-    "de la clase. 9) Trata siempre al docente de usted (pida, escriba, observe), nunca de tú. Formato: texto simple con títulos y listas; sin emojis, sin saludos, sin "
-    "LaTeX (fracciones como 1/2)."
+    "de la clase. 9) Trata siempre al docente de usted (pida, escriba, observe), nunca de tú. Formato: frases claras y "
+    "cortas; sin emojis, sin saludos, sin LaTeX (fracciones como 1/2)."
 )
 
 # Orientaciones por área, tomadas del enfoque de cada área en el currículo oficial
@@ -104,20 +104,33 @@ class Rechazo(Exception):
     """El modelo declinó la petición."""
 
 
-def preguntar_modelo(prompt, sistema=SISTEMA, esquema=None):
+def ejemplo_de(esquema):
+    """Respuesta de relleno con la forma del esquema, para revisar la pantalla sin gastar en el modelo."""
+    if esquema["type"] == "object":
+        return {k: ejemplo_de(v) for k, v in esquema["properties"].items()}
+    if esquema["type"] == "array":
+        return [ejemplo_de(esquema["items"]) for _ in range(2)]
+    if esquema["type"] == "integer":
+        return 10
+    if esquema["type"] == "boolean":
+        return True
+    return "Texto de prueba (modo sin modelo)."
+
+
+def preguntar_modelo(prompt, sistema=SISTEMA, esquema=None, esfuerzo=None):
     if SIMULAR:
-        if esquema:
+        if esquema is ESQUEMA_REVISION:
             return json.dumps({"revision": []})
-        return ("**Modo de prueba de pantalla:** este texto no lo escribió ningún modelo.\n"
-                "1. Propósito de aprendizaje\n2. Inicio\n3. Desarrollo\n4. Cierre\n\n"
-                "Datos recibidos:\n" + "\n".join("- " + l for l in prompt.splitlines()[:6]))
+        if esquema:
+            return json.dumps(ejemplo_de(esquema))
+        return "Modo de prueba de pantalla: este texto no lo escribió ningún modelo."
     import anthropic  # solo hace falta cuando hay modelo
     pedido = {
         "model": MODELO,
         "max_tokens": 16000,
         "system": sistema,
         "messages": [{"role": "user", "content": prompt}],
-        "output_config": {"effort": "low" if esquema is None else "medium"},
+        "output_config": {"effort": esfuerzo or ("low" if esquema is None else "medium")},
     }
     if esquema:
         pedido["output_config"]["format"] = {"type": "json_schema", "schema": esquema}
@@ -171,36 +184,64 @@ def grados_del_aula(d):
     return vistos
 
 
+# Las respuestas llegan ordenadas por partes (salida estructurada) para mostrarlas en tarjetas y tablas
+# que el docente revisa de un vistazo. Con las mismas partes se arma el texto para compartir y guardar.
+TEXTO = {"type": "string"}
+LISTA = {"type": "array", "items": TEXTO}
+
+
+def objeto(**campos):
+    return {"type": "object", "properties": campos, "required": list(campos), "additionalProperties": False}
+
+
+ESQUEMA_PLAN = objeto(
+    titulo=TEXTO, nota_programa=TEXTO, proposito=TEXTO, contenidos=LISTA, materiales=LISTA,
+    momentos={"type": "array", "items": objeto(nombre=TEXTO, minutos={"type": "integer"}, pasos=LISTA)},
+    otras={"type": "array", "items": objeto(titulo=TEXTO, puntos=LISTA)})
+ESQUEMA_EVALUACION = objeto(
+    titulo=TEXTO, nota_programa=TEXTO, como_aplicarla=TEXTO,
+    preguntas={"type": "array", "items": objeto(numero={"type": "integer"}, tipo=TEXTO, pregunta=TEXTO,
+                                                 respuesta_esperada=TEXTO, si_falla=TEXTO)})
+ESQUEMA_OBSERVACION = objeto(
+    titulo=TEXTO, como_aplicarla=TEXTO,
+    criterios={"type": "array", "items": objeto(criterio=TEXTO, logrado=TEXTO, en_proceso=TEXTO, necesita_apoyo=TEXTO)},
+    preguntas_orales=LISTA)
+ESQUEMA_REPASO = objeto(
+    titulo=TEXTO, ideas_clave=LISTA, ejemplo=objeto(enunciado=TEXTO, pasos=LISTA),
+    errores={"type": "array", "items": objeto(error=TEXTO, como_ayudar=TEXTO)},
+    preguntas={"type": "array", "items": objeto(pregunta=TEXTO, respuesta=TEXTO)})
+
+FORMATO = ("\nResponde en el formato estructurado pedido. Dentro de cada texto no uses asteriscos, "
+           "almohadillas ni numeración propia: cada paso o punto va en su propio elemento de la lista.")
+NOTA_PROGRAMA = ("En «nota_programa» escribe una frase solo si el tema no aparece tal cual en el programa "
+                 "oficial de su grado (y cuáles son los contenidos más cercanos); si aparece, déjalo vacío.\n")
+
+
 def prompt_plan(d):
     extra = ""
     if d.get("multigrado"):
         extra = ("Es un aula multigrado: propone una actividad común y luego tareas "
                  "diferenciadas por grado que se puedan hacer al mismo tiempo, con "
-                 "estudiantes mayores apoyando a los menores.\n")
+                 "estudiantes mayores apoyando a los menores (empieza esos pasos con el grado, "
+                 "por ejemplo «3er grado: …»).\n")
     if es_educacion_fisica(d.get("area", "")):
-        partes = ("1. Propósito (una frase: qué lograrán).\n"
-                  "2. Contenido del currículo que se trabaja (cítalo si está arriba).\n"
-                  "3. Materiales y espacio.\n"
-                  "4. Calentamiento (minutos y ejercicios).\n"
-                  "5. Parte principal: 2 o 3 actividades con organización, reglas, "
-                  "tiempos y una variante más fácil y otra más difícil.\n"
-                  "6. Vuelta a la calma y reflexión.\n"
-                  "7. Seguridad e inclusión.\n"
-                  "8. Qué observar para evaluar.\n"
-                  "9. Para casa: una actividad física sencilla que se pueda hacer de día, sin electricidad.\n")
+        partes = ("- momentos: «Calentamiento», «Parte principal» (2 o 3 actividades con organización, reglas "
+                  "y una variante más fácil y otra más difícil) y «Vuelta a la calma» (estiramiento y reflexión breve).\n"
+                  "- otras: «Seguridad e inclusión», «Qué observar para evaluar» y «Para casa» (una actividad "
+                  "física sencilla que se pueda hacer de día, sin electricidad).\n")
     else:
-        partes = ("1. Propósito (una frase: qué podrán hacer al final).\n"
-                  "2. Contenido del currículo que se trabaja (cítalo si está arriba).\n"
-                  "3. Inicio: pregunta o situación que despierte interés.\n"
-                  "4. Desarrollo: actividades paso a paso, con tiempos y organización.\n"
-                  "5. Cierre: cómo comprueba el docente lo que aprendieron.\n"
-                  "6. Para quien va atrasado: una idea de refuerzo.\n"
-                  "7. Tarea para casa sin electricidad: breve, para hacer de día, sin internet y con lo que "
-                  "hay en cualquier casa (cuaderno, objetos, conversar con la familia).\n")
+        partes = ("- momentos: «Inicio» (pregunta o situación que despierte interés), «Desarrollo» (actividades "
+                  "paso a paso, con organización del grupo) y «Cierre» (cómo comprueba el docente lo que aprendieron).\n"
+                  "- otras: «Para quien va atrasado» (una idea de refuerzo) y «Tarea para casa sin electricidad» "
+                  "(breve, para hacer de día, sin internet y con lo que hay en cualquier casa).\n")
     extra += modo_clase(d)
     return (contexto_clase(d) + extra +
-            "\nEscribe un borrador de plan de clase breve con estas partes:\n" + partes +
-            "Termina con: «Borrador para revisar y ajustar por el docente.»")
+            "\nEscribe un borrador de plan de clase breve:\n"
+            "- titulo: «Plan de clase: » y el tema.\n- proposito: una frase, qué podrán hacer al final.\n"
+            "- contenidos: los contenidos del programa oficial que se trabajan (cítalos si están arriba).\n"
+            "- materiales: lo que hace falta, solo lo disponible.\n" + partes +
+            "Cada momento lleva sus minutos; los pasos dicen qué hace y qué dice el docente.\n" +
+            NOTA_PROGRAMA + FORMATO)
 
 
 def modo_clase(d):
@@ -221,30 +262,86 @@ def modo_clase(d):
 def prompt_repaso(d):
     return (contexto_clase(d) +
             "\nEl docente quiere repasar este contenido antes de dar la clase (puede que no sea su "
-            "especialidad). Escribe un repaso breve, de no más de una página, con estas partes:\n"
-            "1. Lo esencial del tema: las ideas clave explicadas con sencillez y con exactitud.\n"
-            "2. Un ejemplo explicado paso a paso, adecuado al grado.\n"
-            "3. Errores frecuentes de los estudiantes y cómo ayudarlos a corregirlos.\n"
-            "4. Tres preguntas que suelen hacer los estudiantes, con una respuesta corta para cada una.\n"
-            "Si no estás seguro de un dato, no lo incluyas. No escribas un plan de clase.")
+            "especialidad). Escribe un repaso breve:\n"
+            "- titulo: «Repaso: » y el tema.\n"
+            "- ideas_clave: lo esencial del tema, explicado con sencillez y con exactitud (3 a 5 ideas).\n"
+            "- ejemplo: un ejemplo adecuado al grado, resuelto paso a paso.\n"
+            "- errores: errores frecuentes de los estudiantes y cómo ayudarlos a corregirlos (2 o 3).\n"
+            "- preguntas: tres preguntas que suelen hacer los estudiantes, con una respuesta corta.\n"
+            "Si no estás seguro de un dato, no lo incluyas. No escribas un plan de clase." + FORMATO)
 
 
 def prompt_evaluacion(d):
     if es_educacion_fisica(d.get("area", "")):
         return (contexto_clase(d) +
-                "\nCrea una lista de observación para evaluar esta clase práctica: 5 "
-                "criterios observables (qué hace el estudiante), cada uno con tres niveles "
-                "(logrado, en proceso, necesita apoyo) descritos en una frase. Añade 2 "
-                "preguntas orales breves para la reflexión final. Escribe solo la lista de "
-                "observación y las preguntas; no repitas el plan de clase.")
+                "\nCrea una lista de observación para evaluar esta clase práctica:\n"
+                "- titulo: «Lista de observación: » y el tema.\n"
+                "- como_aplicarla: una frase sobre cuándo y cómo observar.\n"
+                "- criterios: 5 criterios observables (qué hace el estudiante), cada uno con lo que se ve en "
+                "«logrado», «en proceso» y «necesita apoyo», en una frase cada nivel.\n"
+                "- preguntas_orales: 2 preguntas breves para la reflexión final.\n"
+                "No repitas el plan de clase." + FORMATO)
     return (contexto_clase(d) +
-            "\nCrea una evaluación corta de 5 preguntas sobre el tema, para hacerla en voz "
-            "alta o copiarla en la pizarra (sin fotocopias), adecuada al grado. Mezcla: 2 "
-            "preguntas de recordar, 2 de aplicar a una situación concreta y 1 de explicar "
-            "con sus palabras. Después escribe «Clave para el docente:» con la respuesta "
-            "esperada de cada una (todas las respuestas válidas) y qué error indica que el "
-            "estudiante necesita refuerzo. Escribe solo la evaluación y la clave; no "
-            "repitas el plan de clase.")
+            "\nCrea una evaluación corta de 5 preguntas sobre el tema, para hacerla en voz alta o copiarla "
+            "en la pizarra (sin fotocopias), adecuada al grado:\n"
+            "- titulo: «Evaluación: » y el tema.\n"
+            "- como_aplicarla: una frase sobre cómo hacerla (en voz alta, en la pizarra, en el cuaderno).\n"
+            "- preguntas: 5, numeradas del 1 al 5. Tipo: 2 «Recordar», 2 «Aplicar» (a una situación concreta) "
+            "y 1 «Explicar» (con sus palabras). En respuesta_esperada van todas las respuestas válidas; en "
+            "si_falla, qué error indica que el estudiante necesita refuerzo y qué reforzar.\n" +
+            NOTA_PROGRAMA + "No repitas el plan de clase." + FORMATO)
+
+
+def texto_de(tipo, r):
+    """Texto limpio del resultado, para compartir por WhatsApp y para la revisión de la clave."""
+    l = [r.get("titulo", "")]
+    if r.get("nota_programa"):
+        l += ["", r["nota_programa"]]
+    if tipo == "plan":
+        l += ["", "Propósito: " + r.get("proposito", "")]
+        if r.get("contenidos"):
+            l += ["", "Contenidos del programa:"] + ["- " + x for x in r["contenidos"]]
+        if r.get("materiales"):
+            l += ["", "Materiales: " + ", ".join(r["materiales"])]
+        for m in r.get("momentos", []):
+            l += ["", "{} ({} minutos)".format(m["nombre"], m["minutos"])]
+            l += ["{}. {}".format(i, p) for i, p in enumerate(m["pasos"], 1)]
+        for o in r.get("otras", []):
+            l += ["", o["titulo"]] + ["- " + p for p in o["puntos"]]
+    elif tipo == "evaluacion" and "criterios" in r:
+        l += ["", r.get("como_aplicarla", "")]
+        for i, c in enumerate(r["criterios"], 1):
+            l += ["", "{}. {}".format(i, c["criterio"]), "   Logrado: " + c["logrado"],
+                  "   En proceso: " + c["en_proceso"], "   Necesita apoyo: " + c["necesita_apoyo"]]
+        l += ["", "Preguntas para la reflexión:"] + ["- " + p for p in r.get("preguntas_orales", [])]
+    elif tipo == "evaluacion":
+        l += ["", r.get("como_aplicarla", ""), "", "Preguntas:"]
+        l += ["{}. ({}) {}".format(p["numero"], p["tipo"], p["pregunta"]) for p in r.get("preguntas", [])]
+        l += ["", "Clave para el docente:"]
+        for p in r.get("preguntas", []):
+            l += ["{}. Respuesta esperada: {}".format(p["numero"], p["respuesta_esperada"]),
+                  "   Si responde mal: " + p["si_falla"]]
+    else:
+        l += ["", "Lo esencial:"] + ["- " + x for x in r.get("ideas_clave", [])]
+        ej = r.get("ejemplo") or {}
+        l += ["", "Ejemplo: " + ej.get("enunciado", "")] + ["{}. {}".format(i, p) for i, p in enumerate(ej.get("pasos", []), 1)]
+        l += ["", "Errores frecuentes:"] + ["- {} Cómo ayudar: {}".format(e["error"], e["como_ayudar"]) for e in r.get("errores", [])]
+        l += ["", "Preguntas de los estudiantes:"] + ["- {} {}".format(p["pregunta"], p["respuesta"]) for p in r.get("preguntas", [])]
+    return "\n".join(l).strip()
+
+
+def generar(tipo, d):
+    """Pide el borrador ordenado por partes y devuelve las partes y su texto."""
+    if tipo == "plan":
+        prompt, esquema = prompt_plan(d), ESQUEMA_PLAN
+    elif tipo == "repaso":
+        prompt, esquema = prompt_repaso(d), ESQUEMA_REPASO
+    elif es_educacion_fisica(d.get("area", "")):
+        prompt, esquema = prompt_evaluacion(d), ESQUEMA_OBSERVACION
+    else:
+        prompt, esquema = prompt_evaluacion(d), ESQUEMA_EVALUACION
+    partes = json.loads(preguntar_modelo(prompt, esquema=esquema, esfuerzo="low"))
+    return {"partes": partes, "texto": texto_de(tipo, partes), "curriculo": d["_curriculo"]}
 
 
 # Segunda capa de control: el modelo revisa la clave de respuestas antes de mostrarla.
