@@ -293,40 +293,41 @@ def prompt_evaluacion(d):
 
 
 def texto_de(tipo, r):
-    """Texto limpio del resultado, para compartir por WhatsApp y para la revisión de la clave."""
-    l = [r.get("titulo", "")]
+    """Texto limpio del resultado, para compartir por WhatsApp (títulos en *negrita*) y para revisar la clave."""
+    n = lambda t: "*{}*".format(t)
+    l = [n(r.get("titulo", ""))]
     if r.get("nota_programa"):
         l += ["", r["nota_programa"]]
     if tipo == "plan":
-        l += ["", "Propósito: " + r.get("proposito", "")]
+        l += ["", n("Propósito:") + " " + r.get("proposito", "")]
         if r.get("contenidos"):
-            l += ["", "Contenidos del programa:"] + ["- " + x for x in r["contenidos"]]
+            l += ["", n("Contenidos del programa")] + ["- " + x for x in r["contenidos"]]
         if r.get("materiales"):
-            l += ["", "Materiales: " + ", ".join(r["materiales"])]
+            l += ["", n("Materiales:") + " " + ", ".join(r["materiales"])]
         for m in r.get("momentos", []):
-            l += ["", "{} ({} minutos)".format(m["nombre"], m["minutos"])]
+            l += ["", n("{} ({} minutos)".format(m["nombre"], m["minutos"]))]
             l += ["{}. {}".format(i, p) for i, p in enumerate(m["pasos"], 1)]
         for o in r.get("otras", []):
-            l += ["", o["titulo"]] + ["- " + p for p in o["puntos"]]
+            l += ["", n(o["titulo"])] + ["- " + p for p in o["puntos"]]
     elif tipo == "evaluacion" and "criterios" in r:
         l += ["", r.get("como_aplicarla", "")]
         for i, c in enumerate(r["criterios"], 1):
-            l += ["", "{}. {}".format(i, c["criterio"]), "   Logrado: " + c["logrado"],
-                  "   En proceso: " + c["en_proceso"], "   Necesita apoyo: " + c["necesita_apoyo"]]
-        l += ["", "Preguntas para la reflexión:"] + ["- " + p for p in r.get("preguntas_orales", [])]
+            l += ["", n("{}. {}".format(i, c["criterio"])), "Logrado: " + c["logrado"],
+                  "En proceso: " + c["en_proceso"], "Necesita apoyo: " + c["necesita_apoyo"]]
+        l += ["", n("Preguntas para la reflexión")] + ["- " + p for p in r.get("preguntas_orales", [])]
     elif tipo == "evaluacion":
-        l += ["", r.get("como_aplicarla", ""), "", "Preguntas:"]
+        l += ["", r.get("como_aplicarla", ""), "", n("Preguntas")]
         l += ["{}. ({}) {}".format(p["numero"], p["tipo"], p["pregunta"]) for p in r.get("preguntas", [])]
-        l += ["", "Clave para el docente:"]
+        l += ["", n("Clave para el docente")]
         for p in r.get("preguntas", []):
             l += ["{}. Respuesta esperada: {}".format(p["numero"], p["respuesta_esperada"]),
-                  "   Si responde mal: " + p["si_falla"]]
+                  "   Si responde mal, reforzar: " + p["si_falla"]]
     else:
-        l += ["", "Lo esencial:"] + ["- " + x for x in r.get("ideas_clave", [])]
+        l += ["", n("Lo esencial")] + ["- " + x for x in r.get("ideas_clave", [])]
         ej = r.get("ejemplo") or {}
-        l += ["", "Ejemplo: " + ej.get("enunciado", "")] + ["{}. {}".format(i, p) for i, p in enumerate(ej.get("pasos", []), 1)]
-        l += ["", "Errores frecuentes:"] + ["- {} Cómo ayudar: {}".format(e["error"], e["como_ayudar"]) for e in r.get("errores", [])]
-        l += ["", "Preguntas de los estudiantes:"] + ["- {} {}".format(p["pregunta"], p["respuesta"]) for p in r.get("preguntas", [])]
+        l += ["", n("Ejemplo:") + " " + ej.get("enunciado", "")] + ["{}. {}".format(i, p) for i, p in enumerate(ej.get("pasos", []), 1)]
+        l += ["", n("Errores frecuentes")] + ["- {} Cómo ayudar: {}".format(e["error"], e["como_ayudar"]) for e in r.get("errores", [])]
+        l += ["", n("Preguntas de los estudiantes")] + ["- {} {}".format(p["pregunta"], p["respuesta"]) for p in r.get("preguntas", [])]
     return "\n".join(l).strip()
 
 
