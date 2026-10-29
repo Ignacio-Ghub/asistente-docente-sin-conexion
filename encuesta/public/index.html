@@ -260,7 +260,7 @@
       <div class="numero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/></svg></div>
       <div><h2>Sus necesidades</h2><small>Sección 4 de 5</small></div>
     </div>
-    <div class="pregunta"><span class="enunciado"><span class="n">20.</span>¿Qué es lo que más tiempo le quita o más le cuesta en su trabajo? <span class="nota">Marque hasta dos.</span></span>
+    <div class="pregunta"><span class="enunciado"><span class="n">20.</span>¿Qué es lo que más tiempo le quita o más le cuesta en su trabajo? <span class="nota">Marque todas las que correspondan.</span></span>
       <div class="opciones">
         <label class="chip"><input type="checkbox" name="mas_le_cuesta" value="Planificar las clases"><span>Planificar las clases</span></label>
         <label class="chip"><input type="checkbox" name="mas_le_cuesta" value="Corregir y calificar"><span>Corregir y calificar</span></label>
@@ -268,6 +268,8 @@
         <label class="chip"><input type="checkbox" name="mas_le_cuesta" value="Preparar material sin fotocopias ni electricidad"><span>Preparar material sin fotocopias ni electricidad</span></label>
         <label class="chip"><input type="checkbox" name="mas_le_cuesta" value="Recuperar clases perdidas por los cortes"><span>Recuperar clases perdidas por los cortes</span></label>
         <label class="chip"><input type="checkbox" name="mas_le_cuesta" value="Atender un aula multigrado o un grupo grande"><span>Atender un aula multigrado o un grupo grande</span></label>
+        <label class="chip"><input type="checkbox" name="mas_le_cuesta" value="Atender a estudiantes con rezago"><span>Atender a estudiantes con rezago</span></label>
+        <label class="chip"><input type="checkbox" name="mas_le_cuesta" value="Comunicarse con las familias"><span>Comunicarse con las familias</span></label>
         <label class="chip"><input type="checkbox" name="mas_le_cuesta" value="Otro"><span>Otro</span></label></div>
       <textarea id="mas_le_cuesta_detalle" name="mas_le_cuesta_detalle" placeholder="Cuéntenos más (opcional). Si marcó «Otro», escriba cuál." style="margin-top:10px"></textarea></div>
     <div class="pregunta"><span class="enunciado"><span class="n">21.</span>¿Cómo comparte hoy materiales con otros docentes? <span class="nota">Puede marcar varios.</span></span>
@@ -352,9 +354,6 @@ document.getElementById('orden').innerHTML = HERRAMIENTAS.map(([n, t]) =>
 
 form.querySelectorAll('input[name=documento]').forEach(c => c.addEventListener('change', () =>
   document.getElementById('documento_otro').hidden = !form.querySelector('input[name=documento][value=Otro]').checked));
-form.querySelectorAll('input[name=mas_le_cuesta]').forEach(c => c.addEventListener('change', () => {
-  if (form.querySelectorAll('input[name=mas_le_cuesta]:checked').length > 2) c.checked = false;  // hasta dos
-}));
 // «¿Por qué?»: opcional si usaría el borrador; si duda o no lo usaría, se pide, porque eso dice qué le hace falta.
 form.querySelectorAll('input[name=usaria]').forEach(r => r.addEventListener('change', () =>
   document.getElementById('por_que').placeholder = form.usaria.value === 'Sí' ? 'Cuéntenos con sus palabras (opcional)'
