@@ -83,9 +83,8 @@
   .puestos { display:flex; gap:8px; }
   .puesto { position:relative; flex:1; }
   .puesto input { position:absolute; opacity:0; inset:0; margin:0; cursor:pointer; }
-  .puesto span { display:grid; place-items:center; height:40px; border-radius:12px; border:1.5px solid var(--borde); font-weight:800; color:var(--suave); background:#fff; transition:all .15s; }
+  .puesto span { display:grid; place-items:center; text-align:center; min-height:40px; padding:4px; font-size:14px; border-radius:12px; border:1.5px solid var(--borde); font-weight:800; color:var(--suave); background:#fff; transition:all .15s; }
   .puesto input:checked + span { background:var(--amarillo); border-color:var(--amarillo); color:var(--marino); }
-  .puesto.usado span { opacity:.35; }
   .puesto input:focus-visible + span { outline:3px solid var(--azul); outline-offset:2px; }
 
   .error { color:var(--alerta); font-size:14.5px; font-weight:700; margin:10px 0 0; }
@@ -137,10 +136,10 @@
 <form id="encuesta" novalidate>
   <div class="tarjeta bienvenida">
     <p>Estimada maestra, estimado maestro:</p>
-    <p>Estamos diseñando herramientas digitales para escuelas que trabajan con cortes de electricidad y sin internet. Queremos construir lo que de verdad les sirva, y para eso necesitamos su experiencia. Gracias por su tiempo.</p>
+    <p>Estamos desarrollando herramientas digitales para escuelas que trabajan con cortes de electricidad y sin internet. Con esta encuesta queremos conocer sus necesidades y su experiencia en el aula, para que esas herramientas le sean útiles y funcionen en sus condiciones reales. Gracias por su tiempo.</p>
     <div class="confidencial">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-      <span>Sus respuestas son anónimas: no le pedimos su nombre. Las usaremos, siempre sin nombres, para mejorar estas herramientas.</span>
+      <span>Esta encuesta es anónima: no le pedimos su nombre, y sus datos están protegidos.</span>
     </div>
   </div>
 
@@ -257,10 +256,9 @@
         <label class="chip"><input type="checkbox" name="comparte" value="En persona"><span>En persona</span></label>
         <label class="chip"><input type="checkbox" name="comparte" value="Impresos"><span>Impresos</span></label>
         <label class="chip"><input type="checkbox" name="comparte" value="No comparto"><span>No comparto</span></label></div></div>
-    <div class="pregunta"><span class="enunciado"><span class="n">22.</span>Ordene estas herramientas, todas sin internet, del 1 (la más útil) al 5 (la menos útil). <span class="nota">Use cada número una sola vez.</span></span>
-      <div class="orden" id="orden"></div>
-      <p class="error" id="error-orden" hidden>Cada número del 1 al 5 debe usarse una sola vez.</p></div>
-    <div class="pregunta"><label class="enunciado" for="otra_herramienta"><span class="n">23.</span>¿Qué otra herramienta le gustaría tener que no esté en la lista?</label><textarea id="otra_herramienta" name="otra_herramienta" placeholder="Opcional"></textarea></div>
+    <div class="pregunta"><span class="enunciado"><span class="n">22.</span>¿Qué tan útil le sería cada una de estas herramientas, todas sin internet?</span>
+      <div class="orden" id="orden"></div></div>
+    <div class="pregunta"><label class="enunciado" for="otra_herramienta"><span class="n">23.</span>¿Qué otra herramienta o función le sería útil? Cuéntenos lo que de verdad necesita.</label><textarea id="otra_herramienta" name="otra_herramienta" placeholder="Opcional"></textarea></div>
   </section>
 
   <section class="tarjeta">
@@ -317,26 +315,19 @@ selEstado.addEventListener('change', () => {
   selMunicipio.disabled = !lista.length;
 });
 
-// Orden de herramientas: cada una recibe un puesto del 1 al 5.
+// Utilidad de cada herramienta (las que hace Tiza y las que recogió la investigación): cada una se valora por separado.
 const HERRAMIENTAS = [
-  ['p_planes', 'Preparar planes de clase'],
-  ['p_evaluaciones', 'Crear evaluaciones cortas'],
-  ['p_registros', 'Llevar registros de notas y avisos de quién va quedando atrás'],
-  ['p_material', 'Consultar material educativo (por ejemplo, Wikipedia sin internet)'],
-  ['p_guardar', 'Guardar sus registros de forma segura, aunque se vaya la electricidad'],
+  ['u_planes', 'Preparar planes de clase según el programa oficial'],
+  ['u_evaluaciones', 'Crear evaluaciones cortas con su clave de respuestas'],
+  ['u_calificaciones', 'Llevar las calificaciones y saber quién necesita refuerzo'],
+  ['u_repaso', 'Repasar un tema antes de darlo en clase'],
+  ['u_material', 'Consultar material educativo sin internet (por ejemplo, Wikipedia)'],
 ];
 const ORDEN = HERRAMIENTAS.map(h => h[0]);
+const NIVELES_UTILIDAD = ['Muy útil', 'Útil', 'Poco útil'];
 document.getElementById('orden').innerHTML = HERRAMIENTAS.map(([n, t]) =>
-  `<div class="item-orden"><p>${t}</p><div class="puestos">${[1,2,3,4,5].map(i =>
-    `<label class="puesto"><input type="radio" name="${n}" value="${i}" aria-label="${t}: puesto ${i}"><span>${i}</span></label>`).join('')}</div></div>`).join('');
-
-function marcarUsados() {
-  const usados = ORDEN.map(n => form.querySelector(`[name=${n}]:checked`)?.value).filter(Boolean);
-  form.querySelectorAll('.puesto').forEach(p => {
-    const inp = p.querySelector('input');
-    p.classList.toggle('usado', !inp.checked && usados.includes(inp.value));
-  });
-}
+  `<div class="item-orden"><p>${t}</p><div class="puestos">${NIVELES_UTILIDAD.map(v =>
+    `<label class="puesto"><input type="radio" name="${n}" value="${v}" aria-label="${t}: ${v}"><span>${v}</span></label>`).join('')}</div></div>`).join('');
 
 form.querySelectorAll('input[name=probar]').forEach(r => r.addEventListener('change', () =>
   document.getElementById('bloque-contacto').hidden = form.probar.value !== 'Sí'));
@@ -352,7 +343,7 @@ function respuestas() {
   return r;
 }
 
-// Avance: preguntas con alguna respuesta sobre el total de preguntas (el orden de herramientas cuenta como una).
+// Avance: preguntas con alguna respuesta sobre el total de preguntas (la utilidad de las herramientas cuenta como una).
 const PREGUNTAS = ['estado','municipio','nombre_escuela','tipo_escuela','grados','multigrado','estudiantes','dias_sin_electricidad','duracion_corte','clases_perdidas','internet','equipos','respaldo',
   'horas_planificacion','documento','otra_especialidad','registros','perdio_registros','rezago','mas_le_cuesta','comparte','orden','otra_herramienta','usaria','preocupaciones','probar'];
 function actualizarAvance() {
@@ -364,17 +355,13 @@ function actualizarAvance() {
   etiqueta.textContent = pct + ' %';
   etiqueta.classList.toggle('visible', pct > 0);
 }
-form.addEventListener('input', () => { marcarUsados(); actualizarAvance(); });
-form.addEventListener('change', () => { marcarUsados(); actualizarAvance(); });
+form.addEventListener('input', actualizarAvance);
+form.addEventListener('change', actualizarAvance);
 
 form.onsubmit = async e => {
   e.preventDefault();
   const err = document.getElementById('error'); err.hidden = true;
   const r = respuestas();
-  const usados = ORDEN.map(n => r[n]).filter(Boolean);
-  const ordenMal = new Set(usados).size !== usados.length;
-  document.getElementById('error-orden').hidden = !ordenMal;
-  if (ordenMal) { document.getElementById('orden').scrollIntoView({block:'center'}); return; }
   const respondidas = Object.values(r).filter(v => Array.isArray(v) ? v.length : v).length;
   if (respondidas < 3) { err.textContent = 'Responda al menos algunas preguntas antes de enviar.'; err.hidden = false; return; }
   const boton = document.getElementById('enviar'); boton.disabled = true; boton.firstChild.textContent = 'Enviando… ';
