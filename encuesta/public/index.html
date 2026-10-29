@@ -283,6 +283,7 @@
         <input type="email" id="correo" name="correo" inputmode="email" autocomplete="email" placeholder="Ej.: maestra@gmail.com">
         <label class="enunciado" for="whatsapp" style="margin:12px 0 6px;font-size:15px">WhatsApp</label>
         <input type="tel" id="whatsapp" name="whatsapp" inputmode="tel" autocomplete="tel" placeholder="Ej.: 0414 123 4567">
+        <p class="error" id="error-contacto" hidden>Para enviarle el enlace, escriba su correo o su WhatsApp. Si prefiere no dejarlo, marque «No por ahora».</p>
       </div></div>
   </section>
 
@@ -362,6 +363,10 @@ form.onsubmit = async e => {
   e.preventDefault();
   const err = document.getElementById('error'); err.hidden = true;
   const r = respuestas();
+  // Quien quiere probar Tiza necesita dejar un contacto: el enlace solo llega por correo o WhatsApp.
+  const sinContacto = r.probar === 'Sí' && !r.correo && !r.whatsapp;
+  document.getElementById('error-contacto').hidden = !sinContacto;
+  if (sinContacto) { document.getElementById('correo').scrollIntoView({block:'center'}); document.getElementById('correo').focus(); return; }
   const respondidas = Object.values(r).filter(v => Array.isArray(v) ? v.length : v).length;
   if (respondidas < 3) { err.textContent = 'Responda al menos algunas preguntas antes de enviar.'; err.hidden = false; return; }
   const boton = document.getElementById('enviar'); boton.disabled = true; boton.firstChild.textContent = 'Enviando… ';
