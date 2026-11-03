@@ -34,9 +34,10 @@ class handler(BaseHTTPRequestHandler):
             headers={"Content-Type": "application/json", "User-Agent": "curl/8.7.1"}, method="POST")
         try:
             with urllib.request.urlopen(pedido, timeout=40) as r:
-                ok = json.loads(r.read() or b"{}").get("object") == "page"
+                fila = json.loads(r.read() or b"{}")
+                ok = fila.get("object") == "page"
         except Exception:
-            ok = False
+            ok, fila = False, {}
         if not ok:
             return responder(self, {"ok": False, "error": "No se pudo guardar la respuesta."}, 502)
-        responder(self, {"ok": True})
+        responder(self, {"ok": True, "fila": fila.get("id", "")})  # para el enlace personal de la pantalla final

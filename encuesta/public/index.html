@@ -300,7 +300,7 @@
         <label class="chip"><input type="radio" name="probar" value="Sí"><span>Sí, me gustaría</span></label>
         <label class="chip"><input type="radio" name="probar" value="No"><span>No por ahora</span></label></div>
       <div id="bloque-contacto" hidden>
-        <div class="confidencial" style="margin-top:14px"><span>Sus datos están protegidos: solo usamos su correo o su teléfono para enviarle el enlace de prueba y avisarle si organizamos una demostración en línea. No se publican ni se comparten.</span></div>
+        <div class="confidencial" style="margin-top:14px"><span>Sus datos están protegidos: solo usamos su correo o su teléfono para enviarle un enlace de prueba personal, saber si pudo entrar y qué funciones usó para ofrecerle ayuda, y avisarle si organizamos una demostración en línea. No se publican ni se comparten.</span></div>
         <label class="enunciado" for="correo" style="margin:14px 0 6px;font-size:15px">Correo electrónico</label>
         <input type="email" id="correo" name="correo" inputmode="email" autocomplete="email" placeholder="Ej.: maestra@gmail.com">
         <label class="enunciado" for="whatsapp" style="margin:12px 0 6px;font-size:15px">WhatsApp</label>
@@ -432,7 +432,7 @@ form.onsubmit = async e => {
     if (r.probar === 'Sí') {
       const caja = document.getElementById('revise');
       // El enlace al instante: quien acaba de responder puede probar Tiza sin esperar ningún mensaje.
-      const partes = ['<p style="margin:0 0 10px"><b>Pruebe Tiza ahora.</b> Toque el botón y escriba esta contraseña: <b>aula2026</b>. Puede usar datos ficticios. Dentro de Tiza, toque «Ayuda», abajo a la derecha, para ver cómo se usa.</p><a class="enviar" href="https://tiza-docentes.vercel.app" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;margin:0 0 14px">Abrir Tiza</a>'];
+      const partes = ['<p style="margin:0 0 10px"><b>Pruebe Tiza ahora.</b> Toque el botón y escriba esta contraseña: <b>aula2026</b>. Puede usar datos ficticios. Dentro de Tiza, toque «Ayuda», abajo a la derecha, para ver cómo se usa.</p><a class="enviar" href="https://tiza-docentes.vercel.app' + (j.fila ? '/?p=' + encodeURIComponent(j.fila) + '&c=b' : '') + '" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;margin:0 0 10px">Abrir Tiza</a><p style="margin:0 0 14px;font-size:14px">Este enlace es personal: nos permite saber si pudo entrar a Tiza y qué funciones usó, para ofrecerle ayuda si la necesita. No vemos lo que usted escribe.</p>'];
       if (r.correo) partes.push('<p style="margin:0 0 6px"><b>Revise también su correo.</b> Le enviamos los pasos para usar Tiza. Si no lo ve en unos minutos, revise la carpeta de correo no deseado (spam).</p>');
       if (r.whatsapp) partes.push('<p style="margin:0 0 6px"><b>Revise también su WhatsApp.</b> En breve le escribiremos con los pasos para usar Tiza.</p>');
       caja.innerHTML = partes.join(''); caja.hidden = false;
