@@ -61,7 +61,7 @@ class Tiza(SimpleHTTPRequestHandler):
 
     def api(self, metodo):
         nombre = self.path.split("?")[0][len("/api/"):]
-        if metodo == "do_POST" and nombre in ("opinion", "perfil", "uso"):
+        if metodo == "do_POST" and nombre in ("opinion", "perfil", "uso", "entrada"):
             return self.guardar_local(nombre)
         h = FUNCIONES.get(nombre)
         if not h or not hasattr(h, metodo):

@@ -350,7 +350,7 @@
   </div>
   <div class="tarjeta">
     <h3>Sus datos</h3>
-    <p style="margin:0 0 6px">Para saber si Tiza se usa, contamos de forma anónima qué funciones se abren y cuándo. No contamos nombres, temas ni calificaciones.</p>
+    <p style="margin:0 0 6px">Para saber si Tiza se usa, contamos de forma anónima qué funciones se abren y cuándo. No contamos nombres, temas ni calificaciones. Si entró con el enlace personal que le enviamos, sabemos que pudo entrar y qué funciones usó, para ofrecerle ayuda si la necesita.</p>
     <h3>La contraseña</h3>
     <p style="margin:0">Se escribe una sola vez y queda guardada en este teléfono. Si cierra sesión desde su perfil, vuelve a entrar con la misma contraseña.</p>
   </div>
@@ -981,19 +981,34 @@ $('#entrar').onclick = async () => {
   }
   guardarCodigo(c);
   $('#bienvenida').style.display = 'none'; APP.forEach(s => $(s).style.display = '');
-  primeraVez(); registrarPerfil(); contar('Abrió Tiza');
+  primeraVez(); registrarPerfil(); contar('Abrió Tiza'); registrarEntrada();
 };
 // Contador anónimo de uso: solo qué función se usó y cuándo; nunca nombres, temas ni calificaciones.
 // No debe estorbar: si falla, Tiza sigue igual. Sin conexión se guarda y se envía al volver la señal.
 // En sus propios teléfonos, quien prueba abre Tiza una vez con ?nocontar=1 para no sumar a la cuenta.
 if (/[?&]nocontar=1/.test(location.search)) escribir('nocontar', true);
+// Enlace personal de quien pidió probar Tiza en la encuesta (?p=fila&c=canal): se recuerda hasta poder registrarlo.
+const pedidoEntrada = new URLSearchParams(location.search);
+if (/^[0-9a-f-]{32,36}$/.test(pedidoEntrada.get('p') || '') && ['b', 'c', 'w'].includes(pedidoEntrada.get('c'))) escribir('entrada', {p: pedidoEntrada.get('p'), c: pedidoEntrada.get('c')});
+function idUso() {
+  let id = leer('uso-id', '');
+  if (!id) { id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + '-' + Math.random().toString(36).slice(2); escribir('uso-id', id); }
+  return id;
+}
+async function registrarEntrada() {
+  const e = leer('entrada', null);
+  if (!e || !navigator.onLine || !codigo() || leer('nocontar', false)) return;
+  try {
+    const r = await fetch('/api/entrada', {method:'POST', keepalive:true, headers:{'Content-Type':'application/json', 'X-Codigo':codigo()}, body:JSON.stringify({...e, uso:idUso().slice(0, 8)})});
+    if (r.ok) escribir('entrada', null);
+  } catch (err) {}
+}
 let enviandoUso = false;
 async function enviarUso() {
   if (enviandoUso || !navigator.onLine || !codigo() || leer('nocontar', false)) return;
   enviandoUso = true;
   try {
-    let id = leer('uso-id', '');
-    if (!id) { id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + '-' + Math.random().toString(36).slice(2); escribir('uso-id', id); }
+    const id = idUso();
     for (let cola = leer('uso', []); cola.length; cola = leer('uso', [])) {
       const r = await fetch('/api/uso', {method:'POST', keepalive:true, headers:{'Content-Type':'application/json', 'X-Codigo':codigo()}, body:JSON.stringify({id, eventos:cola.slice(0, 5)})});
       const n = r.ok ? (await r.json()).enviados : 0;
@@ -1012,7 +1027,7 @@ function contar(evento) {
 }
 if (location.search) history.replaceState(null, '', location.pathname);
 aplicarPerfil(); pintarAvatar(); saludar();
-if (!codigo()) mostrarBienvenida(); else { registrarPerfil(); contar('Abrió Tiza'); }
+if (!codigo()) mostrarBienvenida(); else { registrarPerfil(); contar('Abrió Tiza'); registrarEntrada(); }
 
 const estadoConexion = () => { if (!navigator.onLine) $('#estado').textContent = 'Sin conexión · funciona igual'; };
 fetch('/api/estado', {headers:{'X-Codigo': codigo()}}).then(r => r.json()).then(j => {
@@ -1020,7 +1035,7 @@ fetch('/api/estado', {headers:{'X-Codigo': codigo()}}).then(r => r.json()).then(
   if (codigo() && j.acceso === false) { guardarCodigo(''); mostrarBienvenida(); }  // la contraseña de la prueba cambió
 }).catch(estadoConexion);
 addEventListener('offline', estadoConexion);
-addEventListener('online', () => { if (!/escuela/.test($('#estado').textContent)) $('#estado').textContent = 'Con conexión'; registrarPerfil(); enviarUso(); });
+addEventListener('online', () => { if (!/escuela/.test($('#estado').textContent)) $('#estado').textContent = 'Con conexión'; registrarPerfil(); enviarUso(); registrarEntrada(); });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 
 // Aviso para agregar Tiza a la pantalla de inicio (así abre sin internet como una aplicación).
