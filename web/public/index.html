@@ -350,7 +350,7 @@
   </div>
   <div class="tarjeta">
     <h3>Sus datos</h3>
-    <p style="margin:0 0 6px">Para saber si Tiza se usa, contamos de forma anónima qué funciones se abren y cuándo. No contamos nombres, temas ni calificaciones. Si entró con el enlace personal que le enviamos, sabemos que pudo entrar y qué funciones usó, para ofrecerle ayuda si la necesita.</p>
+    <p style="margin:0 0 6px">Para saber si Tiza se usa, contamos de forma anónima qué funciones se abren y cuándo. No contamos nombres, temas ni calificaciones. Si entró con su enlace personal, sabemos que pudo entrar, para ofrecerle ayuda si la necesita.</p>
     <h3>La contraseña</h3>
     <p style="margin:0">Se escribe una sola vez y queda guardada en este teléfono. Si cierra sesión desde su perfil, vuelve a entrar con la misma contraseña.</p>
   </div>
@@ -999,7 +999,7 @@ async function registrarEntrada() {
   const e = leer('entrada', null);
   if (!e || !navigator.onLine || !codigo() || leer('nocontar', false)) return;
   try {
-    const r = await fetch('/api/entrada', {method:'POST', keepalive:true, headers:{'Content-Type':'application/json', 'X-Codigo':codigo()}, body:JSON.stringify({...e, uso:idUso().slice(0, 8)})});
+    const r = await fetch('/api/entrada', {method:'POST', keepalive:true, headers:{'Content-Type':'application/json', 'X-Codigo':codigo()}, body:JSON.stringify(e)});
     if (r.ok) escribir('entrada', null);
   } catch (err) {}
 }
