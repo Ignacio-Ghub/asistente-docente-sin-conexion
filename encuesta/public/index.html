@@ -432,9 +432,9 @@ form.onsubmit = async e => {
     if (r.probar === 'Sí') {
       const caja = document.getElementById('revise');
       // El enlace al instante: quien acaba de responder puede probar Tiza sin esperar ningún mensaje.
-      const partes = ['<p style="margin:0 0 10px"><b>Pruebe Tiza ahora.</b> Toque el botón y escriba esta contraseña: <b>aula2026</b>. Puede usar datos ficticios.</p><a class="enviar" href="https://tiza-docentes.vercel.app" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;margin:0 0 14px">Abrir Tiza</a>'];
-      if (r.correo) partes.push('<p style="margin:0 0 6px"><b>Revise su correo.</b> Le enviamos el enlace para probar Tiza, el asistente para docentes, su contraseña y cómo usarla. Si no lo ve en unos minutos, revise también la carpeta de correo no deseado (spam).</p>');
-      if (r.whatsapp) partes.push('<p style="margin:0 0 6px"><b>Revise su WhatsApp.</b> En breve le escribiremos con el enlace para probar Tiza, el asistente para docentes, y su contraseña.</p>');
+      const partes = ['<p style="margin:0 0 10px"><b>Pruebe Tiza ahora.</b> Toque el botón y escriba esta contraseña: <b>aula2026</b>. Puede usar datos ficticios. Dentro de Tiza, toque «Ayuda», abajo a la derecha, para ver cómo se usa.</p><a class="enviar" href="https://tiza-docentes.vercel.app" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;margin:0 0 14px">Abrir Tiza</a>'];
+      if (r.correo) partes.push('<p style="margin:0 0 6px"><b>Revise también su correo.</b> Le enviamos los pasos para usar Tiza. Si no lo ve en unos minutos, revise la carpeta de correo no deseado (spam).</p>');
+      if (r.whatsapp) partes.push('<p style="margin:0 0 6px"><b>Revise también su WhatsApp.</b> En breve le escribiremos con los pasos para usar Tiza.</p>');
       caja.innerHTML = partes.join(''); caja.hidden = false;
     }
   } catch (ex) {
