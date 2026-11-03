@@ -57,11 +57,11 @@ class Tiza(SimpleHTTPRequestHandler):
         DATOS.mkdir(exist_ok=True)
         with open(DATOS / "{}.jsonl".format(nombre), "a", encoding="utf-8") as f:
             f.write(json.dumps({"fecha": datetime.now().isoformat(timespec="seconds"), **d}, ensure_ascii=False) + "\n")
-        responder(self, {"ok": True})
+        responder(self, {"ok": True, "enviados": len(d.get("eventos", []))})
 
     def api(self, metodo):
         nombre = self.path.split("?")[0][len("/api/"):]
-        if metodo == "do_POST" and nombre in ("opinion", "perfil"):
+        if metodo == "do_POST" and nombre in ("opinion", "perfil", "uso"):
             return self.guardar_local(nombre)
         h = FUNCIONES.get(nombre)
         if not h or not hasattr(h, metodo):

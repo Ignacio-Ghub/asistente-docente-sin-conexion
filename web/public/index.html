@@ -349,6 +349,8 @@
     <p style="margin:0">«Guardar en este teléfono» deja el borrador dentro de Tiza, en Guardados, y se abre sin internet. Para imprimirlo, en Guardados toque «Descargar archivo»: se guarda una copia en su teléfono que puede imprimir o enviar cuando lo necesite.</p>
   </div>
   <div class="tarjeta">
+    <h3>Sus datos</h3>
+    <p style="margin:0 0 6px">Para saber si Tiza se usa, contamos de forma anónima qué funciones se abren y cuándo. No contamos nombres, temas ni calificaciones.</p>
     <h3>La contraseña</h3>
     <p style="margin:0">Se escribe una sola vez y queda guardada en este teléfono. Si cierra sesión desde su perfil, vuelve a entrar con la misma contraseña.</p>
   </div>
@@ -623,6 +625,7 @@ async function generar(accion) {
       <div class="acciones"><button class="principal" data-guardar>Guardar en este teléfono</button>
         <button class="sec" data-compartir>Compartir por WhatsApp</button></div>`;
     activarResultado(salida, tipo, d, j.texto);
+    contar({plan:'Plan generado', evaluacion:'Evaluación generada', repaso:'Repaso generado'}[accion]);
   } catch (e) {
     if (!navigator.onLine || e instanceof TypeError) await mostrarSinConexion(accion, d, salida);
     else { salida.innerHTML = `<p class="alerta">${esc(e.message)}</p>`; mostrarDespues(''); return; }
@@ -663,6 +666,7 @@ function relacionados(bloques, tema) {
 }
 const listaHTML = bs => bs.map(b => `<p><b>${b.bloque}</b></p><ul>${b.items.map(i => `<li>${i}</li>`).join('')}</ul>`).join('');
 async function mostrarSinConexion(accion, d, salida) {
+  contar('Guía sin conexión');
   const programa = await programaOficial(d);
   const m = Math.max(10, +d.minutos || 45), ini = Math.round(m * 0.15), cie = Math.round(m * 0.2), des = m - ini - cie;
   const tema = esc(d.tema);
@@ -723,7 +727,7 @@ function escribir(clave, valor) {
 function guardar(tipo, d, html, texto, boton) {
   const docs = leer('guardados', []);
   docs.unshift({id: Math.max(0, ...docs.map(x => x.id)) + 1, tipo, titulo: tituloDe(tipo, d), html, texto, fecha:new Date().toISOString().slice(0,10)});
-  if (escribir('guardados', docs)) { boton.textContent = 'Guardado ✓'; boton.disabled = true; }
+  if (escribir('guardados', docs)) { boton.textContent = 'Guardado ✓'; boton.disabled = true; contar('Guardó un borrador'); }
 }
 function cargarGuardados() {
   const docs = leer('guardados', []);
@@ -836,6 +840,7 @@ $('#guardar-res').onclick = () => {
   const reg = leerRegistro();
   for (const i of campos) reg.evaluaciones.push({estudiante:+i.dataset.id, nota: i.tagName === 'INPUT' ? +i.value : i.value, tema, fecha});
   escribir('registro', reg);
+  contar('Anotó calificaciones');
   $('#r-tema').value = '';
   cargarRegistro();
   const m = $('#msg-res'); m.style.display = 'block';
@@ -976,11 +981,38 @@ $('#entrar').onclick = async () => {
   }
   guardarCodigo(c);
   $('#bienvenida').style.display = 'none'; APP.forEach(s => $(s).style.display = '');
-  primeraVez(); registrarPerfil();
+  primeraVez(); registrarPerfil(); contar('Abrió Tiza');
 };
+// Contador anónimo de uso: solo qué función se usó y cuándo; nunca nombres, temas ni calificaciones.
+// No debe estorbar: si falla, Tiza sigue igual. Sin conexión se guarda y se envía al volver la señal.
+// En sus propios teléfonos, quien prueba abre Tiza una vez con ?nocontar=1 para no sumar a la cuenta.
+if (/[?&]nocontar=1/.test(location.search)) escribir('nocontar', true);
+let enviandoUso = false;
+async function enviarUso() {
+  if (enviandoUso || !navigator.onLine || !codigo() || leer('nocontar', false)) return;
+  enviandoUso = true;
+  try {
+    let id = leer('uso-id', '');
+    if (!id) { id = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + '-' + Math.random().toString(36).slice(2); escribir('uso-id', id); }
+    for (let cola = leer('uso', []); cola.length; cola = leer('uso', [])) {
+      const r = await fetch('/api/uso', {method:'POST', keepalive:true, headers:{'Content-Type':'application/json', 'X-Codigo':codigo()}, body:JSON.stringify({id, eventos:cola.slice(0, 5)})});
+      const n = r.ok ? (await r.json()).enviados : 0;
+      if (!n) break;
+      escribir('uso', leer('uso', []).slice(n));
+    }
+  } catch (e) {}
+  enviandoUso = false;
+}
+function contar(evento) {
+  try {
+    if (leer('nocontar', false)) return;
+    escribir('uso', [...leer('uso', []), {evento, t:new Date().toISOString()}].slice(-200));
+    enviarUso();
+  } catch (e) {}
+}
 if (location.search) history.replaceState(null, '', location.pathname);
 aplicarPerfil(); pintarAvatar(); saludar();
-if (!codigo()) mostrarBienvenida(); else registrarPerfil();
+if (!codigo()) mostrarBienvenida(); else { registrarPerfil(); contar('Abrió Tiza'); }
 
 const estadoConexion = () => { if (!navigator.onLine) $('#estado').textContent = 'Sin conexión · funciona igual'; };
 fetch('/api/estado', {headers:{'X-Codigo': codigo()}}).then(r => r.json()).then(j => {
@@ -988,7 +1020,7 @@ fetch('/api/estado', {headers:{'X-Codigo': codigo()}}).then(r => r.json()).then(
   if (codigo() && j.acceso === false) { guardarCodigo(''); mostrarBienvenida(); }  // la contraseña de la prueba cambió
 }).catch(estadoConexion);
 addEventListener('offline', estadoConexion);
-addEventListener('online', () => { if (!/escuela/.test($('#estado').textContent)) $('#estado').textContent = 'Con conexión'; registrarPerfil(); });
+addEventListener('online', () => { if (!/escuela/.test($('#estado').textContent)) $('#estado').textContent = 'Con conexión'; registrarPerfil(); enviarUso(); });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
 
 // Aviso para agregar Tiza a la pantalla de inicio (así abre sin internet como una aplicación).
